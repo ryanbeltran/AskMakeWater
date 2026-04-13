@@ -199,7 +199,7 @@ function parseLegacyResponse(text) {
   }
 }
 
-export default function ChatMessage({ message, query, usage, model, onTier2Submit }) {
+export default function ChatMessage({ message, query, usage, model, onTier2Submit, isRepeatQuery = false }) {
   const isUser = message.role === 'user';
 
   if (isUser) {
@@ -255,6 +255,7 @@ export default function ChatMessage({ message, query, usage, model, onTier2Submi
               outputTokens={usage.output_tokens}
               model={model}
               cacheReadTokens={usage.cache_read_input_tokens}
+              isRepeatQuery={isRepeatQuery}
             />
           </div>
         )}

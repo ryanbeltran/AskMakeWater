@@ -24,6 +24,7 @@ export default function ChatPage() {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
+  const [repeats, setRepeats] = useState({});
   const [showTokenCalc, setShowTokenCalc] = useState(false);
 
   // Global usage state
@@ -81,7 +82,7 @@ export default function ChatPage() {
     }
   }
 
-  async function sendMessage(text) {
+  async function sendMessage(text, { isRepeat = false } = {}) {
     if (!text.trim() || loading) return;
 
     const userMessage = { role: 'user', content: text.trim() };
@@ -108,6 +109,9 @@ export default function ChatPage() {
       setMessages(prev => [...prev, assistantMessage]);
       setUsages(prev => ({ ...prev, [msgIndex]: data.usage }));
       setModels(prev => ({ ...prev, [msgIndex]: data.model }));
+      if (isRepeat) {
+        setRepeats(prev => ({ ...prev, [msgIndex]: true }));
+      }
 
       // Report the AI query's own water cost to the global bottle
       reportUsage(text.trim(), data.usage);
@@ -161,7 +165,7 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
       <header className="flex-shrink-0 border-b border-gray-200 bg-white">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
           <button
-            onClick={() => { setMessages([]); setUsages({}); setModels({}); }}
+            onClick={() => { setMessages([]); setUsages({}); setModels({}); setRepeats({}); }}
             className="flex items-center gap-2 cursor-pointer bg-transparent border-none p-0"
           >
             <WaterDrop size={22} className="text-mw-water" />
@@ -268,7 +272,7 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
 
               {/* Recent searches */}
               {recentQueries.length > 0 && (
-                <RecentSearches queries={recentQueries} onQueryClick={(q) => sendMessage(q)} />
+                <RecentSearches queries={recentQueries} onQueryClick={(q) => sendMessage(q, { isRepeat: true })} />
               )}
 
             </div>
@@ -282,6 +286,7 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
                   usage={msg.role === 'assistant' ? usages[i] : undefined}
                   model={msg.role === 'assistant' ? models[i] : undefined}
                   onTier2Submit={handleTier2Submit}
+                  isRepeatQuery={!!repeats[i]}
                 />
               ))}
               {loading && <LoadingIndicator />}

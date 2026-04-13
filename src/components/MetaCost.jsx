@@ -5,7 +5,7 @@ const MODEL_LABELS = {
   'claude-sonnet-4-20250514': 'Sonnet',
 };
 
-export default function MetaCost({ inputTokens, outputTokens, model, cacheReadTokens = 0 }) {
+export default function MetaCost({ inputTokens, outputTokens, model, cacheReadTokens = 0, isRepeatQuery = false }) {
   const totalTokens = inputTokens + outputTokens;
   // 0.14 Wh per 1000 tokens, WUE 1.8 L/kWh
   const wh = totalTokens * 0.14 / 1000;
@@ -18,16 +18,30 @@ export default function MetaCost({ inputTokens, outputTokens, model, cacheReadTo
 
   const modelLabel = MODEL_LABELS[model] || 'Claude';
   const cached = cacheReadTokens > 0;
+  const cacheRatio = inputTokens > 0 ? cacheReadTokens / inputTokens : 0;
+  const heavilyCached = cacheRatio > 0.5;
 
   return (
-    <div className="flex items-center gap-1.5 text-xs text-gray-400">
-      <WaterDrop size={10} className="text-mw-water/40" />
-      <span>
-        This answer cost approximately {display} of water
-        <span className="text-gray-300 ml-1">
-          ({modelLabel} · {totalTokens.toLocaleString()} tokens{cached ? ' · cached' : ''})
+    <div className="space-y-1">
+      <div className="flex items-center gap-1.5 text-xs text-gray-400">
+        <WaterDrop size={10} className="text-mw-water/40" />
+        <span>
+          This answer cost approximately {display} of water
+          <span className="text-gray-300 ml-1">
+            ({modelLabel} · {totalTokens.toLocaleString()} tokens{cached ? ' · cached' : ''})
+          </span>
         </span>
-      </span>
+      </div>
+      {isRepeatQuery && heavilyCached && (
+        <p className="text-[10px] text-green-600 ml-4">
+          This query was already asked — most of the prompt was served from cache, using minimal additional water.
+        </p>
+      )}
+      {isRepeatQuery && !heavilyCached && (
+        <p className="text-[10px] text-gray-400 ml-4">
+          This query was asked before. A fresh classification was still needed, but the result is the same.
+        </p>
+      )}
     </div>
   );
 }
