@@ -22,14 +22,17 @@ export default function MetaCost({ inputTokens, outputTokens, model, cacheReadTo
   if (isRepeatQuery) {
     return (
       <div className="space-y-1">
-        <div className="flex items-center gap-1.5 text-xs text-green-600">
-          <WaterDrop size={10} className="text-green-400" />
+        <div className="flex items-center gap-1.5 text-xs text-gray-400">
+          <WaterDrop size={10} className="text-mw-water/40" />
           <span>
-            This query was already asked — not counted toward today's water usage.
+            This answer cost approximately {display} of water
+            <span className="text-gray-300 ml-1">
+              ({modelLabel} · {totalTokens.toLocaleString()} tokens{cached ? ' · cached' : ''})
+            </span>
           </span>
         </div>
-        <p className="text-[10px] text-gray-400 ml-4">
-          {modelLabel} · {totalTokens.toLocaleString()} tokens{cached ? ' · cached prompt' : ''}
+        <p className="text-[10px] text-green-600 ml-4">
+          This query was already asked — not counted toward today's water usage.
         </p>
       </div>
     );
