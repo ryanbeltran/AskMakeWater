@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import evalTests from '../data/evalTests.json';
 
-const CATEGORIES = ['all', 'streaming', 'ai', 'social', 'gaming', 'crypto', 'email', 'edge_case', 'greeting', 'off_catalog'];
+const CATEGORIES = ['all', 'streaming', 'ai', 'social', 'gaming', 'crypto', 'email', 'edge_case', 'greeting', 'off_catalog', 'off_catalog_digital'];
 
 // Haiku pricing: $0.25/M input, $1.25/M output (as of 2025)
 const HAIKU_INPUT_COST_PER_TOKEN = 0.25 / 1_000_000;
@@ -104,6 +104,16 @@ function gradeTest(test, actual) {
       passed++;
     } else {
       details.push(`show_model_comparison: expected ${test.expected_show_model_comparison}, got ${actual.show_model_comparison}`);
+    }
+  }
+
+  // approximate flag (for off-catalog digital activities)
+  if (test.expected_approximate !== undefined) {
+    total++;
+    if (actual.approximate === test.expected_approximate) {
+      passed++;
+    } else {
+      details.push(`approximate: expected ${test.expected_approximate}, got ${actual.approximate || false}`);
     }
   }
 

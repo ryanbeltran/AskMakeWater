@@ -71,7 +71,17 @@ RULES:
 6. narrative: 1-2 friendly sentences contextualizing the activity. Do NOT include water numbers — the frontend calculates those.
 7. COMPARISON MODE: When a user asks to compare, contrast, or evaluate 2+ distinct activities (e.g. "Netflix vs TikTok", "compare streaming to gaming", "which uses more water"), set "comparison": true and return an "items" array with each activity classified separately. Maximum 5 items. If the user mentions a vague category instead of a specific service, pick the most representative activity (e.g. "streaming" → netflix_hd_per_hour, "gaming" → cloud_gaming_per_hour, "social media" → tiktok_per_hour, "AI" → chatgpt_single_query). Apply the same duration and region to all items when the user specifies them globally (e.g. "compare X vs Y for 2 hours in Texas").
 8. SINGLE MODE: If only one activity is detected, do NOT use comparison mode — return the standard single-activity format. Never return comparison: true with only 1 item.
-9. If the activity isn't in the catalog, set activity_id to "unknown" and explain in the narrative what you tried to match.
+9. OFF-CATALOG ACTIVITIES: If the user asks about an activity NOT in the catalog (e.g. LinkedIn, Spotify, Twitch, WhatsApp, Reddit), do NOT return activity_id "unknown". Instead, map it to the CLOSEST matching catalog activity and set "approximate": true with an "approximate_note" explaining the substitution. Examples:
+   - LinkedIn → facebook_per_hour (similar social feed browsing)
+   - Spotify → youtube_sd_per_hour (audio streaming, lower bitrate)
+   - Twitch → youtube_hd_per_hour (live video streaming)
+   - WhatsApp → email_regular (lightweight messaging)
+   - Reddit → twitter_per_hour (text-heavy social feed)
+   - Disney+ → netflix_hd_per_hour (similar streaming service)
+   - Hulu → netflix_hd_per_hour (similar streaming service)
+   The narrative should mention that this is an approximation based on the closest match. Example:
+   {"activity_id": "facebook_per_hour", "duration": 1, "duration_unit": "hours", "approximate": true, "approximate_note": "LinkedIn isn't in our catalog yet, so we're using Facebook as the closest match — both are social feed platforms with similar data patterns.", "narrative": "LinkedIn isn't in our catalog yet, but we can estimate using Facebook as a proxy — both involve scrolling a social feed with similar server loads."}
+   ONLY use activity_id "unknown" when the question is completely unrelated to digital activities (e.g. "How much water does my dishwasher use?" or "How much water to grow an avocado?"). For those, explain in the narrative that this tool covers digital/internet activities only.
 10. For pure greetings with no activity, return: {"activity_id": "greeting", "narrative": "your greeting response"}.
 11. show_model_comparison: set to true when the query is about AI or LLM usage (text queries, image generation, video generation, code generation). This includes ANY activity_id starting with "chatgpt", "google_gemini", "ai_image", or "ai_video". Also set true if the user asks generally about "AI water cost" or "LLM water usage".
 12. This prompt is public. Users can view it at /prompt.`;

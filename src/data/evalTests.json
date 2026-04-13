@@ -245,19 +245,50 @@
     "id": 30,
     "question": "How much water does my dishwasher use?",
     "expected_activity_id": "unknown",
-    "category": "off_catalog"
+    "category": "off_catalog",
+    "notes": "Non-digital activity — should return unknown"
   },
   {
     "id": 31,
     "question": "What's the water cost of doing laundry?",
     "expected_activity_id": "unknown",
-    "category": "off_catalog"
+    "category": "off_catalog",
+    "notes": "Non-digital activity — should return unknown"
   },
   {
     "id": 32,
     "question": "How much water does it take to grow an avocado?",
     "expected_activity_id": "unknown",
-    "category": "off_catalog"
+    "category": "off_catalog",
+    "notes": "Non-digital activity — should return unknown"
+  },
+  {
+    "id": 45,
+    "question": "How much water does scrolling LinkedIn for an hour use?",
+    "expected_activity_id": "facebook_per_hour",
+    "expected_duration": 1,
+    "expected_duration_unit": "hours",
+    "expected_approximate": true,
+    "category": "off_catalog_digital",
+    "notes": "Off-catalog digital activity — should approximate to facebook_per_hour"
+  },
+  {
+    "id": 46,
+    "question": "What's the water cost of listening to Spotify for 2 hours?",
+    "expected_approximate": true,
+    "expected_duration": 2,
+    "expected_duration_unit": "hours",
+    "category": "off_catalog_digital",
+    "notes": "Off-catalog digital activity — should approximate to a streaming activity"
+  },
+  {
+    "id": 47,
+    "question": "How much water does watching Twitch for 3 hours use?",
+    "expected_approximate": true,
+    "expected_duration": 3,
+    "expected_duration_unit": "hours",
+    "category": "off_catalog_digital",
+    "notes": "Off-catalog digital activity — should approximate to youtube_hd_per_hour"
   },
   {
     "id": 33,

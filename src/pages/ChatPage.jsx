@@ -7,6 +7,7 @@ import WaterBottle from '../components/WaterBottle';
 import RecentSearches from '../components/RecentSearches';
 import { calculateMetaWater } from '../data/recalculate';
 import TokenCalculator from '../components/TokenCalculator';
+import GeometricBackground from '../components/GeometricBackground';
 
 const EXAMPLE_QUESTIONS = [
   'How much water does it cost to stream Netflix for 2 hours?',
@@ -162,9 +163,11 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
   const isEmpty = messages.length === 0;
 
   return (
-    <div className="flex flex-col h-screen bg-[#fafafa]">
+    <div className="flex flex-col h-screen bg-[#fafafa] relative">
+      <GeometricBackground />
+
       {/* Header */}
-      <header className="flex-shrink-0 border-b border-gray-200 bg-white">
+      <header className="flex-shrink-0 border-b border-gray-200 bg-white relative z-10">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
           <button
             onClick={() => { setMessages([]); setUsages({}); setModels({}); setRepeats({}); }}
@@ -186,7 +189,7 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
       </header>
 
       {/* Messages area */}
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto relative z-10">
         <div className="max-w-3xl mx-auto px-4 py-6">
           {isEmpty ? (
             <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
@@ -291,7 +294,7 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
 
       {/* Chat input — only shown in chat mode */}
       {!isEmpty && (
-        <div className="flex-shrink-0 border-t border-gray-200 bg-white">
+        <div className="flex-shrink-0 border-t border-gray-200 bg-white relative z-10">
           <div className="max-w-3xl mx-auto px-4 py-3">
             <form onSubmit={handleSubmit} className="flex gap-2">
               <input
@@ -316,7 +319,7 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
       )}
 
       {/* Footer */}
-      <footer className="flex-shrink-0 border-t border-gray-100 bg-white/80">
+      <footer className="flex-shrink-0 border-t border-gray-100 bg-white/80 relative z-10">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
           <p className="text-[11px] text-gray-400">
             A project of{' '}

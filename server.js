@@ -15,7 +15,12 @@ try {
   for (const line of envFile.split('\n')) {
     const [key, ...rest] = line.split('=');
     if (key && rest.length) {
-      process.env[key.trim()] = rest.join('=').trim();
+      let val = rest.join('=').trim();
+      // Strip surrounding quotes if present
+      if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+        val = val.slice(1, -1);
+      }
+      process.env[key.trim()] = val;
     }
   }
 } catch {}

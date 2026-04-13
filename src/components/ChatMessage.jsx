@@ -112,6 +112,9 @@ function buildResultFromClassification(classification) {
     comparison_type: getComparisonType(classification.activity_id),
     // Expose raw calculated values for ComparisonTable
     calculated,
+    // Approximate match info (off-catalog activities mapped to nearest match)
+    approximate: classification.approximate || false,
+    approximate_note: classification.approximate_note || null,
   };
 }
 
@@ -257,17 +260,27 @@ export default function ChatMessage({ message, query, usage, model, onTier2Submi
 
         {/* Single result mode */}
         {resultData && !comparisonItems && (
-          <ResultCard
-            data={resultData}
-            query={query}
-            model={model}
-            usage={usage}
-            onTier2Submit={onTier2Submit}
-          />
+          <>
+            {/* Approximate match notice */}
+            {resultData.approximate && resultData.approximate_note && (
+              <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 text-sm text-amber-800 leading-relaxed flex items-start gap-2">
+                <span className="text-amber-500 mt-0.5 flex-shrink-0">~</span>
+                <span>{resultData.approximate_note}</span>
+              </div>
+            )}
+            <ResultCard
+              data={resultData}
+              query={query}
+              model={model}
+              usage={usage}
+              onTier2Submit={onTier2Submit}
+            />
+          </>
         )}
 
         {/* Narrative (only show separately if not in comparison mode, which includes it) */}
-        {narrative && !comparisonItems && (
+        {/* For approximate matches with a result card, skip the narrative to avoid duplication */}
+        {narrative && !comparisonItems && !(resultData && resultData.approximate) && (
           <div className="bg-gray-50 rounded-2xl rounded-tl-md px-4 py-3 text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
             {narrative}
           </div>

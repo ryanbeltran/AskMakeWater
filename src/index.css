@@ -49,3 +49,54 @@ body {
   animation: ripple 1.5s ease-out infinite;
 }
 
+/* ── Geometric background decorations ── */
+.geometric-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+  color: #c8d6e5; /* default stroke color — very subtle blue-gray */
+}
+
+.geo-shape {
+  position: absolute;
+}
+
+/* Slow float: 20s */
+@keyframes geoFloatSlow {
+  0%   { transform: translateY(0) rotate(0deg); }
+  50%  { transform: translateY(-14px) rotate(2deg); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+.geo-float-slow {
+  animation: geoFloatSlow 20s ease-in-out infinite;
+}
+
+/* Medium float: 14s */
+@keyframes geoFloatMed {
+  0%   { transform: translateY(0) rotate(0deg); }
+  50%  { transform: translateY(-10px) rotate(-1.5deg); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+.geo-float-med {
+  animation: geoFloatMed 14s ease-in-out infinite;
+}
+
+/* Fast float: 9s */
+@keyframes geoFloatFast {
+  0%   { transform: translateY(0) rotate(0deg); }
+  50%  { transform: translateY(-8px) rotate(1deg); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+.geo-float-fast {
+  animation: geoFloatFast 9s ease-in-out infinite;
+}
+
+/* Hide geometric shapes on very small screens to keep it clean */
+@media (max-width: 640px) {
+  .geometric-bg {
+    display: none;
+  }
+}
+
