@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import changelog from '../data/changelog.json';
 
 const TABS = [
   { id: 'why', label: 'Why We Built This' },
   { id: 'faq', label: 'FAQ' },
+  { id: 'new', label: "What's New" },
   { id: 'prompt', label: 'System Prompt' },
 ];
 
@@ -147,6 +149,34 @@ export default function AboutPage() {
               <div className="space-y-2">
                 {FAQ_ITEMS.map((item, i) => (
                   <FAQItem key={i} item={item} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* What's New */}
+          {tab === 'new' && (
+            <div className="space-y-6">
+              <h1 className="text-2xl font-bold text-mw-base tracking-tight">What's New</h1>
+              <div className="space-y-4">
+                {changelog.map((entry, i) => (
+                  <div key={i} className="bg-white rounded-2xl border border-gray-200 p-5">
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="text-xs font-semibold text-mw-water bg-mw-water-light px-2.5 py-0.5 rounded-full">
+                        {entry.version}
+                      </span>
+                      <span className="text-xs text-gray-400">{entry.date}</span>
+                    </div>
+                    <p className="text-sm font-medium text-gray-800 mb-2">{entry.summary}</p>
+                    <ul className="space-y-1">
+                      {entry.changes.map((change, j) => (
+                        <li key={j} className="text-sm text-gray-600 flex gap-2">
+                          <span className="text-mw-water flex-shrink-0">-</span>
+                          {change}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 ))}
               </div>
             </div>

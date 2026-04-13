@@ -7,9 +7,10 @@
     "dev": "vite",
     "dev:api": "node server.js",
     "dev:full": "node server.js & vite",
-    "build": "vite build",
+    "build": "vite build && node scripts/inject-changelog.js",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "log": "node scripts/log-update.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.88.0",

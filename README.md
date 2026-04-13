@@ -201,6 +201,18 @@ This project is in early development. If you'd like to help:
 
 [Donate](https://www.makewater.org/donate) | [Contact](https://www.makewater.org/contact) | [Website](https://www.makewater.org)
 
+<!-- CHANGELOG:START -->
+## What's New
+
+### v1.0 — 2026-04-13
+Initial release
+- 30 activity water cost calculator with natural language input
+- 40 global regions with specific Water Use Efficiency data
+- Token water calculator comparing 10 AI models
+- Daily water bottle tracking collective site usage
+- FAQ, system prompt transparency, and admin eval dashboard
+<!-- CHANGELOG:END -->
+
 ---
 
 *Built with transparency, powered by research, funded by donations.*

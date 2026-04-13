@@ -1,0 +1,14 @@
+[
+  {
+    "date": "2026-04-13",
+    "version": "v1.0",
+    "summary": "Initial release",
+    "changes": [
+      "30 activity water cost calculator with natural language input",
+      "40 global regions with specific Water Use Efficiency data",
+      "Token water calculator comparing 10 AI models",
+      "Daily water bottle tracking collective site usage",
+      "FAQ, system prompt transparency, and admin eval dashboard"
+    ]
+  }
+]
