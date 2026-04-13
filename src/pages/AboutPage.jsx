@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import DonateButton from '../components/DonateButton';
 
 const TABS = [
   { id: 'why', label: 'Why We Built This' },
@@ -84,14 +85,7 @@ export default function AboutPage() {
             </span>
           </Link>
           <div className="flex items-center gap-3">
-            <a
-              href="https://www.makewater.org/donate"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs px-3 py-1.5 bg-mw-water text-white rounded-lg font-medium hover:bg-mw-water-dark transition-colors no-underline"
-            >
-              Donate
-            </a>
+            <DonateButton />
           </div>
         </div>
       </header>

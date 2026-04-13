@@ -7,6 +7,7 @@ import WaterBottle from '../components/WaterBottle';
 import RecentSearches from '../components/RecentSearches';
 import { calculateMetaWater } from '../data/recalculate';
 import TokenCalculator from '../components/TokenCalculator';
+import DonateButton from '../components/DonateButton';
 
 const EXAMPLE_QUESTIONS = [
   'How much water does it cost to stream Netflix for 2 hours?',
@@ -182,14 +183,7 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
             >
               FAQ
             </Link>
-            <a
-              href="https://www.makewater.org/donate"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs px-3 py-1.5 bg-mw-water text-white rounded-lg font-medium hover:bg-mw-water-dark transition-colors no-underline"
-            >
-              Donate
-            </a>
+            <DonateButton />
           </div>
         </div>
       </header>
