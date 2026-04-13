@@ -183,7 +183,6 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
             >
               FAQ
             </Link>
-            <DonateButton />
           </div>
         </div>
       </header>
@@ -264,6 +263,11 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
                     Token Water Calculator
                   </button>
                 )}
+              </div>
+
+              {/* Donate */}
+              <div className="w-full max-w-lg flex justify-center mb-8">
+                <DonateButton />
               </div>
 
               {/* Recent searches */}
