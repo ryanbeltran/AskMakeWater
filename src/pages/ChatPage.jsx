@@ -173,7 +173,6 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
             <span className="font-bold text-mw-base tracking-tight text-lg">
               ask <span className="text-mw-water">makewater</span>
             </span>
-            <img src="/makewater-logo.png" alt="MakeWater" className="h-8 w-auto" />
           </button>
           <div className="flex items-center gap-3">
             <Link

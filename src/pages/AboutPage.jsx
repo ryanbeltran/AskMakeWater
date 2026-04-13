@@ -81,7 +81,6 @@ export default function AboutPage() {
             <span className="font-bold text-mw-base tracking-tight text-lg">
               ask <span className="text-mw-water">makewater</span>
             </span>
-            <img src="/makewater-logo.png" alt="MakeWater" className="h-8 w-auto" />
           </Link>
           <div className="flex items-center gap-3">
           </div>
