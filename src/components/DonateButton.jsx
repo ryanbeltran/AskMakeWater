@@ -1,11 +1,11 @@
 import { useRef, useEffect } from 'react';
 
 export default function DonateButton() {
-  const containerRef = useRef(null);
+  const hiddenRef = useRef(null);
 
   useEffect(() => {
-    // Inject the dbox-widget into the DOM directly so Donorbox's script can find it
-    const container = containerRef.current;
+    // Inject a hidden dbox-widget so Donorbox's script registers the popup
+    const container = hiddenRef.current;
     if (!container || container.querySelector('dbox-widget')) return;
 
     const widget = document.createElement('dbox-widget');
@@ -21,7 +21,25 @@ export default function DonateButton() {
     container.appendChild(widget);
   }, []);
 
+  function handleClick() {
+    // Try to click the Donorbox-rendered button inside the hidden widget
+    const dboxBtn = hiddenRef.current?.querySelector('a, button');
+    if (dboxBtn) {
+      dboxBtn.click();
+    } else {
+      window.open('https://donorbox.org/makewater', '_blank');
+    }
+  }
+
   return (
-    <span ref={containerRef} className="inline-flex" />
+    <>
+      <button
+        onClick={handleClick}
+        className="text-xs px-3 py-1.5 bg-mw-water text-white rounded-lg font-medium hover:bg-mw-water-dark transition-colors cursor-pointer"
+      >
+        Donate
+      </button>
+      <span ref={hiddenRef} className="hidden" />
+    </>
   );
 }
