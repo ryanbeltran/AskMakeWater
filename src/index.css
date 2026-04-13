@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+@theme {
+  --color-mw-arctic: #f2f2f2;
+  --color-mw-base: #000000;
+  --color-mw-water: #2c6bdb;
+  --color-mw-water-light: #e8f0fe;
+  --color-mw-water-dark: #1a4fa0;
+  --color-mw-forest: #266d46;
+  --color-mw-human: #e54535;
+  --color-mw-solar: #f9bb4e;
+  --font-family-sans: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+body {
+  font-family: var(--font-family-sans);
+  background-color: #fafafa;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #c4c4c4;
+  border-radius: 3px;
+}
+
+@keyframes droplet {
+  0% { transform: translateY(-8px); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: translateY(8px); opacity: 0; }
+}
+
+.animate-droplet {
+  animation: droplet 1.5s ease-in-out infinite;
+}
+
+@keyframes ripple {
+  0% { transform: scale(0.8); opacity: 1; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+
+.animate-ripple {
+  animation: ripple 1.5s ease-out infinite;
+}

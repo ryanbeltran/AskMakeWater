@@ -1,0 +1,678 @@
+{
+  "_metadata": {
+    "version": "1.0.0",
+    "last_updated": "2026-04-12",
+    "compiled_by": "MakeWater",
+    "disclaimer": "All values are best estimates based on published research, corporate sustainability reports, and peer-reviewed studies. Where data is unavailable, reasonable assumptions are noted. We welcome corrections and better data.",
+    "primary_sources": [
+      {
+        "id": "ren_2023",
+        "title": "Making AI Less Thirsty: Uncovering and Addressing the Secret Water Footprint of AI Models",
+        "authors": "Pengfei Li, Jianyi Yang, Mohammad A. Islam, Shaolei Ren",
+        "institution": "University of California, Riverside",
+        "year": 2023,
+        "url": "https://arxiv.org/abs/2304.03271"
+      },
+      {
+        "id": "lbnl_2024",
+        "title": "2024 United States Data Center Energy Usage Report",
+        "institution": "Lawrence Berkeley National Laboratory",
+        "year": 2024,
+        "url": "https://eta-publications.lbl.gov/sites/default/files/2024-12/lbnl-2024-united-states-data-center-energy-usage-report_1.pdf"
+      },
+      {
+        "id": "iea_2020",
+        "title": "The carbon footprint of streaming video: fact-checking the headlines",
+        "authors": "George Kamiya",
+        "institution": "International Energy Agency",
+        "year": 2020,
+        "url": "https://www.iea.org/commentaries/the-carbon-footprint-of-streaming-video-fact-checking-the-headlines"
+      },
+      {
+        "id": "greenspector_2021",
+        "title": "What is the environmental footprint for social media applications? 2021 Edition",
+        "institution": "Greenspector",
+        "year": 2021,
+        "url": "https://greenspector.com/en/social-media-2021/"
+      },
+      {
+        "id": "trg_2025",
+        "title": "Carbon Footprint of Digital Activities Study",
+        "institution": "TRG Datacenters",
+        "year": 2025
+      },
+      {
+        "id": "google_env_2024",
+        "title": "Google Environmental Report 2024",
+        "institution": "Google / Alphabet",
+        "year": 2024
+      },
+      {
+        "id": "microsoft_sustainability",
+        "title": "Microsoft Datacenter Sustainability Metrics",
+        "institution": "Microsoft",
+        "year": 2024,
+        "url": "https://datacenters.microsoft.com/sustainability/efficiency/"
+      }
+    ]
+  },
+
+  "wue_by_provider": {
+    "_unit": "liters per kWh (L/kWh)",
+    "_description": "Water Usage Effectiveness: liters of water consumed for cooling per kWh of IT energy. Lower = better. Industry average is ~1.8 L/kWh.",
+    "industry_average": {
+      "value": 1.80,
+      "source": "Meta Platforms / The Green Grid",
+      "confidence": "high",
+      "notes": "Widely cited benchmark; includes older and less efficient facilities"
+    },
+    "microsoft": {
+      "global_average": {
+        "value": 0.30,
+        "year": "FY2024 (Jul 2023 - Jun 2024)",
+        "source": "microsoft_sustainability",
+        "confidence": "high",
+        "notes": "39% improvement from 0.49 L/kWh in 2021"
+      },
+      "by_region": {
+        "arizona": {
+          "value": 1.52,
+          "confidence": "high",
+          "climate": "hot_arid",
+          "cooling": "evaporative",
+          "notes": "Arid climate requires heavy cooling; pilot zero-water facility planned 2026"
+        },
+        "singapore": {
+          "value": 0.02,
+          "confidence": "high",
+          "climate": "tropical",
+          "cooling": "mechanical_reclaimed_water",
+          "notes": "Uses utility-provided reclaimed water"
+        },
+        "sweden_finland": {
+          "value": 0.05,
+          "confidence": "medium",
+          "climate": "cold",
+          "cooling": "free_air_cooling",
+          "notes": "Cold climates require minimal cooling; estimated from Microsoft descriptions"
+        },
+        "iowa": {
+          "value": 0.35,
+          "confidence": "medium",
+          "climate": "temperate_continental",
+          "cooling": "mixed",
+          "notes": "Estimated from fleet average and climate data"
+        },
+        "virginia": {
+          "value": 0.40,
+          "confidence": "medium",
+          "climate": "humid_subtropical",
+          "cooling": "mixed",
+          "notes": "Large cluster; improving as new builds come online"
+        },
+        "netherlands": {
+          "value": 0.15,
+          "confidence": "medium",
+          "climate": "maritime_temperate",
+          "cooling": "free_air_dominant",
+          "notes": "Cool climate allows extensive free cooling"
+        }
+      },
+      "future_target": {
+        "value": 0.00,
+        "timeline": "New designs from Aug 2024, operational late 2027",
+        "notes": "Zero-water evaporation cooling using closed-loop chip-level cooling. Saves 125M+ liters per datacenter per year."
+      }
+    },
+    "google": {
+      "global_average": {
+        "value": 0.50,
+        "year": 2024,
+        "source": "google_env_2024",
+        "confidence": "medium",
+        "notes": "Google reports PUE (1.09 in 2024) but is less transparent about WUE by region. Estimated from total water consumption and energy data."
+      },
+      "pue": 1.09,
+      "total_freshwater_consumption_gallons": 7000000000,
+      "notes": "Replenished 64% (4.5B gallons) via water stewardship projects in 2024, though methodology is disputed"
+    },
+    "aws": {
+      "global_average": {
+        "value": 0.15,
+        "year": 2024,
+        "source": "AWS sustainability claims",
+        "confidence": "medium",
+        "notes": "AWS claims 0.15 L/kWh but has not disclosed total water consumption. Some investigations suggest significantly higher actual use."
+      }
+    },
+    "meta": {
+      "recent_builds": {
+        "value": 0.20,
+        "year": 2024,
+        "confidence": "high",
+        "notes": "Recently completed facilities; 80% more efficient than their older portfolio average"
+      },
+      "portfolio_average": {
+        "value": 0.90,
+        "confidence": "medium",
+        "notes": "Estimated; older facilities skew higher"
+      }
+    }
+  },
+
+  "energy_per_activity": {
+    "_description": "Estimated energy consumption per unit of digital activity. These are data-center-side estimates unless noted otherwise.",
+
+    "ai_queries": {
+      "chatgpt_single_query": {
+        "kwh": 0.0029,
+        "wh": 2.9,
+        "confidence": "medium",
+        "source": "Multiple estimates converging; ~10x a Google search",
+        "notes": "Varies significantly by model size. GPT-4 likely higher than GPT-3.5. Range: 0.2-10 Wh depending on model and response length."
+      },
+      "chatgpt_conversation_20_50_queries": {
+        "kwh": 0.058,
+        "wh": 58,
+        "confidence": "medium",
+        "source": "ren_2023",
+        "notes": "Basis for the widely-cited '500mL per conversation' estimate"
+      },
+      "google_gemini_text_query": {
+        "kwh": 0.00024,
+        "wh": 0.24,
+        "confidence": "medium",
+        "source": "Google 2025 environmental report",
+        "notes": "Google's own estimate; significantly lower than third-party ChatGPT estimates"
+      },
+      "ai_image_generation": {
+        "kwh": 0.0006,
+        "wh": 0.6,
+        "confidence": "low",
+        "source": "Various estimates, 0.3-1.2 Wh range",
+        "notes": "Highly variable by model (DALL-E, Midjourney, Stable Diffusion) and resolution"
+      },
+      "ai_video_generation_5sec": {
+        "kwh": 1.0,
+        "wh": 1000,
+        "confidence": "low",
+        "source": "Estimate for OpenAI Sora-class models",
+        "notes": "Extremely energy-intensive; ~1 kWh for 5 seconds of video. Limited data available."
+      }
+    },
+
+    "search": {
+      "google_search": {
+        "kwh": 0.0003,
+        "wh": 0.3,
+        "confidence": "high",
+        "source": "Google (2009, likely lower now due to efficiency gains)",
+        "notes": "Widely cited figure. Google says efficiency has improved but hasn't published updated number."
+      },
+      "google_ai_overview_search": {
+        "kwh": 0.003,
+        "wh": 3.0,
+        "confidence": "low",
+        "source": "Estimated at ~10x traditional search",
+        "notes": "AI-augmented search results require additional inference compute"
+      }
+    },
+
+    "streaming_video": {
+      "_notes": "Includes data center, CDN, and network transmission. Does NOT include user device energy unless noted.",
+      "netflix_hd_per_hour": {
+        "kwh": 0.077,
+        "confidence": "high",
+        "source": "iea_2020",
+        "notes": "IEA 2020 estimate for HD streaming. Includes data center + network. Device energy adds 0.02-0.1 kWh depending on screen."
+      },
+      "netflix_4k_per_hour": {
+        "kwh": 0.15,
+        "confidence": "medium",
+        "source": "Extrapolated from HD (roughly 2x bitrate)",
+        "notes": "4K streams ~2-3x the data of HD"
+      },
+      "youtube_hd_per_hour": {
+        "kwh": 0.077,
+        "confidence": "medium",
+        "source": "Assumed similar to Netflix HD",
+        "notes": "YouTube has different CDN architecture but comparable bitrates for HD"
+      },
+      "youtube_sd_per_hour": {
+        "kwh": 0.037,
+        "confidence": "medium",
+        "source": "iea_2020 (SD estimate)",
+        "notes": "SD uses roughly half the data of HD"
+      },
+      "tiktok_per_hour": {
+        "kwh": 0.10,
+        "confidence": "low",
+        "source": "Estimated; short-form video with heavy recommendation compute",
+        "notes": "TikTok's recommendation algorithm adds server-side compute cost beyond pure streaming"
+      },
+      "zoom_video_call_per_hour": {
+        "kwh": 0.15,
+        "confidence": "medium",
+        "source": "Various estimates; 0.5-1.0 kWh including device for group calls",
+        "notes": "Highly variable: 1-on-1 vs group, video on/off, resolution. 0.15 kWh is server-side for typical 1-on-1."
+      }
+    },
+
+    "social_media": {
+      "_notes": "Per-minute energy consumption on the device side (phone). Server-side costs are additional.",
+      "tiktok_scroll_per_minute": {
+        "mah": 15.81,
+        "co2_grams": 2.63,
+        "confidence": "medium",
+        "source": "greenspector_2021, CloudZero analysis",
+        "notes": "Highest energy consumer among social apps measured"
+      },
+      "facebook_scroll_per_minute": {
+        "mah": 12.35,
+        "co2_grams": 1.5,
+        "confidence": "medium",
+        "source": "greenspector_2021"
+      },
+      "instagram_scroll_per_minute": {
+        "mah": 8.58,
+        "co2_grams": 1.05,
+        "confidence": "medium",
+        "source": "greenspector_2021"
+      },
+      "twitter_scroll_per_minute": {
+        "mah": 9.5,
+        "co2_grams": 0.60,
+        "confidence": "medium",
+        "source": "greenspector_2021",
+        "notes": "Lower data exchange than video-heavy platforms"
+      },
+      "snapchat_per_minute": {
+        "mah": 14.5,
+        "co2_grams": 1.3,
+        "confidence": "medium",
+        "source": "greenspector_2021"
+      },
+      "posting_a_photo": {
+        "co2_grams": 0.10,
+        "confidence": "low",
+        "source": "Openr estimates"
+      }
+    },
+
+    "email": {
+      "regular_email": {
+        "kwh": 0.0133,
+        "co2_grams": 4.0,
+        "confidence": "medium",
+        "source": "trg_2025, Mike Berners-Lee estimates",
+        "notes": "Without attachments. Attachments can increase 10x or more."
+      },
+      "spam_email": {
+        "co2_grams": 0.3,
+        "confidence": "low",
+        "source": "Berners-Lee estimates"
+      },
+      "email_with_large_attachment": {
+        "co2_grams": 50.0,
+        "confidence": "low",
+        "source": "Berners-Lee estimates"
+      }
+    },
+
+    "gaming": {
+      "cloud_gaming_per_hour": {
+        "kwh": 0.20,
+        "confidence": "low",
+        "source": "Estimated; cloud gaming requires continuous GPU rendering server-side",
+        "notes": "Highly variable by platform (GeForce Now, Xbox Cloud, PS Now) and game complexity"
+      },
+      "console_gaming_per_hour_device_only": {
+        "kwh": 0.15,
+        "confidence": "medium",
+        "source": "NRDC gaming console reports",
+        "notes": "PS5/Xbox Series X ~100-200W during active gaming. This is device only, not server-side."
+      },
+      "mobile_gaming_per_hour": {
+        "kwh": 0.005,
+        "confidence": "low",
+        "source": "Estimated from phone power consumption",
+        "notes": "Phone draws ~3-8W during gaming; server costs for online games are additional"
+      }
+    },
+
+    "crypto": {
+      "bitcoin_transaction": {
+        "kwh": 707,
+        "confidence": "medium",
+        "source": "Digiconomist / Cambridge Bitcoin Electricity Consumption Index",
+        "notes": "Extremely energy-intensive due to proof-of-work. One transaction ≈ avg US household for 24 days."
+      },
+      "ethereum_transaction_post_merge": {
+        "kwh": 0.03,
+        "confidence": "medium",
+        "source": "Ethereum Foundation estimates post-Merge (Sep 2022)",
+        "notes": "Proof-of-stake reduced energy by ~99.95%"
+      }
+    }
+  },
+
+  "device_energy": {
+    "_description": "Energy consumption of user devices during digital activities. Important for total water footprint calculation.",
+    "smartphone_active_use_per_hour": {
+      "kwh": 0.005,
+      "watts": 5,
+      "notes": "Varies by screen brightness, processing load. Range: 3-8W"
+    },
+    "laptop_active_per_hour": {
+      "kwh": 0.05,
+      "watts": 50,
+      "notes": "Range: 30-80W depending on model and workload"
+    },
+    "desktop_pc_per_hour": {
+      "kwh": 0.15,
+      "watts": 150,
+      "notes": "Range: 80-300W. Gaming PCs at high end."
+    },
+    "tv_55_inch_led_per_hour": {
+      "kwh": 0.08,
+      "watts": 80,
+      "notes": "Modern LED TVs: 50-120W. OLED may be slightly higher."
+    },
+    "tv_65_inch_oled_per_hour": {
+      "kwh": 0.12,
+      "watts": 120
+    },
+    "gaming_console_active_per_hour": {
+      "kwh": 0.15,
+      "watts": 150,
+      "notes": "PS5: ~100-200W active. Xbox Series X similar."
+    },
+    "smart_speaker_per_hour": {
+      "kwh": 0.003,
+      "watts": 3
+    },
+    "wifi_router_per_hour": {
+      "kwh": 0.01,
+      "watts": 10,
+      "notes": "Always-on device; contributes to all network activities"
+    }
+  },
+
+  "water_per_activity_calculated": {
+    "_description": "Pre-calculated water cost estimates using the calculation chain: kWh × WUE = liters. These use the industry average WUE (1.8 L/kWh) as the default, with regional variations available via the multipliers table.",
+    "_default_wue": 1.8,
+
+    "ai_queries": {
+      "chatgpt_single_query": {
+        "water_ml": 5.2,
+        "calculation": "0.0029 kWh × 1.8 L/kWh × 1000 = 5.22 mL",
+        "range_ml": [0.4, 18.0],
+        "range_notes": "Low end: efficient model + cold-climate DC. High end: large model + hot-climate DC.",
+        "comparison": "About 1 teaspoon of water"
+      },
+      "chatgpt_conversation_20_50_queries": {
+        "water_ml": 500,
+        "calculation": "Widely cited figure from Ren et al. (2023) for 20-50 exchanges",
+        "comparison": "One standard water bottle"
+      },
+      "google_gemini_text_query": {
+        "water_ml": 0.43,
+        "calculation": "0.00024 kWh × 1.8 L/kWh × 1000 = 0.43 mL",
+        "comparison": "About 1/12 of a teaspoon"
+      },
+      "ai_image_generation": {
+        "water_ml": 1.1,
+        "calculation": "0.0006 kWh × 1.8 L/kWh × 1000 = 1.08 mL",
+        "range_ml": [0.5, 2.2],
+        "comparison": "A few drops"
+      },
+      "ai_video_generation_5sec": {
+        "water_ml": 1800,
+        "calculation": "1.0 kWh × 1.8 L/kWh × 1000 = 1800 mL",
+        "comparison": "Almost 4 standard water bottles for 5 seconds of AI video"
+      }
+    },
+
+    "search": {
+      "google_search": {
+        "water_ml": 0.54,
+        "calculation": "0.0003 kWh × 1.8 L/kWh × 1000 = 0.54 mL"
+      }
+    },
+
+    "streaming": {
+      "netflix_1_hour_hd": {
+        "water_ml": 139,
+        "calculation": "0.077 kWh × 1.8 L/kWh × 1000 = 138.6 mL",
+        "comparison": "About half a glass of water"
+      },
+      "netflix_1_hour_hd_with_tv": {
+        "water_ml": 283,
+        "calculation": "(0.077 + 0.08) kWh × 1.8 L/kWh × 1000 = 282.6 mL",
+        "notes": "Including a 55-inch LED TV's power consumption",
+        "comparison": "Just over one glass of water"
+      },
+      "youtube_1_hour_on_phone": {
+        "water_ml": 148,
+        "calculation": "(0.077 + 0.005) kWh × 1.8 × 1000 = 147.6 mL",
+        "notes": "Server-side streaming + phone energy"
+      },
+      "tiktok_1_hour": {
+        "water_ml": 189,
+        "calculation": "(0.10 + 0.005) kWh × 1.8 × 1000 = 189 mL",
+        "notes": "Higher due to recommendation algorithm compute"
+      },
+      "zoom_1_hour_video": {
+        "water_ml": 360,
+        "calculation": "(0.15 + 0.05) kWh × 1.8 × 1000 = 360 mL",
+        "notes": "Server + laptop. Group calls can be significantly higher."
+      }
+    },
+
+    "email": {
+      "one_email_no_attachment": {
+        "water_ml": 24,
+        "calculation": "0.0133 kWh × 1.8 × 1000 = 23.9 mL"
+      }
+    },
+
+    "gaming": {
+      "cloud_gaming_1_hour": {
+        "water_ml": 630,
+        "calculation": "(0.20 + 0.15) kWh × 1.8 × 1000 = 630 mL",
+        "notes": "Cloud server GPU + console/PC device",
+        "comparison": "More than a standard water bottle per hour"
+      },
+      "console_gaming_1_hour_offline": {
+        "water_ml": 270,
+        "calculation": "0.15 kWh × 1.8 × 1000 = 270 mL",
+        "notes": "Device power only; grid electricity generation also uses water"
+      }
+    },
+
+    "crypto": {
+      "one_bitcoin_transaction": {
+        "water_liters": 1273,
+        "calculation": "707 kWh × 1.8 L/kWh = 1272.6 L",
+        "comparison": "Equivalent to about 8 full bathtubs of water"
+      }
+    }
+  },
+
+  "regional_multipliers": {
+    "_description": "Multipliers to adjust the default (industry average) water cost by region. Based on WUE data and climate factors. Multiply the default water estimate by this factor.",
+    "_formula": "regional_water = default_water × (regional_wue / default_wue)",
+    "_default_wue_for_multiplier": 1.8,
+
+    "regions": {
+      "us_southwest_arizona": {
+        "multiplier": 0.84,
+        "representative_wue": 1.52,
+        "climate": "Hot arid",
+        "notes": "Despite Microsoft's high WUE here, many DCs use heavy evaporative cooling. Water stress is extreme.",
+        "water_stress": "critical"
+      },
+      "us_virginia": {
+        "multiplier": 0.78,
+        "representative_wue": 1.40,
+        "climate": "Humid subtropical",
+        "notes": "Largest US DC cluster (Data Center Alley). Humidity reduces but doesn't eliminate cooling water needs.",
+        "water_stress": "moderate"
+      },
+      "us_iowa": {
+        "multiplier": 0.56,
+        "representative_wue": 1.00,
+        "climate": "Temperate continental",
+        "notes": "Cold winters allow free cooling part of year. Major Microsoft and Google presence.",
+        "water_stress": "low_to_moderate"
+      },
+      "us_texas_san_antonio": {
+        "multiplier": 0.72,
+        "representative_wue": 1.30,
+        "climate": "Hot semi-arid to humid subtropical",
+        "notes": "Rapidly expanding DC market. Water availability is a growing concern. SAWS service area.",
+        "water_stress": "moderate_to_high"
+      },
+      "us_oregon": {
+        "multiplier": 0.44,
+        "representative_wue": 0.80,
+        "climate": "Temperate maritime",
+        "notes": "Cool climate, access to hydroelectric power. Major Google, Facebook, Amazon presence.",
+        "water_stress": "low"
+      },
+      "nordics_sweden_finland": {
+        "multiplier": 0.17,
+        "representative_wue": 0.30,
+        "climate": "Cold / subarctic",
+        "notes": "Near-zero cooling water needs for much of the year. Abundant renewable energy.",
+        "water_stress": "minimal"
+      },
+      "ireland": {
+        "multiplier": 0.33,
+        "representative_wue": 0.60,
+        "climate": "Cool maritime",
+        "notes": "Temperate climate reduces cooling needs. Major EU DC hub but facing grid capacity issues.",
+        "water_stress": "low"
+      },
+      "netherlands": {
+        "multiplier": 0.28,
+        "representative_wue": 0.50,
+        "climate": "Maritime temperate",
+        "notes": "Cool climate, major European DC hub.",
+        "water_stress": "low"
+      },
+      "singapore": {
+        "multiplier": 0.11,
+        "representative_wue": 0.20,
+        "climate": "Tropical",
+        "notes": "Despite hot climate, advanced cooling tech and reclaimed water bring WUE very low.",
+        "water_stress": "managed"
+      },
+      "middle_east_uae": {
+        "multiplier": 1.33,
+        "representative_wue": 2.40,
+        "climate": "Hot desert",
+        "notes": "Extreme cooling demands. Often uses desalinated water, which itself is energy-intensive.",
+        "water_stress": "extreme"
+      },
+      "india_mumbai": {
+        "multiplier": 1.11,
+        "representative_wue": 2.00,
+        "climate": "Tropical / hot humid",
+        "notes": "Growing DC market. High cooling demands, variable water availability.",
+        "water_stress": "high"
+      }
+    }
+  },
+
+  "comparisons_library": {
+    "_description": "Relatable real-world comparisons for water quantities. Used to make results tangible.",
+    "teaspoon_ml": 5,
+    "tablespoon_ml": 15,
+    "sip_of_water_ml": 25,
+    "shot_glass_ml": 44,
+    "glass_of_water_ml": 250,
+    "water_bottle_standard_ml": 500,
+    "toilet_flush_liters": 6,
+    "shower_per_minute_liters": 9.5,
+    "average_shower_8min_liters": 76,
+    "bathtub_full_liters": 150,
+    "washing_machine_load_liters": 50,
+    "dishwasher_cycle_liters": 15,
+    "garden_hose_per_minute_liters": 35,
+    "olympic_swimming_pool_liters": 2500000,
+    "daily_drinking_water_recommended_liters": 2.0,
+    "producing_1kg_beef_liters": 15400,
+    "producing_1_cotton_tshirt_liters": 2700,
+    "producing_1_smartphone_liters": 12000,
+    "average_american_daily_water_use_liters": 310
+  },
+
+  "meta_calculation": {
+    "_description": "How to calculate the water cost of using THIS tool (the meta layer). Based on the Anthropic Claude API.",
+    "estimated_wh_per_1000_tokens": {
+      "value": 0.14,
+      "confidence": "low",
+      "source": "Extrapolated from published LLM energy estimates. Claude Sonnet likely in the 0.1-0.5 Wh per 1000 token range.",
+      "notes": "This is a rough estimate. Anthropic has not published per-query energy data. We use a conservative mid-range estimate."
+    },
+    "average_query_tokens": {
+      "input": 200,
+      "output": 500,
+      "total": 700,
+      "notes": "Rough average for a typical Q&A interaction on this tool"
+    },
+    "estimated_wh_per_tool_query": {
+      "value": 0.1,
+      "notes": "700 tokens × 0.14 Wh/1000 tokens ≈ 0.1 Wh"
+    },
+    "estimated_water_per_tool_query_ml": {
+      "at_industry_average_wue": 0.18,
+      "at_microsoft_average_wue": 0.03,
+      "at_arizona_wue": 0.15,
+      "at_nordics_wue": 0.003,
+      "calculation": "0.0001 kWh × WUE(L/kWh) × 1000 = mL",
+      "display_default_ml": 0.18,
+      "notes": "Very small per query, but it adds up across millions of users"
+    }
+  },
+
+  "training_water_costs": {
+    "_description": "One-time water costs for training AI models. Amortized across all queries over the model's lifetime.",
+    "gpt3_training": {
+      "water_liters": 700000,
+      "source": "ren_2023",
+      "confidence": "medium",
+      "notes": "700,000 liters of freshwater evaporated training GPT-3 in Microsoft US data centers"
+    },
+    "gpt4_training": {
+      "water_liters": "unknown_estimated_3x_to_10x_gpt3",
+      "confidence": "low",
+      "notes": "No official figures. Estimated based on compute scaling."
+    },
+    "global_ai_water_projection_2027": {
+      "withdrawal_cubic_meters": "4.2-6.6 billion",
+      "consumption_cubic_meters": "0.38-0.60 billion",
+      "source": "ren_2023",
+      "notes": "More than the total annual water withdrawal of 4-6 Denmark or half the UK"
+    }
+  },
+
+  "indirect_water_costs": {
+    "_description": "Water used in electricity GENERATION (scope-2), not at the data center. Often larger than on-site cooling water but rarely discussed.",
+    "thermoelectric_power_water_per_kwh_liters": {
+      "coal": 1.9,
+      "natural_gas_combined_cycle": 0.7,
+      "nuclear": 2.3,
+      "notes": "Cooling water for power plants. This is IN ADDITION to data center WUE."
+    },
+    "renewable_water_per_kwh_liters": {
+      "solar": 0.1,
+      "wind": 0.004,
+      "hydroelectric": "highly_variable_evaporation",
+      "notes": "Solar panels need cleaning; wind is near-zero. Hydro reservoirs lose water to evaporation."
+    },
+    "us_average_grid_water_per_kwh_liters": 1.8,
+    "notes": "On average, generating 1 kWh of US grid electricity withdraws ~1.8 liters of water. This roughly DOUBLES the total water footprint when added to on-site DC cooling."
+  }
+}
