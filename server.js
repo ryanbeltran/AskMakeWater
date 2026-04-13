@@ -134,13 +134,14 @@ let usageStore = {
   date: new Date().toISOString().slice(0, 10),
   total_ml: 0,
   query_count: 0,
-  recent: [],
+  recent: [],   // public: query + timestamp only
+  stats: [],    // private: full analytics
 };
 
 async function handleUsage(req, res) {
   const today = new Date().toISOString().slice(0, 10);
   if (usageStore.date !== today) {
-    usageStore = { date: today, total_ml: 0, query_count: 0, recent: [] };
+    usageStore = { date: today, total_ml: 0, query_count: 0, recent: [], stats: [] };
   }
 
   if (req.method === 'GET') {
@@ -160,20 +161,28 @@ async function handleUsage(req, res) {
     for await (const chunk of req) body += chunk;
     const data = JSON.parse(body);
 
-    const entry = {
+    const publicEntry = {
+      query: String(data.query || '').slice(0, 200),
+      timestamp: Date.now(),
+    };
+
+    const statEntry = {
       query: String(data.query || '').slice(0, 200),
       activity_id: data.activity_id || 'unknown',
-      water_ml: Math.round((data.water_ml || 0) * 10) / 10,
-      water_display: data.water_display || '',
-      comparison: data.comparison || '',
-      comparison_icon: data.comparison_icon || 'drop',
+      water_ml: Math.round((data.water_ml || 0) * 100) / 100,
+      tokens: data.tokens || 0,
+      zip_code: data.zip_code || null,
+      region: data.region || null,
+      device: data.device || null,
       timestamp: Date.now(),
     };
 
     usageStore.total_ml += data.water_ml || 0;
     usageStore.query_count += 1;
-    usageStore.recent.unshift(entry);
+    usageStore.recent.unshift(publicEntry);
+    usageStore.stats.unshift(statEntry);
     if (usageStore.recent.length > 10) usageStore.recent = usageStore.recent.slice(0, 10);
+    if (usageStore.stats.length > 200) usageStore.stats = usageStore.stats.slice(0, 200);
 
     res.writeHead(200, { 'Content-Type': 'application/json' });
     return res.end(JSON.stringify({

@@ -1,13 +1,15 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import ChatPage from './pages/ChatPage';
-import PromptPage from './pages/PromptPage';
+import AboutPage from './pages/AboutPage';
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<ChatPage />} />
-        <Route path="/prompt" element={<PromptPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        {/* Legacy route */}
+        <Route path="/prompt" element={<AboutPage />} />
       </Routes>
     </BrowserRouter>
   );

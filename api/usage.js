@@ -17,7 +17,8 @@ let store = {
   date: new Date().toISOString().slice(0, 10),
   total_ml: 0,
   query_count: 0,
-  recent: [], // newest first
+  recent: [],   // public: query text + timestamp only
+  stats: [],    // private: full analytics (zip, region, device, tokens, etc.)
 };
 
 function resetIfNewDay() {
@@ -51,27 +52,39 @@ export default function handler(req, res) {
   }
 
   if (req.method === 'POST') {
-    const { query, activity_id, water_ml, water_display, comparison, comparison_icon } = req.body || {};
+    const { query, water_ml, tokens, activity_id, zip_code, region, device } = req.body || {};
 
     if (!query || water_ml === undefined) {
       return res.status(400).json({ error: 'query and water_ml are required' });
     }
 
-    const entry = {
-      query: String(query).slice(0, 200), // truncate long queries
+    // Public entry — only the query text and timestamp
+    const publicEntry = {
+      query: String(query).slice(0, 200),
+      timestamp: Date.now(),
+    };
+
+    // Private stats — full analytics, never returned to clients
+    const statEntry = {
+      query: String(query).slice(0, 200),
       activity_id: activity_id || 'unknown',
-      water_ml: Math.round(water_ml * 10) / 10,
-      water_display: water_display || `~${Math.round(water_ml)} mL`,
-      comparison: comparison || '',
-      comparison_icon: comparison_icon || 'drop',
+      water_ml: Math.round(water_ml * 100) / 100,
+      tokens: tokens || 0,
+      zip_code: zip_code || null,
+      region: region || null,
+      device: device || null,
       timestamp: Date.now(),
     };
 
     store.total_ml += water_ml;
     store.query_count += 1;
-    store.recent.unshift(entry);
+    store.recent.unshift(publicEntry);
+    store.stats.unshift(statEntry);
     if (store.recent.length > MAX_RECENT) {
       store.recent = store.recent.slice(0, MAX_RECENT);
+    }
+    if (store.stats.length > 200) {
+      store.stats = store.stats.slice(0, 200);
     }
 
     return res.status(200).json({

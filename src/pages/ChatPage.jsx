@@ -6,6 +6,7 @@ import WaterDrop from '../components/WaterDrop';
 import WaterBottle from '../components/WaterBottle';
 import RecentSearches from '../components/RecentSearches';
 import { calculateMetaWater } from '../data/recalculate';
+import TokenCalculator from '../components/TokenCalculator';
 
 const EXAMPLE_QUESTIONS = [
   'How much water does it cost to stream Netflix for 2 hours?',
@@ -22,6 +23,8 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+
+  const [showTokenCalc, setShowTokenCalc] = useState(false);
 
   // Global usage state
   const [bottleMl, setBottleMl] = useState(0);
@@ -61,11 +64,8 @@ export default function ChatPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           query,
-          activity_id: 'ai_query_meta',
           water_ml: waterMl,
-          water_display: `This query used ${waterDisplay} of water`,
-          comparison: `${totalTokens} tokens processed`,
-          comparison_icon: 'drop',
+          tokens: totalTokens,
         }),
       });
       const data = await res.json();
@@ -74,11 +74,6 @@ export default function ChatPage() {
       }
       setRecentQueries(prev => [{
         query,
-        activity_id: 'ai_query_meta',
-        water_ml: waterMl,
-        water_display: `This query used ${waterDisplay}`,
-        comparison: `${totalTokens} tokens`,
-        comparison_icon: 'drop',
         timestamp: Date.now(),
       }, ...prev].slice(0, 10));
     } catch {
@@ -174,12 +169,22 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
               ask <span className="text-mw-water">makewater</span>
             </span>
           </button>
-          <Link
-            to="/prompt"
-            className="text-xs text-gray-400 hover:text-mw-water transition-colors no-underline"
-          >
-            view system prompt
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              to="/about"
+              className="text-xs px-3 py-1.5 border border-gray-200 text-gray-600 rounded-lg font-medium hover:border-mw-water hover:text-mw-water transition-colors no-underline"
+            >
+              FAQ
+            </Link>
+            <a
+              href="https://www.makewater.org/donate"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs px-3 py-1.5 bg-mw-water text-white rounded-lg font-medium hover:bg-mw-water-dark transition-colors no-underline"
+            >
+              Donate
+            </a>
+          </div>
         </div>
       </header>
 
@@ -188,18 +193,52 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
         <div className="max-w-3xl mx-auto px-4 py-6">
           {isEmpty ? (
             <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-              {/* Water bottle */}
-              <div className="mb-6">
-                <WaterBottle currentMl={bottleMl} maxMl={bottleMax} />
+              {/* Hero: text left, bottle right */}
+              <div className="flex items-center gap-8 mb-8 w-full max-w-lg">
+                <div className="flex-1 text-left">
+                  <h1 className="text-2xl font-bold text-mw-base tracking-tight mb-2">
+                    What's the water cost of your digital life?
+                  </h1>
+                  <p className="text-gray-500 text-sm leading-relaxed">
+                    Every digital action has a hidden water cost. Ask anything — streaming, AI, gaming,
+                    crypto, social media — and we'll show you the water footprint with full transparency.
+                  </p>
+                </div>
+                <div className="flex-shrink-0">
+                  <WaterBottle currentMl={bottleMl} maxMl={bottleMax} />
+                </div>
               </div>
 
-              <h1 className="text-2xl font-bold text-mw-base tracking-tight mb-2">
-                What's the water cost of your digital life?
-              </h1>
-              <p className="text-gray-500 text-sm max-w-md mb-8 leading-relaxed">
-                Every digital action has a hidden water cost. Ask anything — streaming, AI, gaming,
-                crypto, social media — and we'll show you the water footprint with full transparency.
-              </p>
+              {/* Input area */}
+              <div className="w-full max-w-lg mb-8 bg-white rounded-2xl border border-gray-200 p-4 shadow-sm">
+                <form onSubmit={handleSubmit} className="flex gap-2">
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={input}
+                    onChange={e => setInput(e.target.value)}
+                    placeholder="How much water does it cost to..."
+                    disabled={loading}
+                    className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:border-mw-water focus:ring-1 focus:ring-mw-water/30 focus:bg-white disabled:opacity-50 transition-colors"
+                  />
+                  <button
+                    type="submit"
+                    disabled={loading || !input.trim()}
+                    className="px-4 py-2.5 bg-mw-water text-white rounded-xl text-sm font-medium hover:bg-mw-water-dark disabled:opacity-40 transition-colors cursor-pointer disabled:cursor-not-allowed flex items-center gap-1.5"
+                  >
+                    <WaterDrop size={14} />
+                    Ask
+                  </button>
+                </form>
+                <p className="text-[11px] text-gray-400 mt-2 text-center leading-relaxed">
+                  Every estimate is our best calculation based on published research. We show our work.
+                  Think we got something wrong?{' '}
+                  <a href="https://www.makewater.org/contact" target="_blank" rel="noopener noreferrer" className="text-mw-water hover:underline">
+                    Tell us
+                  </a>
+                  .
+                </p>
+              </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full max-w-lg mb-8">
                 {EXAMPLE_QUESTIONS.map((q, i) => (
@@ -213,10 +252,25 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
                 ))}
               </div>
 
+              {/* Token calculator */}
+              <div className="w-full max-w-lg mb-8 flex flex-col items-center">
+                {showTokenCalc ? (
+                  <TokenCalculator onClose={() => setShowTokenCalc(false)} />
+                ) : (
+                  <button
+                    onClick={() => setShowTokenCalc(true)}
+                    className="text-sm text-gray-500 border border-gray-200 rounded-xl px-4 py-2.5 hover:border-mw-water hover:text-mw-water transition-colors cursor-pointer bg-white"
+                  >
+                    Token Water Calculator
+                  </button>
+                )}
+              </div>
+
               {/* Recent searches */}
               {recentQueries.length > 0 && (
-                <RecentSearches queries={recentQueries} />
+                <RecentSearches queries={recentQueries} onQueryClick={(q) => sendMessage(q)} />
               )}
+
             </div>
           ) : (
             <div className="space-y-4">
@@ -237,38 +291,31 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
         </div>
       </main>
 
-      {/* Input area */}
-      <footer className="flex-shrink-0 border-t border-gray-200 bg-white">
-        <div className="max-w-3xl mx-auto px-4 py-3">
-          <form onSubmit={handleSubmit} className="flex gap-2">
-            <input
-              ref={inputRef}
-              type="text"
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              placeholder="How much water does it cost to..."
-              disabled={loading}
-              className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-mw-water focus:ring-1 focus:ring-mw-water/30 disabled:opacity-50 transition-colors"
-            />
-            <button
-              type="submit"
-              disabled={loading || !input.trim()}
-              className="px-4 py-2.5 bg-mw-water text-white rounded-xl text-sm font-medium hover:bg-mw-water-dark disabled:opacity-40 transition-colors cursor-pointer disabled:cursor-not-allowed flex items-center gap-1.5"
-            >
-              <WaterDrop size={14} />
-              Ask
-            </button>
-          </form>
-          <p className="text-[11px] text-gray-400 mt-2 text-center leading-relaxed">
-            Every estimate is our best calculation based on published research. We show our work.
-            Think we got something wrong?{' '}
-            <a href="mailto:info@makewater.org" className="text-mw-water hover:underline">
-              Tell us
-            </a>
-            .
-          </p>
-        </div>
-      </footer>
+      {/* Footer input — only shown in chat mode */}
+      {!isEmpty && (
+        <footer className="flex-shrink-0 border-t border-gray-200 bg-white">
+          <div className="max-w-3xl mx-auto px-4 py-3">
+            <form onSubmit={handleSubmit} className="flex gap-2">
+              <input
+                type="text"
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                placeholder="How much water does it cost to..."
+                disabled={loading}
+                className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-mw-water focus:ring-1 focus:ring-mw-water/30 disabled:opacity-50 transition-colors"
+              />
+              <button
+                type="submit"
+                disabled={loading || !input.trim()}
+                className="px-4 py-2.5 bg-mw-water text-white rounded-xl text-sm font-medium hover:bg-mw-water-dark disabled:opacity-40 transition-colors cursor-pointer disabled:cursor-not-allowed flex items-center gap-1.5"
+              >
+                <WaterDrop size={14} />
+                Ask
+              </button>
+            </form>
+          </div>
+        </footer>
+      )}
     </div>
   );
 }
