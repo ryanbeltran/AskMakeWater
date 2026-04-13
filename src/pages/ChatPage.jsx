@@ -170,7 +170,7 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
             onClick={() => { setMessages([]); setUsages({}); setModels({}); setRepeats({}); }}
             className="flex items-center gap-2 cursor-pointer bg-transparent border-none p-0"
           >
-            <WaterDrop size={22} className="text-mw-water" />
+            <img src="/makewater-logo.png" alt="MakeWater" className="h-8 w-auto" />
             <span className="font-bold text-mw-base tracking-tight text-lg">
               ask <span className="text-mw-water">makewater</span>
             </span>
@@ -298,9 +298,9 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
         </div>
       </main>
 
-      {/* Footer input — only shown in chat mode */}
+      {/* Chat input — only shown in chat mode */}
       {!isEmpty && (
-        <footer className="flex-shrink-0 border-t border-gray-200 bg-white">
+        <div className="flex-shrink-0 border-t border-gray-200 bg-white">
           <div className="max-w-3xl mx-auto px-4 py-3">
             <form onSubmit={handleSubmit} className="flex gap-2">
               <input
@@ -321,8 +321,29 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
               </button>
             </form>
           </div>
-        </footer>
+        </div>
       )}
+
+      {/* Footer */}
+      <footer className="flex-shrink-0 border-t border-gray-100 bg-white/80">
+        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
+          <p className="text-[11px] text-gray-400">
+            A project of{' '}
+            <a href="https://www.makewater.org" target="_blank" rel="noopener noreferrer" className="text-mw-water hover:underline">
+              MakeWater
+            </a>
+            {' '}501(c)(3)
+          </p>
+          <a
+            href="https://www.makewater.org/contact"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[11px] px-3 py-1.5 border border-gray-200 text-gray-500 rounded-lg hover:border-mw-water hover:text-mw-water transition-colors no-underline"
+          >
+            Feedback / Contact
+          </a>
+        </div>
+      </footer>
     </div>
   );
 }

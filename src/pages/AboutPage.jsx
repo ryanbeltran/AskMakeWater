@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import WaterDrop from '../components/WaterDrop';
 
 const TABS = [
   { id: 'why', label: 'Why We Built This' },
@@ -39,7 +38,7 @@ const FAQ_ITEMS = [
   },
   {
     q: 'Can the AI hallucinate or make up numbers?',
-    a: `We designed the system specifically to prevent this. The AI never does any math or generates any energy or water figures. It only classifies your question — identifying which activity you're asking about and what parameters apply. Then your browser looks up the real data from our reference dataset and does the multiplication. If the AI classifies something that doesn't exist in our dataset, the system catches it and tells you honestly instead of making something up.`,
+    a: `We designed the system specifically to minimize this. The AI never does any math or generates any energy or water figures. It only classifies your question — identifying which activity you're asking about and what parameters apply. Then your browser looks up the real data from our reference dataset and does the multiplication. If the AI classifies something that doesn't exist in our dataset, the system catches it and tells you honestly instead of making something up. That said, AI is AI — we can't guarantee it will always classify perfectly, and edge cases can still produce unexpected results. We're always working to reduce the likelihood of errors, but we'd rather be honest about the limitations than pretend they don't exist.`,
   },
   {
     q: 'How can I help improve this?',
@@ -79,7 +78,7 @@ export default function AboutPage() {
       <header className="flex-shrink-0 border-b border-gray-200 bg-white">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 no-underline">
-            <WaterDrop size={22} className="text-mw-water" />
+            <img src="/makewater-logo.png" alt="MakeWater" className="h-8 w-auto" />
             <span className="font-bold text-mw-base tracking-tight text-lg">
               ask <span className="text-mw-water">makewater</span>
             </span>
@@ -197,7 +196,7 @@ function PromptContent() {
 
       <h3 className="font-semibold text-gray-800 mt-4">Why this matters</h3>
       <ul className="list-disc list-inside space-y-1">
-        <li>The AI can never hallucinate water numbers — it only classifies, the math is deterministic</li>
+        <li>The AI doesn't generate water numbers — it only classifies, the math is deterministic. Misclassifications can still happen, but we're always working to reduce them.</li>
         <li>Prompt caching means repeat-pattern queries use ~90% fewer input tokens</li>
         <li>Haiku uses ~10x less energy than larger models</li>
         <li>Every query shows its own water cost on screen</li>
