@@ -7,7 +7,6 @@ import WaterBottle from '../components/WaterBottle';
 import RecentSearches from '../components/RecentSearches';
 import { calculateMetaWater } from '../data/recalculate';
 import TokenCalculator from '../components/TokenCalculator';
-import DonateButton from '../components/DonateButton';
 
 const EXAMPLE_QUESTIONS = [
   'How much water does it cost to stream Netflix for 2 hours?',
@@ -171,10 +170,10 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
             onClick={() => { setMessages([]); setUsages({}); setModels({}); setRepeats({}); }}
             className="flex items-center gap-2 cursor-pointer bg-transparent border-none p-0"
           >
-            <img src="/makewater-logo.png" alt="MakeWater" className="h-8 w-auto" />
             <span className="font-bold text-mw-base tracking-tight text-lg">
               ask <span className="text-mw-water">makewater</span>
             </span>
+            <img src="/makewater-logo.png" alt="MakeWater" className="h-8 w-auto" />
           </button>
           <div className="flex items-center gap-3">
             <Link
@@ -183,7 +182,6 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
             >
               FAQ
             </Link>
-            <DonateButton />
           </div>
         </div>
       </header>

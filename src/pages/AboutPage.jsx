@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import DonateButton from '../components/DonateButton';
 
 const TABS = [
   { id: 'why', label: 'Why We Built This' },
@@ -79,13 +78,12 @@ export default function AboutPage() {
       <header className="flex-shrink-0 border-b border-gray-200 bg-white">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 no-underline">
-            <img src="/makewater-logo.png" alt="MakeWater" className="h-8 w-auto" />
             <span className="font-bold text-mw-base tracking-tight text-lg">
               ask <span className="text-mw-water">makewater</span>
             </span>
+            <img src="/makewater-logo.png" alt="MakeWater" className="h-8 w-auto" />
           </Link>
           <div className="flex items-center gap-3">
-            <DonateButton />
           </div>
         </div>
       </header>
