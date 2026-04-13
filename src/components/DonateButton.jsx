@@ -39,7 +39,7 @@ export default function DonateButton() {
       >
         Donate
       </button>
-      <span ref={hiddenRef} className="hidden" />
+      <span ref={hiddenRef} style={{ position: 'fixed', left: '-9999px', top: '-9999px' }} />
     </>
   );
 }
