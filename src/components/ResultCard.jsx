@@ -5,6 +5,22 @@ import RefinementQuestions from './RefinementQuestions';
 import { recalculate, recalculateConfidence, calculateMetaWater, formatWater, DEVICES, REGIONS } from '../data/recalculate';
 import AIModelComparison from './AIModelComparison';
 
+const BOTTLE_ML = 500;
+
+function BottleCount({ ml }) {
+  if (!ml || ml < 50) return null; // don't show for tiny amounts
+  const bottles = ml / BOTTLE_ML;
+  const display = bottles < 10 ? bottles.toFixed(1) : Math.round(bottles);
+  const fullBottles = Math.min(Math.floor(bottles), 5); // show up to 5 icons
+  const hasMore = bottles > 5;
+  return (
+    <span className="flex items-center gap-1 text-sm text-mw-water">
+      {'🍶'.repeat(fullBottles)}{hasMore ? '+' : ''}
+      <span className="text-xs font-medium text-gray-500">{display} bottles (500 mL)</span>
+    </span>
+  );
+}
+
 function ComparisonIcon({ type }) {
   const icons = {
     drop: '\uD83D\uDCA7',
@@ -394,9 +410,12 @@ export default function ResultCard({ data, query, model, usage, onTier2Submit })
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm text-gray-500 mb-1">{data.activity}</p>
-            <p className="text-2xl font-bold text-mw-base tracking-tight transition-all duration-300">
-              {displayWater}
-            </p>
+            <div className="flex items-center gap-3">
+              <p className="text-2xl font-bold text-mw-base tracking-tight transition-all duration-300">
+                {displayWater}
+              </p>
+              <BottleCount ml={isModified ? calculatedResult.water_ml : data.water_ml} />
+            </div>
             <p className="text-sm text-gray-600 mt-1">{displayComparison}</p>
             {isModified && (
               <p className="text-[10px] text-mw-water mt-1">

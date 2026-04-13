@@ -56,12 +56,22 @@ export default function TokenCalculator({ onClose }) {
 
   const maxWater = Math.max(...results.map(r => r.waterMl), 0.01);
 
+  const BOTTLE_ML = 500;
+
   function formatWater(ml) {
     if (ml < 0.01) return '<0.01 mL';
     if (ml < 1) return `${ml.toFixed(2)} mL`;
     if (ml < 100) return `${ml.toFixed(1)} mL`;
     if (ml < 1000) return `${Math.round(ml)} mL`;
     return `${(ml / 1000).toFixed(2)} L`;
+  }
+
+  function formatBottles(ml) {
+    const bottles = ml / BOTTLE_ML;
+    if (bottles < 0.01) return `${bottles.toFixed(3)}`;
+    if (bottles < 0.1) return `${bottles.toFixed(2)}`;
+    if (bottles < 1) return `${bottles.toFixed(1)}`;
+    return `${bottles.toFixed(1)}`;
   }
 
   return (
@@ -137,8 +147,11 @@ export default function TokenCalculator({ onClose }) {
                 }}
               />
             </div>
-            <span className="text-xs font-mono text-gray-700 w-20 text-right flex-shrink-0">
+            <span className="text-xs font-mono text-gray-700 flex-shrink-0 text-right">
               {formatWater(r.waterMl)}
+            </span>
+            <span className="text-[10px] text-gray-400 flex-shrink-0 text-right ml-0.5">
+              {formatBottles(r.waterMl) ? `${formatBottles(r.waterMl)} bottles` : ''}
             </span>
           </div>
         ))}
@@ -155,7 +168,7 @@ export default function TokenCalculator({ onClose }) {
       </div>
 
       <p className="text-[10px] text-gray-400 mt-3 leading-relaxed">
-        Per-token energy derived from per-query benchmarks assuming ~800 tokens per query. Real costs vary by prompt length, batching, caching, and hardware. Water = energy x WUE ({wue} L/kWh for {region.label}).
+        Per-token energy derived from per-query benchmarks assuming ~800 tokens per query. Real costs vary by prompt length, batching, caching, and hardware. Water = energy x WUE ({wue} L/kWh for {region.label}). 1 bottle = 500 mL.
       </p>
     </div>
   );
