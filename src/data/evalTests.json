@@ -1,0 +1,325 @@
+[
+  {
+    "id": 1,
+    "question": "How much water does a single ChatGPT query use?",
+    "expected_activity_id": "chatgpt_single_query",
+    "expected_duration": 1,
+    "expected_duration_unit": "queries",
+    "category": "ai"
+  },
+  {
+    "id": 2,
+    "question": "What's the water cost of a full ChatGPT conversation with like 30 back-and-forths?",
+    "expected_activity_id": "chatgpt_conversation",
+    "expected_duration": 1,
+    "expected_duration_unit": "conversations",
+    "category": "ai"
+  },
+  {
+    "id": 3,
+    "question": "How much water does Google Gemini use per query?",
+    "expected_activity_id": "google_gemini_query",
+    "expected_duration": 1,
+    "expected_duration_unit": "queries",
+    "category": "ai"
+  },
+  {
+    "id": 4,
+    "question": "What's the water footprint of generating an AI image?",
+    "expected_activity_id": "ai_image_generation",
+    "expected_duration": 1,
+    "expected_duration_unit": "images",
+    "expected_show_model_comparison": true,
+    "category": "ai"
+  },
+  {
+    "id": 5,
+    "question": "How much water does making a 5-second AI video cost?",
+    "expected_activity_id": "ai_video_generation_5sec",
+    "expected_duration": 1,
+    "expected_duration_unit": "clips",
+    "expected_show_model_comparison": true,
+    "category": "ai"
+  },
+  {
+    "id": 6,
+    "question": "How much water does a Google search use?",
+    "expected_activity_id": "google_search",
+    "expected_duration": 1,
+    "expected_duration_unit": "searches",
+    "category": "ai"
+  },
+  {
+    "id": 7,
+    "question": "What's the water cost of a Google AI Overview search?",
+    "expected_activity_id": "google_ai_overview_search",
+    "expected_duration": 1,
+    "expected_duration_unit": "searches",
+    "category": "ai"
+  },
+  {
+    "id": 8,
+    "question": "How much water does it cost to stream Netflix for 2 hours?",
+    "expected_activity_id": "netflix_hd_per_hour",
+    "expected_duration": 2,
+    "expected_duration_unit": "hours",
+    "category": "streaming"
+  },
+  {
+    "id": 9,
+    "question": "What's the water footprint of watching Netflix in 4K for 3 hours?",
+    "expected_activity_id": "netflix_4k_per_hour",
+    "expected_duration": 3,
+    "expected_duration_unit": "hours",
+    "category": "streaming"
+  },
+  {
+    "id": 10,
+    "question": "How much water does 3 hours of YouTube use?",
+    "expected_activity_id": "youtube_hd_per_hour",
+    "expected_duration": 3,
+    "expected_duration_unit": "hours",
+    "category": "streaming"
+  },
+  {
+    "id": 11,
+    "question": "What's the water cost of watching YouTube in SD for an hour?",
+    "expected_activity_id": "youtube_sd_per_hour",
+    "expected_duration": 1,
+    "expected_duration_unit": "hours",
+    "category": "streaming"
+  },
+  {
+    "id": 12,
+    "question": "How much water does an hour of TikTok scrolling use?",
+    "expected_activity_id": "tiktok_per_hour",
+    "expected_duration": 1,
+    "expected_duration_unit": "hours",
+    "category": "social"
+  },
+  {
+    "id": 13,
+    "question": "What's the water cost of a 2 hour Zoom call?",
+    "expected_activity_id": "zoom_video_call_per_hour",
+    "expected_duration": 2,
+    "expected_duration_unit": "hours",
+    "category": "streaming"
+  },
+  {
+    "id": 14,
+    "question": "How much water does scrolling Facebook for an hour use?",
+    "expected_activity_id": "facebook_per_hour",
+    "expected_duration": 1,
+    "expected_duration_unit": "hours",
+    "category": "social"
+  },
+  {
+    "id": 15,
+    "question": "What's the water cost of 2 hours on Instagram?",
+    "expected_activity_id": "instagram_per_hour",
+    "expected_duration": 2,
+    "expected_duration_unit": "hours",
+    "category": "social"
+  },
+  {
+    "id": 16,
+    "question": "How much water does an hour of scrolling X use?",
+    "expected_activity_id": "twitter_per_hour",
+    "expected_duration": 1,
+    "expected_duration_unit": "hours",
+    "category": "social"
+  },
+  {
+    "id": 17,
+    "question": "What's the water footprint of using Snapchat for 30 minutes?",
+    "expected_activity_id": "snapchat_per_hour",
+    "expected_duration": 0.5,
+    "expected_duration_unit": "hours",
+    "category": "social"
+  },
+  {
+    "id": 18,
+    "question": "How much water does sending an email use?",
+    "expected_activity_id": "email_regular",
+    "expected_duration": 1,
+    "expected_duration_unit": "emails",
+    "category": "email"
+  },
+  {
+    "id": 19,
+    "question": "What's the water cost of sending an email with a big attachment?",
+    "expected_activity_id": "email_with_attachment",
+    "expected_duration": 1,
+    "expected_duration_unit": "emails",
+    "category": "email"
+  },
+  {
+    "id": 20,
+    "question": "How much water does cloud gaming use per hour?",
+    "expected_activity_id": "cloud_gaming_per_hour",
+    "expected_duration": 1,
+    "expected_duration_unit": "hours",
+    "category": "gaming"
+  },
+  {
+    "id": 21,
+    "question": "What's the water cost of playing PlayStation for 4 hours?",
+    "expected_activity_id": "console_gaming_per_hour",
+    "expected_duration": 4,
+    "expected_duration_unit": "hours",
+    "category": "gaming"
+  },
+  {
+    "id": 22,
+    "question": "How much water does mobile gaming use per hour?",
+    "expected_activity_id": "mobile_gaming_per_hour",
+    "expected_duration": 1,
+    "expected_duration_unit": "hours",
+    "category": "gaming"
+  },
+  {
+    "id": 23,
+    "question": "What's the water footprint of a Bitcoin transaction?",
+    "expected_activity_id": "bitcoin_transaction",
+    "expected_duration": 1,
+    "expected_duration_unit": "transactions",
+    "category": "crypto"
+  },
+  {
+    "id": 24,
+    "question": "How much water does an Ethereum transaction use?",
+    "expected_activity_id": "ethereum_transaction",
+    "expected_duration": 1,
+    "expected_duration_unit": "transactions",
+    "category": "crypto"
+  },
+  {
+    "id": 25,
+    "question": "I watched Netflix all evening",
+    "expected_activity_id": "netflix_hd_per_hour",
+    "expected_duration": 3,
+    "expected_duration_unit": "hours",
+    "category": "edge_case",
+    "notes": "Ambiguous duration — 'all evening' is roughly 3 hours"
+  },
+  {
+    "id": 26,
+    "question": "watched 30 minutes of YouTube on my tablet",
+    "expected_activity_id": "youtube_hd_per_hour",
+    "expected_duration": 0.5,
+    "expected_duration_unit": "hours",
+    "expected_device_hint": "tablet",
+    "category": "edge_case",
+    "notes": "Duration extraction (minutes to hours) + device detection"
+  },
+  {
+    "id": 27,
+    "question": "Netflix on my phone for an hour",
+    "expected_activity_id": "netflix_hd_per_hour",
+    "expected_duration": 1,
+    "expected_duration_unit": "hours",
+    "expected_device_hint": "phone",
+    "category": "edge_case",
+    "notes": "Device detection override"
+  },
+  {
+    "id": 28,
+    "question": "I live in Texas and I want to know the water cost of streaming",
+    "expected_activity_id": "netflix_hd_per_hour",
+    "expected_duration": 1,
+    "expected_duration_unit": "hours",
+    "category": "edge_case",
+    "notes": "Region detection — should pick a Texas region hint"
+  },
+  {
+    "id": 29,
+    "question": "Gaming on my laptop for 2 hours via cloud",
+    "expected_activity_id": "cloud_gaming_per_hour",
+    "expected_duration": 2,
+    "expected_duration_unit": "hours",
+    "expected_device_hint": "laptop",
+    "category": "edge_case",
+    "notes": "Device override + cloud gaming classification"
+  },
+  {
+    "id": 30,
+    "question": "How much water does my dishwasher use?",
+    "expected_activity_id": "unknown",
+    "category": "off_catalog"
+  },
+  {
+    "id": 31,
+    "question": "What's the water cost of doing laundry?",
+    "expected_activity_id": "unknown",
+    "category": "off_catalog"
+  },
+  {
+    "id": 32,
+    "question": "How much water does it take to grow an avocado?",
+    "expected_activity_id": "unknown",
+    "category": "off_catalog"
+  },
+  {
+    "id": 33,
+    "question": "hi",
+    "expected_activity_id": "greeting",
+    "category": "greeting"
+  },
+  {
+    "id": 34,
+    "question": "hello, what is this tool?",
+    "expected_activity_id": "greeting",
+    "category": "greeting"
+  },
+  {
+    "id": 35,
+    "question": "What's the water cost of AI?",
+    "expected_activity_id": "chatgpt_single_query",
+    "expected_show_model_comparison": true,
+    "category": "ai",
+    "notes": "Generic AI question — should set show_model_comparison"
+  },
+  {
+    "id": 36,
+    "question": "How much water do LLMs use?",
+    "expected_show_model_comparison": true,
+    "category": "ai",
+    "notes": "Generic LLM question — activity_id flexible but must show comparison"
+  },
+  {
+    "id": 37,
+    "question": "Is TikTok or YouTube worse for water?",
+    "expected_activity_id": "tiktok_per_hour",
+    "expected_duration": 1,
+    "expected_duration_unit": "hours",
+    "category": "edge_case",
+    "notes": "Comparison question — should pick primary activity (TikTok mentioned first)"
+  },
+  {
+    "id": 38,
+    "question": "What costs more water: an hour of TikTok or an hour of Zoom?",
+    "expected_activity_id": "tiktok_per_hour",
+    "expected_duration": 1,
+    "expected_duration_unit": "hours",
+    "category": "edge_case",
+    "notes": "Comparison — picks primary activity"
+  },
+  {
+    "id": 39,
+    "question": "I sent 50 emails today, how much water did that use?",
+    "expected_activity_id": "email_regular",
+    "expected_duration": 50,
+    "expected_duration_unit": "emails",
+    "category": "edge_case",
+    "notes": "Large quantity extraction"
+  },
+  {
+    "id": 40,
+    "question": "How much water does streaming from Ireland cost?",
+    "expected_activity_id": "netflix_hd_per_hour",
+    "expected_duration": 1,
+    "expected_duration_unit": "hours",
+    "category": "edge_case",
+    "notes": "Region detection — should pick ireland/uk/northern_europe"
+  }
+]

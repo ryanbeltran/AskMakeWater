@@ -66,6 +66,11 @@ const server = createServer(async (req, res) => {
     return handleUsage(req, res);
   }
 
+  // Admin auth endpoint
+  if (req.url === '/api/admin-auth') {
+    return handleAdminAuth(req, res);
+  }
+
   if (req.url !== '/api/chat') {
     res.writeHead(404, { 'Content-Type': 'application/json' });
     return res.end(JSON.stringify({ error: 'Not found' }));
@@ -195,6 +200,27 @@ async function handleUsage(req, res) {
 
   res.writeHead(405, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify({ error: 'Method not allowed' }));
+}
+
+async function handleAdminAuth(req, res) {
+  if (req.method !== 'POST') {
+    res.writeHead(405, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({ error: 'Method not allowed' }));
+  }
+  let body = '';
+  for await (const chunk of req) body += chunk;
+  const { password } = JSON.parse(body);
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  if (!adminPassword) {
+    res.writeHead(500, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({ error: 'ADMIN_PASSWORD not configured' }));
+  }
+  if (password === adminPassword) {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({ ok: true }));
+  }
+  res.writeHead(401, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify({ error: 'Invalid password' }));
 }
 
 server.listen(3001, () => {

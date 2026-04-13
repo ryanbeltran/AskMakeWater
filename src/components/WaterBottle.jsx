@@ -120,7 +120,7 @@ export default function WaterBottle({ currentMl = 0, maxMl = 500 }) {
       {/* Numeric display */}
       <div className="text-center">
         <p className="text-sm font-semibold text-gray-700 tabular-nums">
-          {displayMl < 1 ? '<1' : Math.round(displayMl)} mL
+          {displayMl < 0.01 ? '0.00' : displayMl < 1 ? displayMl.toFixed(2) : displayMl < 10 ? displayMl.toFixed(1) : Math.round(displayMl)} mL
           <span className="text-gray-400 font-normal"> / {maxMl} mL</span>
         </p>
         {isFull ? (
