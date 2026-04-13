@@ -49,16 +49,3 @@ body {
   animation: ripple 1.5s ease-out infinite;
 }
 
-/* Restyle Donorbox widget button to match our header buttons */
-.dbox-donate-wrapper dbox-widget a,
-.dbox-donate-wrapper dbox-widget button {
-  font-size: 12px !important;
-  padding: 6px 12px !important;
-  border-radius: 8px !important;
-  font-family: 'Inter', system-ui, sans-serif !important;
-  font-weight: 500 !important;
-  line-height: 1 !important;
-  min-height: unset !important;
-  height: auto !important;
-}
-

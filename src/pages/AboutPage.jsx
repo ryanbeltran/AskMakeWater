@@ -85,6 +85,7 @@ export default function AboutPage() {
             </span>
           </Link>
           <div className="flex items-center gap-3">
+            <DonateButton />
           </div>
         </div>
       </header>
@@ -161,10 +162,6 @@ export default function AboutPage() {
               <PromptContent />
             </div>
           )}
-          {/* Donate */}
-          <div className="flex justify-center mt-8 mb-4">
-            <DonateButton />
-          </div>
         </div>
       </main>
     </div>
