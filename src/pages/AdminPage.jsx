@@ -15,6 +15,44 @@ function gradeTest(test, actual) {
   let passed = 0;
   let total = 0;
 
+  // COMPARISON TEST: check if comparison mode was returned with expected items
+  if (test.expected_comparison) {
+    total++;
+    if (actual.comparison === true && Array.isArray(actual.items) && actual.items.length >= 2) {
+      passed++;
+    } else {
+      details.push(`comparison: expected comparison mode with items array, got ${actual.comparison ? 'comparison' : 'single'} mode`);
+    }
+
+    // Check expected comparison IDs if specified
+    if (test.expected_comparison_ids && Array.isArray(actual.items)) {
+      total++;
+      const actualIds = actual.items.map(i => i.activity_id);
+      const allFound = test.expected_comparison_ids.every(id => actualIds.includes(id));
+      if (allFound) {
+        passed++;
+      } else {
+        const missing = test.expected_comparison_ids.filter(id => !actualIds.includes(id));
+        details.push(`comparison_ids: missing [${missing.join(', ')}], got [${actualIds.join(', ')}]`);
+      }
+    }
+
+    // Check minimum item count if specified
+    if (test.expected_comparison_count_min && Array.isArray(actual.items)) {
+      total++;
+      if (actual.items.length >= test.expected_comparison_count_min) {
+        passed++;
+      } else {
+        details.push(`comparison_count: expected >= ${test.expected_comparison_count_min}, got ${actual.items.length}`);
+      }
+    }
+
+    if (passed === total) return { grade: 'PASS', details };
+    if (passed >= total * 0.5) return { grade: 'PARTIAL', details };
+    return { grade: 'FAIL', details };
+  }
+
+  // SINGLE TEST: existing logic
   // activity_id (required)
   total++;
   if (test.expected_activity_id) {

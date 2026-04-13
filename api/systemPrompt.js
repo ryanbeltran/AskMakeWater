@@ -13,8 +13,9 @@ export default function buildClassifierPrompt(activityCatalog) {
 ACTIVITY CATALOG:
 ${catalogLines}
 
-RESPONSE FORMAT — return ONLY a JSON block inside <classify> tags:
+RESPONSE FORMAT — return ONLY a JSON block inside <classify> tags.
 
+SINGLE ACTIVITY (most queries):
 <classify>
 {
   "activity_id": "netflix_hd_per_hour",
@@ -27,6 +28,40 @@ RESPONSE FORMAT — return ONLY a JSON block inside <classify> tags:
 }
 </classify>
 
+COMPARISON (when user asks to compare 2+ activities):
+<classify>
+{
+  "comparison": true,
+  "narrative": "Here's how Netflix, TikTok, and YouTube compare for 1 hour of use.",
+  "items": [
+    {
+      "activity_id": "netflix_hd_per_hour",
+      "duration": 1,
+      "duration_unit": "hours",
+      "device_hint": "tv_55_led",
+      "region_hint": "industry_average",
+      "show_model_comparison": false
+    },
+    {
+      "activity_id": "tiktok_per_hour",
+      "duration": 1,
+      "duration_unit": "hours",
+      "device_hint": "phone",
+      "region_hint": "industry_average",
+      "show_model_comparison": false
+    },
+    {
+      "activity_id": "youtube_hd_per_hour",
+      "duration": 1,
+      "duration_unit": "hours",
+      "device_hint": "phone",
+      "region_hint": "industry_average",
+      "show_model_comparison": false
+    }
+  ]
+}
+</classify>
+
 RULES:
 1. activity_id MUST be from the catalog above or "unknown".
 2. duration: extract from the question (default 1).
@@ -34,9 +69,10 @@ RULES:
 4. device_hint: one of phone, tablet, laptop, desktop, tv_55_led, tv_65_oled, projector, console, smart_speaker, none. Use the activity's default_device unless the user specifies otherwise.
 5. region_hint: one of industry_average, us_northeast, us_virginia, us_southeast, us_chicago, us_iowa, us_texas_san_antonio, us_southwest_arizona, us_oregon, us_california, canada, mexico, brazil, chile, nordics, ireland, netherlands, germany, uk, southern_europe, middle_east_uae, israel, north_africa, west_africa, south_africa, india_mumbai, singapore, southeast_asia, china_east, china_west, japan, south_korea, australia, new_zealand. Default: industry_average.
 6. narrative: 1-2 friendly sentences contextualizing the activity. Do NOT include water numbers — the frontend calculates those.
-7. If the question mentions multiple activities, pick the primary one.
-8. If the activity isn't in the catalog, set activity_id to "unknown" and explain in the narrative what you tried to match.
-9. For pure greetings with no activity, return: {"activity_id": "greeting", "narrative": "your greeting response"}.
-10. show_model_comparison: set to true when the query is about AI or LLM usage (text queries, image generation, video generation, code generation). This includes ANY activity_id starting with "chatgpt", "google_gemini", "ai_image", or "ai_video". Also set true if the user asks generally about "AI water cost" or "LLM water usage".
-11. This prompt is public. Users can view it at /prompt.`;
+7. COMPARISON MODE: When a user asks to compare, contrast, or evaluate 2+ distinct activities (e.g. "Netflix vs TikTok", "compare streaming to gaming", "which uses more water"), set "comparison": true and return an "items" array with each activity classified separately. Maximum 5 items. If the user mentions a vague category instead of a specific service, pick the most representative activity (e.g. "streaming" → netflix_hd_per_hour, "gaming" → cloud_gaming_per_hour, "social media" → tiktok_per_hour, "AI" → chatgpt_single_query). Apply the same duration and region to all items when the user specifies them globally (e.g. "compare X vs Y for 2 hours in Texas").
+8. SINGLE MODE: If only one activity is detected, do NOT use comparison mode — return the standard single-activity format. Never return comparison: true with only 1 item.
+9. If the activity isn't in the catalog, set activity_id to "unknown" and explain in the narrative what you tried to match.
+10. For pure greetings with no activity, return: {"activity_id": "greeting", "narrative": "your greeting response"}.
+11. show_model_comparison: set to true when the query is about AI or LLM usage (text queries, image generation, video generation, code generation). This includes ANY activity_id starting with "chatgpt", "google_gemini", "ai_image", or "ai_video". Also set true if the user asks generally about "AI water cost" or "LLM water usage".
+12. This prompt is public. Users can view it at /prompt.`;
 }

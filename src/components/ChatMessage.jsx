@@ -1,4 +1,5 @@
 import ResultCard from './ResultCard';
+import ComparisonTable from './ComparisonTable';
 import MetaCost from './MetaCost';
 import WaterDrop from './WaterDrop';
 import { getActivity } from '../data/activityLookup';
@@ -6,47 +7,18 @@ import { recalculate, recalculateConfidence, formatWater, getComparison, DEVICES
 import { getComparisonType } from '../data/aiModelComparison';
 
 /**
- * Parse the classifier's <classify> JSON and build a full result
- * using client-side data. No math comes from the AI.
+ * Build a full result object from a single classification item.
+ * Shared between single-query and comparison modes.
  */
-function parseClassifierResponse(text) {
-  const classifyMatch = text.match(/<classify>\s*([\s\S]*?)\s*<\/classify>/);
-  if (!classifyMatch) return { resultData: null, narrative: text.trim() };
-
-  let classification;
-  try {
-    classification = JSON.parse(classifyMatch[1]);
-  } catch {
-    return { resultData: null, narrative: text.trim() };
-  }
-
-  const narrative = classification.narrative || '';
-
-  // Greetings or unknown — no result card
-  if (classification.activity_id === 'greeting') {
-    return { resultData: null, narrative };
-  }
-
-  // Look up activity in our local catalog
+function buildResultFromClassification(classification) {
   const activity = getActivity(classification.activity_id);
-  if (!activity && classification.activity_id !== 'unknown') {
-    return {
-      resultData: null,
-      narrative: narrative || `I couldn't find a matching activity for "${classification.activity_id}".`,
-    };
-  }
+  if (!activity && classification.activity_id !== 'unknown') return null;
+  if (classification.activity_id === 'unknown') return null;
 
-  // For "unknown" activities, return a message with no result card
-  if (classification.activity_id === 'unknown') {
-    return { resultData: null, narrative };
-  }
-
-  // Extract parameters from classification
   const duration = classification.duration || 1;
   const deviceKey = classification.device_hint || activity.default_device || 'none';
   const regionKey = classification.region_hint || 'industry_average';
 
-  // Calculate water cost deterministically
   const calculated = recalculate({
     activity_kwh: activity.kwh,
     duration,
@@ -55,7 +27,6 @@ function parseClassifierResponse(text) {
     duration_hours: activity.unit === 'hours' ? duration : 0,
   });
 
-  // Build confidence factors from activity's confidence_base
   const cb = activity.confidence_base;
   const region = REGIONS[regionKey];
   const device = DEVICES[deviceKey];
@@ -113,16 +84,11 @@ function parseClassifierResponse(text) {
   };
 
   const confidenceScore = Object.values(confidenceFactors).reduce((sum, f) => sum + f.points, 0);
-
-  // Build refinement questions from activity's suggested_refinements
   const refinementQuestions = buildRefinementQuestions(activity.suggested_refinements, activity.category);
 
-  // Build sources
-  const sources = activity.source_id !== 'estimated' && activity.source_id !== 'various'
-    ? [{ id: activity.source_id, title: activity.source_title, year: activity.source_year }]
-    : [{ id: activity.source_id, title: activity.source_title, year: activity.source_year }];
+  const sources = [{ id: activity.source_id, title: activity.source_title, year: activity.source_year }];
 
-  const resultData = {
+  return {
     activity_id: classification.activity_id,
     activity: activity.label + (duration > 1 ? ` (${duration} ${activity.unit})` : ''),
     duration: `${duration} ${activity.unit}`,
@@ -142,12 +108,64 @@ function parseClassifierResponse(text) {
       region_key: regionKey,
     },
     refinement_questions: refinementQuestions,
-    // AI model comparison
     show_model_comparison: classification.show_model_comparison || !!getComparisonType(classification.activity_id),
     comparison_type: getComparisonType(classification.activity_id),
+    // Expose raw calculated values for ComparisonTable
+    calculated,
   };
+}
 
-  return { resultData, narrative };
+/**
+ * Parse the classifier's <classify> JSON and build full result(s).
+ * Supports both single-activity and comparison modes.
+ */
+function parseClassifierResponse(text) {
+  const classifyMatch = text.match(/<classify>\s*([\s\S]*?)\s*<\/classify>/);
+  if (!classifyMatch) return { resultData: null, comparisonItems: null, narrative: text.trim() };
+
+  let classification;
+  try {
+    classification = JSON.parse(classifyMatch[1]);
+  } catch {
+    return { resultData: null, comparisonItems: null, narrative: text.trim() };
+  }
+
+  const narrative = classification.narrative || '';
+
+  // Greetings — no result
+  if (classification.activity_id === 'greeting') {
+    return { resultData: null, comparisonItems: null, narrative };
+  }
+
+  // COMPARISON MODE: multiple items
+  if (classification.comparison === true && Array.isArray(classification.items) && classification.items.length >= 2) {
+    const comparisonItems = classification.items
+      .slice(0, 5) // cap at 5
+      .map(item => buildResultFromClassification(item))
+      .filter(Boolean);
+
+    if (comparisonItems.length >= 2) {
+      return { resultData: null, comparisonItems, narrative };
+    }
+    // Fall through to single mode if too many items failed to resolve
+  }
+
+  // SINGLE MODE
+  // For "unknown" activities, return narrative only
+  if (classification.activity_id === 'unknown') {
+    return { resultData: null, comparisonItems: null, narrative };
+  }
+
+  const resultData = buildResultFromClassification(classification);
+  if (!resultData) {
+    return {
+      resultData: null,
+      comparisonItems: null,
+      narrative: narrative || `I couldn't find a matching activity for "${classification.activity_id}".`,
+    };
+  }
+
+  return { resultData, comparisonItems: null, narrative };
 }
 
 function buildRefinementQuestions(suggested, category) {
@@ -213,8 +231,8 @@ export default function ChatMessage({ message, query, usage, model, onTier2Submi
   }
 
   // Try new classifier format first, fall back to legacy
-  let { resultData, narrative } = parseClassifierResponse(message.content);
-  if (!resultData) {
+  let { resultData, comparisonItems, narrative } = parseClassifierResponse(message.content);
+  if (!resultData && !comparisonItems) {
     const legacy = parseLegacyResponse(message.content);
     if (legacy) {
       resultData = legacy;
@@ -232,7 +250,13 @@ export default function ChatMessage({ message, query, usage, model, onTier2Submi
           <span className="text-xs font-medium text-gray-400">ask makewater</span>
         </div>
 
-        {resultData && (
+        {/* Comparison mode */}
+        {comparisonItems && comparisonItems.length >= 2 && (
+          <ComparisonTable items={comparisonItems} narrative={narrative} />
+        )}
+
+        {/* Single result mode */}
+        {resultData && !comparisonItems && (
           <ResultCard
             data={resultData}
             query={query}
@@ -242,7 +266,8 @@ export default function ChatMessage({ message, query, usage, model, onTier2Submi
           />
         )}
 
-        {narrative && (
+        {/* Narrative (only show separately if not in comparison mode, which includes it) */}
+        {narrative && !comparisonItems && (
           <div className="bg-gray-50 rounded-2xl rounded-tl-md px-4 py-3 text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
             {narrative}
           </div>

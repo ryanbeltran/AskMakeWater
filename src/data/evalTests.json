@@ -289,20 +289,18 @@
   {
     "id": 37,
     "question": "Is TikTok or YouTube worse for water?",
-    "expected_activity_id": "tiktok_per_hour",
-    "expected_duration": 1,
-    "expected_duration_unit": "hours",
+    "expected_comparison": true,
+    "expected_comparison_ids": ["tiktok_per_hour", "youtube_hd_per_hour"],
     "category": "edge_case",
-    "notes": "Comparison question — should pick primary activity (TikTok mentioned first)"
+    "notes": "Comparison question — should return comparison mode with both activities"
   },
   {
     "id": 38,
     "question": "What costs more water: an hour of TikTok or an hour of Zoom?",
-    "expected_activity_id": "tiktok_per_hour",
-    "expected_duration": 1,
-    "expected_duration_unit": "hours",
+    "expected_comparison": true,
+    "expected_comparison_ids": ["tiktok_per_hour", "zoom_video_call_per_hour"],
     "category": "edge_case",
-    "notes": "Comparison — picks primary activity"
+    "notes": "Comparison — should return both activities"
   },
   {
     "id": 39,
@@ -321,5 +319,37 @@
     "expected_duration_unit": "hours",
     "category": "edge_case",
     "notes": "Region detection — should pick ireland/uk/northern_europe"
+  },
+  {
+    "id": 41,
+    "question": "Compare Netflix vs TikTok vs YouTube for 1 hour",
+    "expected_comparison": true,
+    "expected_comparison_ids": ["netflix_hd_per_hour", "tiktok_per_hour", "youtube_hd_per_hour"],
+    "category": "edge_case",
+    "notes": "Explicit 3-way comparison with shared duration"
+  },
+  {
+    "id": 42,
+    "question": "How does streaming compare to gaming for water?",
+    "expected_comparison": true,
+    "expected_comparison_count_min": 2,
+    "category": "edge_case",
+    "notes": "Vague category comparison — should pick representative activities"
+  },
+  {
+    "id": 43,
+    "question": "Compare Bitcoin and Ethereum transaction water costs",
+    "expected_comparison": true,
+    "expected_comparison_ids": ["bitcoin_transaction", "ethereum_transaction"],
+    "category": "crypto",
+    "notes": "Crypto comparison — both should be returned"
+  },
+  {
+    "id": 44,
+    "question": "What uses more water: sending 10 emails or one ChatGPT query?",
+    "expected_comparison": true,
+    "expected_comparison_count_min": 2,
+    "category": "edge_case",
+    "notes": "Cross-category comparison with different durations"
   }
 ]
