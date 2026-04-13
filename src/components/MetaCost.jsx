@@ -18,30 +18,32 @@ export default function MetaCost({ inputTokens, outputTokens, model, cacheReadTo
 
   const modelLabel = MODEL_LABELS[model] || 'Claude';
   const cached = cacheReadTokens > 0;
-  const cacheRatio = inputTokens > 0 ? cacheReadTokens / inputTokens : 0;
-  const heavilyCached = cacheRatio > 0.5;
+
+  if (isRepeatQuery) {
+    return (
+      <div className="space-y-1">
+        <div className="flex items-center gap-1.5 text-xs text-green-600">
+          <WaterDrop size={10} className="text-green-400" />
+          <span>
+            This query was already asked — not counted toward today's water usage.
+          </span>
+        </div>
+        <p className="text-[10px] text-gray-400 ml-4">
+          {modelLabel} · {totalTokens.toLocaleString()} tokens{cached ? ' · cached prompt' : ''}
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-1">
-      <div className="flex items-center gap-1.5 text-xs text-gray-400">
-        <WaterDrop size={10} className="text-mw-water/40" />
-        <span>
-          This answer cost approximately {display} of water
-          <span className="text-gray-300 ml-1">
-            ({modelLabel} · {totalTokens.toLocaleString()} tokens{cached ? ' · cached' : ''})
-          </span>
+    <div className="flex items-center gap-1.5 text-xs text-gray-400">
+      <WaterDrop size={10} className="text-mw-water/40" />
+      <span>
+        This answer cost approximately {display} of water
+        <span className="text-gray-300 ml-1">
+          ({modelLabel} · {totalTokens.toLocaleString()} tokens{cached ? ' · cached' : ''})
         </span>
-      </div>
-      {isRepeatQuery && heavilyCached && (
-        <p className="text-[10px] text-green-600 ml-4">
-          This query was already asked — most of the prompt was served from cache, using minimal additional water.
-        </p>
-      )}
-      {isRepeatQuery && !heavilyCached && (
-        <p className="text-[10px] text-gray-400 ml-4">
-          This query was asked before. A fresh classification was still needed, but the result is the same.
-        </p>
-      )}
+      </span>
     </div>
   );
 }

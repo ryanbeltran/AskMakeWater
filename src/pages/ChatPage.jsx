@@ -113,8 +113,10 @@ export default function ChatPage() {
         setRepeats(prev => ({ ...prev, [msgIndex]: true }));
       }
 
-      // Report the AI query's own water cost to the global bottle
-      reportUsage(text.trim(), data.usage);
+      // Only report usage for new queries, not repeat searches
+      if (!isRepeat) {
+        reportUsage(text.trim(), data.usage);
+      }
     } catch (err) {
       setMessages(prev => [
         ...prev,
