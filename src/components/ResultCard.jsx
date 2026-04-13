@@ -1,7 +1,6 @@
 import { useState, useMemo, useCallback } from 'react';
 import WaterDrop from './WaterDrop';
 import InteractiveBreakdown from './InteractiveBreakdown';
-import RefinementQuestions from './RefinementQuestions';
 import { recalculate, recalculateConfidence, calculateMetaWater, formatWater, DEVICES, REGIONS } from '../data/recalculate';
 import AIModelComparison from './AIModelComparison';
 
@@ -487,16 +486,6 @@ export default function ResultCard({ data, query, model, usage, onTier2Submit })
               />
             )}
 
-            {/* Tier 1 + Tier 2 refinement */}
-            {data.refinement_questions && data.refinement_questions.length > 0 && (
-              <div className="border-t border-gray-100 pt-4">
-                <RefinementQuestions
-                  questions={data.refinement_questions}
-                  onSelect={handleRefinementSelect}
-                  onTier2Submit={handleTier2}
-                />
-              </div>
-            )}
 
             {/* Tier 2 response */}
             {tier2Narrative && (
