@@ -4,32 +4,65 @@
  * GET  /api/usage — returns today's cumulative usage + recent queries
  * POST /api/usage — reports a new query's water cost
  *
- * Storage: in-memory (persists across warm Vercel invocations).
- * Resets on cold start or deploy. For production, upgrade to
- * Vercel KV, Upstash Redis, or a database.
+ * Storage: Upstash Redis (persists across deploys and cold starts).
+ * Falls back to in-memory for local dev when Redis env vars are not set.
  */
+
+import { Redis } from '@upstash/redis';
 
 const MAX_RECENT = 10;
 const DAILY_BOTTLE_ML = 500;
 
-// Module-level store — survives warm starts on Vercel
-let store = {
-  date: new Date().toISOString().slice(0, 10),
-  total_ml: 0,
-  query_count: 0,
-  recent: [],   // public: query text + timestamp only
-  stats: [],    // private: full analytics (zip, region, device, tokens, etc.)
-};
-
-function resetIfNewDay() {
-  const today = new Date().toISOString().slice(0, 10);
-  if (store.date !== today) {
-    store = { date: today, total_ml: 0, query_count: 0, recent: [] };
+// --- Redis client (only created if env vars exist) ---
+let redis = null;
+function getRedis() {
+  if (redis) return redis;
+  const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (url && token) {
+    redis = new Redis({ url, token });
+    return redis;
   }
+  return null;
 }
 
-export default function handler(req, res) {
-  // CORS
+function todayKey() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+// --- Redis-backed storage ---
+async function getStoreFromRedis(r) {
+  const key = `usage:${todayKey()}`;
+  const data = await r.get(key);
+  if (data && typeof data === 'object') return data;
+  return { date: todayKey(), total_ml: 0, query_count: 0, recent: [], stats: [] };
+}
+
+async function saveStoreToRedis(r, store) {
+  const key = `usage:${todayKey()}`;
+  // Expire at end of day + 1 hour buffer (max 25 hours)
+  await r.set(key, store, { ex: 90000 });
+}
+
+// --- In-memory fallback for local dev ---
+let memStore = {
+  date: todayKey(),
+  total_ml: 0,
+  query_count: 0,
+  recent: [],
+  stats: [],
+};
+
+function getMemStore() {
+  const today = todayKey();
+  if (memStore.date !== today) {
+    memStore = { date: today, total_ml: 0, query_count: 0, recent: [], stats: [] };
+  }
+  return memStore;
+}
+
+// --- Handler ---
+export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -38,16 +71,17 @@ export default function handler(req, res) {
     return res.status(204).end();
   }
 
-  resetIfNewDay();
+  const r = getRedis();
 
   if (req.method === 'GET') {
+    const store = r ? await getStoreFromRedis(r) : getMemStore();
     return res.status(200).json({
       date: store.date,
-      total_ml: Math.round(store.total_ml * 10) / 10,
+      total_ml: Math.round((store.total_ml || 0) * 10) / 10,
       max_ml: DAILY_BOTTLE_ML,
-      query_count: store.query_count,
-      bottle_full: store.total_ml >= DAILY_BOTTLE_ML,
-      recent: store.recent,
+      query_count: store.query_count || 0,
+      bottle_full: (store.total_ml || 0) >= DAILY_BOTTLE_ML,
+      recent: store.recent || [],
     });
   }
 
@@ -58,13 +92,11 @@ export default function handler(req, res) {
       return res.status(400).json({ error: 'query and water_ml are required' });
     }
 
-    // Public entry — only the query text and timestamp
     const publicEntry = {
       query: String(query).slice(0, 200),
       timestamp: Date.now(),
     };
 
-    // Private stats — full analytics, never returned to clients
     const statEntry = {
       query: String(query).slice(0, 200),
       activity_id: activity_id || 'unknown',
@@ -76,8 +108,12 @@ export default function handler(req, res) {
       timestamp: Date.now(),
     };
 
-    store.total_ml += water_ml;
-    store.query_count += 1;
+    const store = r ? await getStoreFromRedis(r) : getMemStore();
+
+    store.total_ml = (store.total_ml || 0) + water_ml;
+    store.query_count = (store.query_count || 0) + 1;
+    store.recent = store.recent || [];
+    store.stats = store.stats || [];
     store.recent.unshift(publicEntry);
     store.stats.unshift(statEntry);
     if (store.recent.length > MAX_RECENT) {
@@ -85,6 +121,10 @@ export default function handler(req, res) {
     }
     if (store.stats.length > 200) {
       store.stats = store.stats.slice(0, 200);
+    }
+
+    if (r) {
+      await saveStoreToRedis(r, store);
     }
 
     return res.status(200).json({
