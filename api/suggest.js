@@ -161,16 +161,17 @@ async function listAll(r) {
 }
 
 function isAuthorizedAdmin(req) {
-  const token = req.headers?.authorization?.replace(/^Bearer\s+/i, '') || req.headers?.['x-admin-token'];
-  const expected = process.env.ADMIN_TOKEN;
-  return expected && token && token === expected;
+  const headerPwd = req.headers?.['x-admin-password']
+    || req.headers?.authorization?.replace(/^Bearer\s+/i, '');
+  const expected = process.env.ADMIN_PASSWORD;
+  return expected && headerPwd && headerPwd === expected;
 }
 
 // --- Handler ---
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Admin-Token');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Admin-Password');
 
   if (req.method === 'OPTIONS') return res.status(204).end();
 

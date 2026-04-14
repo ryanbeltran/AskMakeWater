@@ -273,6 +273,191 @@ function TestRow({ test, result }) {
   );
 }
 
+function buildCatalogSnippet(entry) {
+  const slug = entry.slug || 'unknown';
+  const label = (entry.name || slug).replace(/'/g, "\\'");
+  const kwh = entry.last_kwh || 0.05;
+  const similar = entry.last_similar_to || '';
+  const reasoning = (entry.last_reasoning || '').replace(/'/g, "\\'").slice(0, 160);
+  return `${slug}: {
+  id: '${slug}',
+  label: '${label}',
+  category: 'other',
+  unit: 'hours',
+  kwh: ${kwh},
+  default_device: 'none',
+  suggested_refinements: ['device', 'region'],
+  source_id: 'estimated_v1',
+  source_title: 'Community-reviewed estimate${similar ? ` (similar to ${similar})` : ''}',
+  source_year: ${new Date().getFullYear()},
+  confidence_base: {
+    energy_published: false,
+    multi_source: false,
+    direct_data: false,
+    data_recent: true,
+  },
+  // ${reasoning}
+},`;
+}
+
+function SuggestionsPanel() {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [data, setData] = useState(null);
+  const [expanded, setExpanded] = useState({});
+  const [copiedSlug, setCopiedSlug] = useState(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const password = sessionStorage.getItem('admin_auth') || '';
+      const res = await fetch('/api/suggest', {
+        headers: { 'X-Admin-Password': password },
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      setData(json);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  function handleCopy(entry) {
+    const snippet = buildCatalogSnippet(entry);
+    navigator.clipboard.writeText(snippet).then(() => {
+      setCopiedSlug(entry.slug);
+      setTimeout(() => setCopiedSlug(null), 2000);
+    });
+  }
+
+  const suggestions = data?.suggestions || [];
+  const corrections = data?.correctionsBySlug || {};
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-200 p-5">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h2 className="text-sm font-semibold text-gray-800 uppercase tracking-wider">Off-catalog Suggestions</h2>
+          <p className="text-[11px] text-gray-400 mt-0.5">AI-estimated queries logged for review. Sorted by frequency.</p>
+        </div>
+        <button
+          onClick={load}
+          disabled={loading}
+          className="text-xs px-3 py-1.5 border border-gray-200 text-gray-600 rounded-lg font-medium hover:border-mw-water hover:text-mw-water disabled:opacity-40 transition-colors cursor-pointer"
+        >
+          {loading ? 'Loading...' : 'Refresh'}
+        </button>
+      </div>
+
+      {error && <p className="text-xs text-red-500 mb-3">Error: {error}</p>}
+
+      {!loading && suggestions.length === 0 && !error && (
+        <p className="text-sm text-gray-400">No suggestions yet.</p>
+      )}
+
+      <div className="space-y-2">
+        {suggestions.map(entry => {
+          const slug = entry.slug;
+          const isOpen = !!expanded[slug];
+          const slugCorrections = corrections[slug] || [];
+          return (
+            <div key={slug} className="border border-gray-200 rounded-xl overflow-hidden">
+              <button
+                onClick={() => setExpanded(prev => ({ ...prev, [slug]: !prev[slug] }))}
+                className="w-full text-left px-4 py-3 flex items-center gap-3 bg-white hover:bg-gray-50 transition-colors cursor-pointer"
+              >
+                <span className="text-[10px] font-semibold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full flex-shrink-0">
+                  ×{entry.count || 1}
+                </span>
+                <span className="text-sm text-gray-700 flex-1 truncate">{entry.name || slug}</span>
+                {slugCorrections.length > 0 && (
+                  <span className="text-[10px] text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full flex-shrink-0">
+                    {slugCorrections.length} correction{slugCorrections.length === 1 ? '' : 's'}
+                  </span>
+                )}
+                <span className="text-[10px] text-gray-400 flex-shrink-0 tabular-nums">
+                  {entry.last_kwh ? `${entry.last_kwh} kWh/h` : ''}
+                </span>
+                <span className={`text-lg flex-shrink-0 transition-transform ${isOpen ? 'rotate-45' : ''}`}>+</span>
+              </button>
+              {isOpen && (
+                <div className="px-4 pb-4 pt-1 bg-gray-50 text-xs space-y-3">
+                  <div className="grid grid-cols-2 gap-2 text-[11px]">
+                    <div><span className="text-gray-400">Slug:</span> <code className="text-gray-700">{slug}</code></div>
+                    <div><span className="text-gray-400">Similar to:</span> <code className="text-gray-700">{entry.last_similar_to || '—'}</code></div>
+                    <div><span className="text-gray-400">First seen:</span> <span className="text-gray-700">{entry.first_seen ? new Date(entry.first_seen).toLocaleDateString() : '—'}</span></div>
+                    <div><span className="text-gray-400">Last seen:</span> <span className="text-gray-700">{entry.last_seen ? new Date(entry.last_seen).toLocaleDateString() : '—'}</span></div>
+                  </div>
+
+                  {entry.last_query && (
+                    <div>
+                      <span className="text-gray-400">Last query:</span>{' '}
+                      <span className="text-gray-700 italic">"{entry.last_query}"</span>
+                    </div>
+                  )}
+
+                  {entry.last_reasoning && (
+                    <div>
+                      <span className="text-gray-400">AI reasoning:</span>{' '}
+                      <span className="text-gray-700">{entry.last_reasoning}</span>
+                    </div>
+                  )}
+
+                  {slugCorrections.length > 0 && (
+                    <div className="border-t border-gray-200 pt-2">
+                      <p className="font-semibold text-gray-500 mb-1.5">Corrections ({slugCorrections.length})</p>
+                      <div className="space-y-1.5">
+                        {slugCorrections.map((c, i) => (
+                          <div key={i} className="bg-white border border-gray-200 rounded-lg p-2">
+                            <div className="flex items-center justify-between text-[10px] text-gray-400 mb-1">
+                              <span>{c.submitted_at ? new Date(c.submitted_at).toLocaleString() : ''}</span>
+                              {c.suggested_kwh != null && <span className="tabular-nums">{c.suggested_kwh} kWh/h</span>}
+                            </div>
+                            {c.activity_name && <p className="text-gray-700">{c.activity_name}</p>}
+                            {c.source_url && (
+                              <a href={c.source_url} target="_blank" rel="noopener noreferrer" className="text-mw-water hover:underline break-all">
+                                {c.source_url}
+                              </a>
+                            )}
+                            {c.notes && <p className="text-gray-600 mt-1">{c.notes}</p>}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="border-t border-gray-200 pt-2">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <p className="font-semibold text-gray-500">Catalog snippet (copy into activityLookup.js)</p>
+                      <button
+                        onClick={() => handleCopy(entry)}
+                        className="text-[10px] px-2 py-0.5 border border-gray-200 rounded text-gray-500 hover:border-mw-water hover:text-mw-water cursor-pointer"
+                      >
+                        {copiedSlug === slug ? 'Copied!' : 'Copy snippet'}
+                      </button>
+                    </div>
+                    <pre className="text-[10px] text-gray-600 bg-white rounded-lg border border-gray-200 p-2 overflow-x-auto max-h-48 overflow-y-auto font-mono whitespace-pre">
+{buildCatalogSnippet(entry)}
+                    </pre>
+                    <p className="text-[10px] text-gray-400 mt-1">Auto-promote is disabled — review, edit, and paste into src/data/activityLookup.js manually.</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export default function AdminPage() {
   const [authed, setAuthed] = useState(!!sessionStorage.getItem('admin_auth'));
   const [results, setResults] = useState(() => {
@@ -419,6 +604,8 @@ export default function AdminPage() {
 
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+
+          <SuggestionsPanel />
 
           {/* Score overview */}
           <div className="bg-white rounded-2xl border border-gray-200 p-5">

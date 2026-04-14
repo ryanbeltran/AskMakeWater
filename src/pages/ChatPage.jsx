@@ -8,6 +8,7 @@ import RecentSearches from '../components/RecentSearches';
 import { calculateMetaWater } from '../data/recalculate';
 import TokenCalculator from '../components/TokenCalculator';
 import GeometricBackground from '../components/GeometricBackground';
+import SuggestCorrectionForm from '../components/SuggestCorrectionForm';
 
 const EXAMPLE_QUESTIONS = [
   'How much water does it cost to stream Netflix for 2 hours?',
@@ -427,6 +428,9 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
           </div>
         </div>
       )}
+
+      {/* Correction modal */}
+      <SuggestCorrectionForm target={correctionTarget} onClose={() => setCorrectionTarget(null)} />
 
       {/* Footer */}
       <footer className="flex-shrink-0 border-t border-gray-100 bg-white/80 relative z-10">
