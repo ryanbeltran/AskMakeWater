@@ -257,45 +257,47 @@ function MethodologyContent() {
               <span className="text-mw-water flex-shrink-0">•</span>
               <span>
                 <a
-                  href="https://github.com/ryanbeltran/AskMakeWater/blob/main/ask-makewater/src/data/water_cost_reference_data.json"
+                  href="https://github.com/ryanbeltran/AskMakeWater/blob/main/src/data/activityLookup.js"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-mw-water hover:underline font-semibold"
                 >
-                  30 digital activities
+                  24 digital activities
                 </a>{' '}
                 with energy-per-unit data (kWh) sourced from organizations like the IEA,
-                peer-reviewed studies, and company sustainability reports.
+                peer-reviewed studies, and company sustainability reports. Each entry cites
+                its own source, year, and confidence flags.
               </span>
             </li>
             <li className="flex gap-2">
               <span className="text-mw-water flex-shrink-0">•</span>
               <span>
                 <a
-                  href="https://github.com/ryanbeltran/AskMakeWater/blob/main/ask-makewater/src/data/recalculate.js#L20"
+                  href="https://github.com/ryanbeltran/AskMakeWater/blob/main/src/data/recalculate.js#L20"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-mw-water hover:underline font-semibold"
                 >
-                  40 regions
+                  34 regions
                 </a>{' '}
                 with Water Use Efficiency (WUE) values from data center sustainability
-                disclosures (Google, Microsoft, Meta, AWS, and others).
+                disclosures (Google, Microsoft, Meta, AWS, and others) plus estimated values
+                for regions without published figures.
               </span>
             </li>
             <li className="flex gap-2">
               <span className="text-mw-water flex-shrink-0">•</span>
               <span>
                 <a
-                  href="https://github.com/ryanbeltran/AskMakeWater/blob/main/ask-makewater/src/data/recalculate.js#L4"
+                  href="https://github.com/ryanbeltran/AskMakeWater/blob/main/src/data/recalculate.js#L4"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-mw-water hover:underline font-semibold"
                 >
-                  11 device types
+                  9 device types
                 </a>{' '}
-                with measured wattage data — phones, tablets, laptops, desktops, TVs, and
-                gaming consoles.
+                with measured wattage data — phones, tablets, laptops, desktops, TVs, gaming
+                consoles, smart speakers, and projectors.
               </span>
             </li>
           </ul>
