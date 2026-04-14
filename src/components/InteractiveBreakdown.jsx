@@ -38,6 +38,7 @@ export default function InteractiveBreakdown({
   originalData,
   confidenceData,
   activityId,
+  highlightedField = null,
 }) {
   const [zipCode, setZipCode] = useState('');
   const [zipResult, setZipResult] = useState(null);
@@ -98,9 +99,14 @@ export default function InteractiveBreakdown({
         <div className="flex items-center gap-2">
           <label className="text-xs text-gray-500 min-w-[100px]">Device</label>
           <select
+            data-focus-target="device"
             value={params.device_key}
             onChange={e => onParamChange({ device_key: e.target.value })}
-            className="flex-1 px-2 py-1 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-mw-water focus:ring-1 focus:ring-mw-water/30 bg-white"
+            className={`flex-1 px-2 py-1 text-sm border rounded-lg focus:outline-none focus:border-mw-water focus:ring-1 focus:ring-mw-water/30 bg-white transition-all ${
+              highlightedField === 'device'
+                ? 'border-mw-water ring-2 ring-mw-water/40'
+                : 'border-gray-200'
+            }`}
           >
             {deviceOptions.map(opt => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -152,6 +158,7 @@ export default function InteractiveBreakdown({
         <div className="flex items-center gap-2">
           <label className="text-xs text-gray-500 min-w-[100px]">Region</label>
           <select
+            data-focus-target="region"
             value={params.region_key}
             onChange={e => {
               onParamChange({ region_key: e.target.value });
@@ -161,7 +168,11 @@ export default function InteractiveBreakdown({
                 setZipResult(null);
               }
             }}
-            className="flex-1 px-2 py-1 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-mw-water focus:ring-1 focus:ring-mw-water/30 bg-white"
+            className={`flex-1 px-2 py-1 text-sm border rounded-lg focus:outline-none focus:border-mw-water focus:ring-1 focus:ring-mw-water/30 bg-white transition-all ${
+              highlightedField === 'region'
+                ? 'border-mw-water ring-2 ring-mw-water/40'
+                : 'border-gray-200'
+            }`}
           >
             {REGION_GROUPS.map(group => (
               <optgroup key={group.label} label={group.label}>

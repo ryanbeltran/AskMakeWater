@@ -1,5 +1,6 @@
 import ResultCard from './ResultCard';
 import ComparisonTable from './ComparisonTable';
+import FollowUpChips from './FollowUpChips';
 import MetaCost from './MetaCost';
 import WaterDrop from './WaterDrop';
 import { getActivity } from '../data/activityLookup';
@@ -220,7 +221,7 @@ function parseLegacyResponse(text) {
   }
 }
 
-export default function ChatMessage({ message, query, usage, model, onTier2Submit, isRepeatQuery = false }) {
+export default function ChatMessage({ message, query, usage, model, onTier2Submit, isRepeatQuery = false, showFollowUps = false, onFollowUpAction = null, followUpsDisabled = false, focusRequest = null }) {
   const isUser = message.role === 'user';
 
   if (isUser) {
@@ -274,6 +275,7 @@ export default function ChatMessage({ message, query, usage, model, onTier2Submi
               model={model}
               usage={usage}
               onTier2Submit={onTier2Submit}
+              focusRequest={focusRequest}
             />
           </>
         )}
@@ -284,6 +286,11 @@ export default function ChatMessage({ message, query, usage, model, onTier2Submi
           <div className="bg-gray-50 rounded-2xl rounded-tl-md px-4 py-3 text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
             {narrative}
           </div>
+        )}
+
+        {/* Follow-up suggestion chips — shown only on the latest result message */}
+        {showFollowUps && onFollowUpAction && (resultData || comparisonItems) && (
+          <FollowUpChips onAction={onFollowUpAction} disabled={followUpsDisabled} />
         )}
 
         {usage && (

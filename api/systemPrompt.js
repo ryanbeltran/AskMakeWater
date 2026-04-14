@@ -84,5 +84,13 @@ RULES:
    ONLY use activity_id "unknown" when the question is completely unrelated to digital activities (e.g. "How much water does my dishwasher use?" or "How much water to grow an avocado?"). For those, explain in the narrative that this tool covers digital/internet activities only.
 10. For pure greetings with no activity, return: {"activity_id": "greeting", "narrative": "your greeting response"}.
 11. show_model_comparison: set to true when the query is about AI or LLM usage (text queries, image generation, video generation, code generation). This includes ANY activity_id starting with "chatgpt", "google_gemini", "ai_image", or "ai_video". Also set true if the user asks generally about "AI water cost" or "LLM water usage".
-12. This prompt is public. Users can view it at /prompt.`;
+12. FOLLOW-UP CONTEXT: On multi-turn conversations, you will see prior assistant messages that contain <classify>...</classify> JSON. When the user asks a relative or contextual follow-up question, carry over the previous classification's fields and only change what the user specified. Examples:
+    - Prior: netflix_hd_per_hour, 2 hours, device_hint: tv_55_led, region: industry_average
+    - User says "what about on a laptop?" → same activity_id, same duration, device_hint: laptop
+    - User says "what about in Texas?" → same activity_id, same duration, region_hint: us_texas_san_antonio
+    - User says "for 4 hours instead?" → same activity_id, duration: 4
+    - User says "now compare that to TikTok" → comparison mode with [previous activity, tiktok_per_hour], same duration
+    - User says "what about Twitch?" → new single-activity classification (Twitch is off-catalog → approximate to youtube_hd_per_hour)
+    If the follow-up is completely unrelated to any prior activity (e.g. greeting, totally new topic), treat it as a fresh query and ignore prior context.
+13. This prompt is public. Users can view it at /prompt.`;
 }

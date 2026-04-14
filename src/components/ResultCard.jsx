@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import WaterDrop from './WaterDrop';
 import InteractiveBreakdown from './InteractiveBreakdown';
 import { recalculate, recalculateConfidence, calculateMetaWater, formatWater, DEVICES, REGIONS } from '../data/recalculate';
@@ -306,8 +306,32 @@ function buildRawExport({ query, model, usage, data, params, calculatedResult, c
   };
 }
 
-export default function ResultCard({ data, query, model, usage, onTier2Submit }) {
+export default function ResultCard({ data, query, model, usage, onTier2Submit, focusRequest = null }) {
   const [expanded, setExpanded] = useState(false);
+  const breakdownRef = useRef(null);
+  const [highlightedField, setHighlightedField] = useState(null);
+
+  // Respond to focusRequest: expand breakdown, scroll to the target field,
+  // focus its native control, and briefly highlight it.
+  useEffect(() => {
+    if (!focusRequest || !focusRequest.field) return;
+    setExpanded(true);
+
+    // Wait for the expand animation / DOM to settle, then scroll + focus.
+    const timer = setTimeout(() => {
+      const root = breakdownRef.current;
+      if (!root) return;
+      const el = root.querySelector(`[data-focus-target="${focusRequest.field}"]`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (typeof el.focus === 'function') el.focus({ preventScroll: true });
+      }
+      setHighlightedField(focusRequest.field);
+      setTimeout(() => setHighlightedField(null), 1800);
+    }, 120);
+
+    return () => clearTimeout(timer);
+  }, [focusRequest]);
 
   // Extract initial editable params from AI response
   const initialParams = useMemo(() => {
@@ -454,7 +478,7 @@ export default function ResultCard({ data, query, model, usage, onTier2Submit })
         </button>
 
         {expanded && (
-          <div className="px-5 pb-5 space-y-5">
+          <div ref={breakdownRef} className="px-5 pb-5 space-y-5">
             {/* Interactive editable breakdown */}
             <InteractiveBreakdown
               params={params}
@@ -463,6 +487,7 @@ export default function ResultCard({ data, query, model, usage, onTier2Submit })
               originalData={data}
               confidenceData={confidenceData}
               activityId={data.activity_id}
+              highlightedField={highlightedField}
             />
 
             {/* Educational comparison: show water savings if region changed significantly */}

@@ -8,11 +8,31 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <script>
+      // Donorbox sticky button — move to 3/4 up from bottom (25% from top).
+      // The visible button lives inside dbox-widget's shadow DOM, so outer CSS
+      // can't reach it. Poll for the button and patch its inline style.
+      (function () {
+        function applyPosition() {
+          const host = document.querySelector('dbox-widget');
+          if (!host || !host.shadowRoot) return false;
+          const btn = host.shadowRoot.querySelector('button.sticky');
+          if (!btn) return false;
+          btn.style.setProperty('top', '25%', 'important');
+          btn.style.setProperty('bottom', 'auto', 'important');
+          return true;
+        }
+        const iv = setInterval(() => {
+          if (applyPosition()) clearInterval(iv);
+        }, 200);
+        setTimeout(() => clearInterval(iv), 15000);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="https://donorbox.org/widgets.js" async></script>
-    <dbox-widget interval="1 T" campaign="makewater" type="popup" button-label="Donate" button-type="sticky" button-color="#2c6bdb" button-size="medium" sticky-position="left" show-icon=""></dbox-widget>
+    <dbox-widget interval="1 T" campaign="makewater" type="popup" button-label="Donate" button-type="sticky" button-color="#2c6bdb" button-size="medium" sticky-position="right" show-icon=""></dbox-widget>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

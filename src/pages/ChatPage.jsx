@@ -16,6 +16,10 @@ const EXAMPLE_QUESTIONS = [
   'What costs more water: an hour of TikTok or an hour of Zoom?',
 ];
 
+// Cap per session: 5 user messages total (initial question + 4 follow-ups).
+// Keeps token costs bounded and prevents treating the tool like a general chatbot.
+const MAX_USER_MESSAGES = 5;
+
 export default function ChatPage() {
   const [messages, setMessages] = useState([]);
   const [usages, setUsages] = useState({});
@@ -27,6 +31,9 @@ export default function ChatPage() {
 
   const [repeats, setRepeats] = useState({});
   const [showTokenCalc, setShowTokenCalc] = useState(false);
+  // Signal to the latest ResultCard to expand its breakdown and scroll
+  // to a specific editable field (device or region).
+  const [focusRequest, setFocusRequest] = useState(null);
 
   // Global usage state
   const [bottleMl, setBottleMl] = useState(0);
@@ -83,8 +90,22 @@ export default function ChatPage() {
     }
   }
 
+  // Count user messages (initial + follow-ups) for the session cap
+  const userMessageCount = messages.filter(m => m.role === 'user').length;
+  const atMessageLimit = userMessageCount >= MAX_USER_MESSAGES;
+
+  function resetConversation() {
+    setMessages([]);
+    setUsages({});
+    setModels({});
+    setRepeats({});
+    setInput('');
+    setTimeout(() => inputRef.current?.focus(), 50);
+  }
+
   async function sendMessage(text, { isRepeat = false } = {}) {
     if (!text.trim() || loading) return;
+    if (atMessageLimit) return;
 
     const userMessage = { role: 'user', content: text.trim() };
     const newMessages = [...messages, userMessage];
@@ -160,7 +181,37 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
     sendMessage(input);
   }
 
+  // Handle follow-up chip clicks. Two behaviors:
+  //   - focus-device / focus-region: bump focusRequest so the latest
+  //     ResultCard opens its breakdown and scrolls to the matching dropdown.
+  //   - compose: fill the input so the user can type the rest (e.g. the
+  //     comparison target).
+  function handleFollowUpAction(chip) {
+    if (loading) return;
+    if (chip.action === 'focus-device') {
+      setFocusRequest({ field: 'device', nonce: Date.now() });
+    } else if (chip.action === 'focus-region') {
+      setFocusRequest({ field: 'region', nonce: Date.now() });
+    } else if (chip.action === 'compose') {
+      if (atMessageLimit) return;
+      setInput(chip.prompt);
+      setTimeout(() => inputRef.current?.focus(), 50);
+    }
+  }
+
   const isEmpty = messages.length === 0;
+
+  // Index of the last assistant message — chips only render there
+  const lastAssistantIdx = (() => {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].role === 'assistant') return i;
+    }
+    return -1;
+  })();
+
+  // Dynamic placeholder: initial vs follow-up mode
+  const followUpPlaceholder = 'Adjust this estimate or ask about another activity...';
+  const initialPlaceholder = 'How much water does it cost to...';
 
   return (
     <div className="flex flex-col h-screen bg-[#fafafa] relative">
@@ -170,7 +221,7 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
       <header className="flex-shrink-0 border-b border-gray-200 bg-white relative z-10">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
           <button
-            onClick={() => { setMessages([]); setUsages({}); setModels({}); setRepeats({}); }}
+            onClick={resetConversation}
             className="flex items-center gap-2 cursor-pointer bg-transparent border-none p-0"
           >
             <span className="font-bold text-mw-base tracking-tight text-lg">
@@ -217,7 +268,7 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
                     type="text"
                     value={input}
                     onChange={e => setInput(e.target.value)}
-                    placeholder="How much water does it cost to..."
+                    placeholder={initialPlaceholder}
                     disabled={loading}
                     className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:border-mw-water focus:ring-1 focus:ring-mw-water/30 focus:bg-white disabled:opacity-50 transition-colors"
                   />
@@ -283,9 +334,34 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
                   model={msg.role === 'assistant' ? models[i] : undefined}
                   onTier2Submit={handleTier2Submit}
                   isRepeatQuery={!!repeats[i]}
+                  showFollowUps={i === lastAssistantIdx && !loading}
+                  onFollowUpAction={handleFollowUpAction}
+                  followUpsDisabled={loading}
+                  focusRequest={i === lastAssistantIdx ? focusRequest : null}
                 />
               ))}
               {loading && <LoadingIndicator />}
+
+              {/* Message limit reached banner */}
+              {atMessageLimit && !loading && (
+                <div className="flex justify-center pt-2">
+                  <div className="bg-mw-water-light border border-mw-water/30 rounded-2xl px-5 py-4 text-center max-w-md">
+                    <p className="text-sm text-mw-water-dark font-medium mb-2">
+                      Start a new question to keep exploring
+                    </p>
+                    <p className="text-xs text-gray-600 mb-3">
+                      Each session is limited to {MAX_USER_MESSAGES} messages to keep our water cost low.
+                    </p>
+                    <button
+                      onClick={resetConversation}
+                      className="text-xs px-4 py-2 bg-mw-water text-white rounded-lg font-medium hover:bg-mw-water-dark transition-colors cursor-pointer"
+                    >
+                      Start new question
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <div ref={messagesEndRef} />
             </div>
           )}
@@ -298,22 +374,26 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
           <div className="max-w-3xl mx-auto px-4 py-3">
             <form onSubmit={handleSubmit} className="flex gap-2">
               <input
+                ref={inputRef}
                 type="text"
                 value={input}
                 onChange={e => setInput(e.target.value)}
-                placeholder="How much water does it cost to..."
-                disabled={loading}
-                className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-mw-water focus:ring-1 focus:ring-mw-water/30 disabled:opacity-50 transition-colors"
+                placeholder={atMessageLimit ? 'Start a new question to keep exploring' : followUpPlaceholder}
+                disabled={loading || atMessageLimit}
+                className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-mw-water focus:ring-1 focus:ring-mw-water/30 disabled:opacity-50 disabled:bg-gray-50 transition-colors"
               />
               <button
                 type="submit"
-                disabled={loading || !input.trim()}
+                disabled={loading || atMessageLimit || !input.trim()}
                 className="px-4 py-2.5 bg-mw-water text-white rounded-xl text-sm font-medium hover:bg-mw-water-dark disabled:opacity-40 transition-colors cursor-pointer disabled:cursor-not-allowed flex items-center gap-1.5"
               >
                 <WaterDrop size={14} />
                 Ask
               </button>
             </form>
+            <p className="text-[11px] text-gray-400 mt-1.5 text-center">
+              {userMessageCount} / {MAX_USER_MESSAGES} messages this session
+            </p>
           </div>
         </div>
       )}
