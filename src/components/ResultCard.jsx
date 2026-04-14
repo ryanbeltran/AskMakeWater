@@ -1,8 +1,10 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import WaterDrop from './WaterDrop';
 import InteractiveBreakdown from './InteractiveBreakdown';
-import { recalculate, recalculateConfidence, calculateMetaWater, formatWater, DEVICES, REGIONS } from '../data/recalculate';
+import { recalculate, recalculateConfidence, calculateMetaWater, formatWater, DEVICES, REGIONS, calculatePowerSourceVariants } from '../data/recalculate';
 import AIModelComparison from './AIModelComparison';
+import PowerSourceChart from './PowerSourceChart';
+import { getReferenceData } from '../data/referenceDataClient';
 
 const BOTTLE_ML = 500;
 
@@ -350,6 +352,16 @@ export default function ResultCard({ data, query, model, usage, onTier2Submit, f
 
   const [params, setParams] = useState(initialParams);
   const [tier2Narrative, setTier2Narrative] = useState(null);
+  const [referenceData, setReferenceData] = useState(null);
+
+  // Load public reference data once per session; cached in-module.
+  useEffect(() => {
+    let cancelled = false;
+    getReferenceData().then(payload => {
+      if (!cancelled) setReferenceData(payload);
+    });
+    return () => { cancelled = true; };
+  }, []);
 
   const onParamChange = useCallback((updates) => {
     setParams(prev => {
@@ -361,7 +373,9 @@ export default function ResultCard({ data, query, model, usage, onTier2Submit, f
     });
   }, []);
 
-  // Recalculate on every param change
+  // Recalculate on every param change. Reference data is threaded through so
+  // regional_wue overrides take effect once they've loaded; if it's null the
+  // calculation falls back to hardcoded REGIONS values transparently.
   const calculatedResult = useMemo(() => {
     const effectiveKwh = params.activity_kwh * (params.resolution_multiplier || 1.0);
     return recalculate({
@@ -371,8 +385,28 @@ export default function ResultCard({ data, query, model, usage, onTier2Submit, f
       region_key: params.region_key,
       custom_device_watts: params.custom_device_watts,
       duration_hours: params.duration_hours,
+      reference_data: referenceData,
     });
-  }, [params]);
+  }, [params, referenceData]);
+
+  // Power source variants — one recalculation per published power source in
+  // the reference data. Empty array until reference data loads or if no
+  // cited/attributed power_sources exist.
+  const powerSourceVariants = useMemo(() => {
+    if (!referenceData) return [];
+    const effectiveKwh = params.activity_kwh * (params.resolution_multiplier || 1.0);
+    return calculatePowerSourceVariants({
+      params: {
+        activity_kwh: effectiveKwh,
+        duration: params.duration,
+        device_key: params.device_key,
+        region_key: params.region_key,
+        custom_device_watts: params.custom_device_watts,
+        duration_hours: params.duration_hours,
+      },
+      reference_data: referenceData,
+    });
+  }, [params, referenceData]);
 
   // Recalculate confidence based on user refinements
   const confidenceData = useMemo(() => {
@@ -523,6 +557,10 @@ export default function ResultCard({ data, query, model, usage, onTier2Submit, f
           <ConfidenceBar score={displayConfidence} />
         </div>
       </div>
+
+      {/* Power source comparison — collapsed by default, only renders when
+          cited/attributed power_sources reference data is available */}
+      <PowerSourceChart variants={powerSourceVariants} />
 
       {/* Expandable breakdown */}
       <div className="border-t border-gray-100">

@@ -304,9 +304,50 @@ export function formatWater(ml) {
 }
 
 /**
- * Recalculate water cost from editable parameters.
+ * Look up a regional WUE override from reference data, if one exists for the
+ * given region key. Returns null if no match. Only entries with visibility
+ * 'cited' or 'attributed' reach this function — draft filtering happens on
+ * the server side of /api/referenceData.
  */
-export function recalculate({ activity_kwh, duration = 1, device_key = 'none', region_key = 'industry_average', duration_hours = 1, custom_device_watts = 0 }) {
+function findRegionalWueOverride(regionKey, referenceData) {
+  if (!referenceData || !Array.isArray(referenceData.regional_wue)) return null;
+  const match = referenceData.regional_wue.find(ds =>
+    ds.slug === regionKey || ds.id === `regional_wue/${regionKey}`
+  );
+  if (!match || !Array.isArray(match.data) || match.data.length === 0) return null;
+  const row = match.data[0];
+  const candidates = [row.wue, row.wue_liters_per_kwh, row.water_per_kwh_liters, row.value];
+  for (const c of candidates) {
+    const n = Number(c);
+    if (Number.isFinite(n) && n > 0) return { value: n, dataset: match };
+  }
+  return null;
+}
+
+/**
+ * Recalculate water cost from editable parameters.
+ *
+ * Optional `reference_data` parameter: the payload from /api/referenceData.
+ * When provided and a matching regional_wue entry exists for the selected
+ * region, that published value is preferred over the hardcoded REGIONS table.
+ * If reference_data is missing or has no match, falls back to hardcoded
+ * defaults silently — the calculator must never break because reference data
+ * is unavailable.
+ *
+ * Optional `water_per_kwh_override`: force a specific water-per-kWh value
+ * (used by calculatePowerSourceVariants to run the same activity against
+ * every power source in the reference data).
+ */
+export function recalculate({
+  activity_kwh,
+  duration = 1,
+  device_key = 'none',
+  region_key = 'industry_average',
+  duration_hours = 1,
+  custom_device_watts = 0,
+  reference_data = null,
+  water_per_kwh_override = null,
+}) {
   let device = DEVICES[device_key] || DEVICES.none;
   // Handle custom device wattage
   if (device_key === 'custom' && custom_device_watts > 0) {
@@ -317,7 +358,20 @@ export function recalculate({ activity_kwh, duration = 1, device_key = 'none', r
   const base_kwh = activity_kwh * duration;
   const device_kwh = device.kwh * duration_hours;
   const total_kwh = base_kwh + device_kwh;
-  const wue = region.wue;
+
+  let wue = region.wue;
+  let wue_source = 'hardcoded';
+  if (water_per_kwh_override != null && Number.isFinite(Number(water_per_kwh_override))) {
+    wue = Number(water_per_kwh_override);
+    wue_source = 'override';
+  } else if (reference_data) {
+    const override = findRegionalWueOverride(region_key, reference_data);
+    if (override) {
+      wue = override.value;
+      wue_source = 'reference_data';
+    }
+  }
+
   const water_liters = total_kwh * wue;
   const water_ml = water_liters * 1000;
 
@@ -332,10 +386,75 @@ export function recalculate({ activity_kwh, duration = 1, device_key = 'none', r
     base_kwh,
     device_kwh,
     wue,
+    wue_source,
     region_label: region.label,
     water_stress: region.water_stress,
     region_estimated: region.estimated || false,
   };
+}
+
+/**
+ * Run the same calculation against every power source in the reference data.
+ *
+ * Returns one variant per dataset with a parseable water-per-kWh value, sorted
+ * ascending by water_ml. Each variant is tagged with `is_baseline: true` if
+ * its slug matches `baseline_slug` (default: `us_average_grid_mix`), so the UI
+ * can highlight where the user's current estimate falls in the range.
+ *
+ * Draft entries are never included — the filtering already happens server-side
+ * in /api/referenceData, but we double-check here as belt-and-suspenders.
+ *
+ * Returns an empty array if no reference data is available.
+ */
+export function calculatePowerSourceVariants({
+  params,
+  reference_data,
+  baseline_slug = 'us_average_grid_mix',
+}) {
+  if (!reference_data || !Array.isArray(reference_data.power_sources)) return [];
+  const sources = reference_data.power_sources.filter(ds =>
+    ds && ds.visibility !== 'draft' && Array.isArray(ds.data) && ds.data.length > 0
+  );
+  if (sources.length === 0) return [];
+
+  const variants = [];
+  for (const ds of sources) {
+    const row = ds.data[0];
+    const candidates = [
+      row.total_water_per_kwh_liters,
+      row.water_per_kwh_liters,
+      row.liters_per_kwh,
+      row.value,
+    ];
+    let waterPerKwh = null;
+    for (const c of candidates) {
+      const n = Number(c);
+      if (Number.isFinite(n) && n >= 0) { waterPerKwh = n; break; }
+    }
+    if (waterPerKwh == null) continue;
+
+    const result = recalculate({
+      ...params,
+      water_per_kwh_override: waterPerKwh,
+    });
+
+    variants.push({
+      id: ds.id,
+      slug: ds.slug,
+      name: ds.name,
+      label: row.label || ds.name,
+      water_per_kwh: waterPerKwh,
+      water_ml: result.water_ml,
+      water_display: result.water_display,
+      total_kwh: result.total_kwh,
+      is_baseline: ds.slug === baseline_slug,
+      source_citation: ds.source_citation || '',
+      source_url: ds.source_url || '',
+    });
+  }
+
+  variants.sort((a, b) => a.water_ml - b.water_ml);
+  return variants;
 }
 
 /**
