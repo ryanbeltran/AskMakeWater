@@ -204,6 +204,20 @@ This project is in early development. If you'd like to help:
 <!-- CHANGELOG:START -->
 ## What's New
 
+### v1.4.0 — 2026-04-14
+Reference data system, AI-powered ingestion, and a new power source bar chart on every result.
+- New 'Same activity, different power source' chart on every result — re-runs the calculation against every published power source (solar, wind, natural gas, coal, nuclear, hydro, US grid mix) and shows a horizontal bar chart from lowest to highest water cost, with the US grid mix baseline outlined for reference
+- Reference data system: power sources, cooling methods, and regional WUE values are now stored in a live database and feed directly into public calculations — with graceful fallback to hardcoded defaults if the data is unavailable
+- Regional WUE values from reference data automatically override hardcoded defaults when a published source exists for the selected region
+- New admin Reference Data tab: list, filter, edit, delete, and export any dataset. Prominent red/yellow/green visibility banners show at a glance which entries need citations, which are private sources, and which are public-linked
+- New admin Data Ingestion tab: paste raw content from a paper, report, or webpage, and Claude Sonnet extracts quantitative data points + citation fields for review. Supports all 8 source types (research paper, government report, industry whitepaper, conference, personal communication, proprietary, website, dataset)
+- Citation completeness now automatically determines whether a dataset is 'cited' (public link available), 'attributed' (private source), or 'draft' (needs citation) — and drafts are never used in public calculations
+- Unit normalization helpers: gallons↔liters, MWh↔kWh, BTU↔kWh, and compound 'liters per kWh' conversions shown inline during ingestion review
+- Reference data is cached for 5 minutes server-side and fetched once per browser session for fast subsequent calculations
+- New 'General Estimate' tier: queries like 'uploading a file to Google Drive', 'running a 60-watt light bulb', or 'charging my Tesla' now return calculated water costs based on AI-estimated wattage instead of bouncing as off-topic — if it uses electricity, we estimate it
+- Off-catalog queries are logged for admin review with a built-in correction form, and the admin suggestions panel generates catalog snippets that can be copied directly into the verified activity list
+- App footer now shows the current version and commit SHA so you can always see exactly which build is live
+
 ### v1.3.0 — 2026-04-14
 Result-anchored chat, smarter follow-ups, and a repositioned donate button.
 - Conversations now center on your first result — up to 5 follow-up messages per session before a gentle reset
@@ -226,14 +240,6 @@ New floating geometric background and off-catalog activities now return real res
 Ask about two things at once and see them side-by-side.
 - Multi-activity comparison mode: ask 'What costs more, an hour of Netflix or an hour of Zoom?' and get a single comparison table
 - Supports up to 5 items per comparison with shared narrative context
-
-### v1.0.0 — 2026-04-13
-Initial release.
-- 30 activity water cost calculator with natural language input
-- 40 global regions with specific Water Use Efficiency data
-- Token water calculator comparing 10 AI models
-- Daily water bottle tracking collective site usage
-- FAQ, system prompt transparency, and admin eval dashboard
 <!-- CHANGELOG:END -->
 
 ---
