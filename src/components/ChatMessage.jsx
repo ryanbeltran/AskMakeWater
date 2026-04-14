@@ -4,14 +4,96 @@ import FollowUpChips from './FollowUpChips';
 import MetaCost from './MetaCost';
 import WaterDrop from './WaterDrop';
 import { getActivity } from '../data/activityLookup';
-import { recalculate, recalculateConfidence, formatWater, getComparison, DEVICES, REGIONS } from '../data/recalculate';
+import { recalculate, recalculateConfidence, formatWater, getComparison, DEVICES, REGIONS, clampEstimatedKwh, buildEstimatedConfidence } from '../data/recalculate';
 import { getComparisonType } from '../data/aiModelComparison';
+
+/**
+ * Build a result object for an AI-estimated (tier 3) classification.
+ * Uses the AI-supplied kWh value instead of a catalog lookup, clamps it to a
+ * realistic range, and caps confidence at ESTIMATED_CONFIDENCE_CAP.
+ */
+function buildEstimatedResult(classification) {
+  const duration = classification.duration || 1;
+  const deviceKey = classification.device_hint || 'none';
+  const regionKey = classification.region_hint || 'industry_average';
+  const similarTo = classification.similar_to || null;
+  const name = classification.suggested_activity_name || 'Unrecognized digital activity';
+  const reasoning = classification.reasoning || 'AI-generated estimate based on similar activities.';
+
+  // Clamp the AI-provided kWh to the guardrail range
+  const clamped = clampEstimatedKwh(classification.estimated_kwh_per_hour);
+
+  // Reuse the shared recalculate() math — it doesn't care where activity_kwh came from
+  const calculated = recalculate({
+    activity_kwh: clamped.value,
+    duration,
+    device_key: deviceKey,
+    region_key: regionKey,
+    duration_hours: duration, // estimated entries are always per-hour
+  });
+
+  // Build confidence factors specific to estimated entries (capped)
+  const { factors: confidenceFactors, score: confidenceScore } = buildEstimatedConfidence({
+    similarTo,
+    deviceMeasured: deviceKey !== 'none' && DEVICES[deviceKey]?.kwh > 0,
+  });
+
+  // Source list shows the peer activity the estimate was anchored on
+  const similarActivity = similarTo ? getActivity(similarTo) : null;
+  const sources = similarActivity
+    ? [{
+        id: similarActivity.source_id,
+        title: `Anchored on ${similarActivity.label} — ${similarActivity.source_title}`,
+        year: similarActivity.source_year,
+      }]
+    : [];
+
+  return {
+    activity_id: 'estimated',
+    activity: `${name}${duration > 1 ? ` (${duration} hours)` : ''}`,
+    duration: `${duration} hours`,
+    water_ml: calculated.water_ml,
+    water_display: calculated.water_display,
+    comparison: calculated.comparison,
+    comparison_icon: calculated.comparison_icon,
+    confidence_score: confidenceScore,
+    confidence_factors: confidenceFactors,
+    sources,
+    editable_params: {
+      activity_kwh: clamped.value,
+      duration,
+      duration_unit: 'hours',
+      duration_hours: duration,
+      device_key: deviceKey,
+      region_key: regionKey,
+    },
+    refinement_questions: [],
+    show_model_comparison: false,
+    comparison_type: null,
+    calculated,
+    approximate: false,
+    approximate_note: null,
+    // Estimated-tier metadata
+    estimated: true,
+    estimated_name: name,
+    estimated_reasoning: reasoning,
+    estimated_similar_to: similarTo,
+    estimated_similar_label: similarActivity?.label || null,
+    estimated_kwh_clamped: clamped.clamped,
+    estimated_kwh_used: clamped.value,
+  };
+}
 
 /**
  * Build a full result object from a single classification item.
  * Shared between single-query and comparison modes.
  */
 function buildResultFromClassification(classification) {
+  // Estimated tier — AI-supplied kWh value, no catalog entry
+  if (classification.estimated === true) {
+    return buildEstimatedResult(classification);
+  }
+
   const activity = getActivity(classification.activity_id);
   if (!activity && classification.activity_id !== 'unknown') return null;
   if (classification.activity_id === 'unknown') return null;
@@ -221,7 +303,7 @@ function parseLegacyResponse(text) {
   }
 }
 
-export default function ChatMessage({ message, query, usage, model, onTier2Submit, isRepeatQuery = false, showFollowUps = false, onFollowUpAction = null, followUpsDisabled = false, focusRequest = null }) {
+export default function ChatMessage({ message, query, usage, model, onTier2Submit, isRepeatQuery = false, showFollowUps = false, onFollowUpAction = null, followUpsDisabled = false, focusRequest = null, onSuggestCorrection = null }) {
   const isUser = message.role === 'user';
 
   if (isUser) {
@@ -276,6 +358,7 @@ export default function ChatMessage({ message, query, usage, model, onTier2Submi
               usage={usage}
               onTier2Submit={onTier2Submit}
               focusRequest={focusRequest}
+              onSuggestCorrection={onSuggestCorrection}
             />
           </>
         )}

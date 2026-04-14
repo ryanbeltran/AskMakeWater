@@ -370,6 +370,76 @@ export function recalculateConfidence(originalFactors, overrides = {}) {
   return { confidence_factors: factors, confidence_score: total };
 }
 
+// --- Estimated-tier guardrails ---
+// AI-supplied kWh values are clamped to this range to prevent hallucinated outliers.
+export const ESTIMATED_KWH_MIN = 0.001;
+export const ESTIMATED_KWH_MAX = 50;
+// AI-supplied estimates are capped at this overall confidence score.
+export const ESTIMATED_CONFIDENCE_CAP = 50;
+
+/**
+ * Clamp an AI-supplied kWh/unit value to a realistic range.
+ * Returns the clamped number and a flag indicating whether clamping occurred.
+ */
+export function clampEstimatedKwh(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n) || n <= 0) {
+    return { value: ESTIMATED_KWH_MIN, clamped: true, reason: 'invalid' };
+  }
+  if (n < ESTIMATED_KWH_MIN) return { value: ESTIMATED_KWH_MIN, clamped: true, reason: 'below_min' };
+  if (n > ESTIMATED_KWH_MAX) return { value: ESTIMATED_KWH_MAX, clamped: true, reason: 'above_max' };
+  return { value: n, clamped: false, reason: null };
+}
+
+/**
+ * Build the confidence factor set for an AI-estimated entry.
+ * All published-source and multi-source factors are forced to false, and the
+ * total is capped at ESTIMATED_CONFIDENCE_CAP regardless of what is met.
+ */
+export function buildEstimatedConfidence({ similarTo, deviceMeasured = false }) {
+  const factors = {
+    energy_source_published: {
+      met: false,
+      detail: 'No published source — AI-estimated from similar activities',
+      points: 0,
+    },
+    wue_provider_specific: {
+      met: false,
+      detail: 'Using industry average WUE (1.8 L/kWh)',
+      points: 0,
+    },
+    multi_source_verified: {
+      met: false,
+      detail: 'Single AI estimate, not multi-source verified',
+      points: 0,
+    },
+    direct_not_extrapolated: {
+      met: false,
+      detail: `Extrapolated from ${similarTo || 'a similar activity'}`,
+      points: 0,
+    },
+    regional_specific: {
+      met: false,
+      detail: 'No region specified, using industry average',
+      points: 0,
+    },
+    data_under_2_years: {
+      met: true,
+      detail: 'Estimate generated now from current AI knowledge',
+      points: 10,
+    },
+    device_energy_measured: {
+      met: deviceMeasured,
+      detail: deviceMeasured ? 'Device energy from measured wattage data' : 'No device energy (server only)',
+      points: deviceMeasured ? 5 : 0,
+    },
+  };
+
+  let total = Object.values(factors).reduce((sum, f) => sum + f.points, 0);
+  if (total > ESTIMATED_CONFIDENCE_CAP) total = ESTIMATED_CONFIDENCE_CAP;
+  return { factors, score: total };
+}
+
 /**
  * Calculate meta water cost from token count.
  */

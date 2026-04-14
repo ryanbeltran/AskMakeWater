@@ -63,7 +63,7 @@ COMPARISON (when user asks to compare 2+ activities):
 </classify>
 
 RULES:
-1. activity_id MUST be from the catalog above or "unknown".
+1. activity_id MUST be from the catalog above, or "unknown", or the new "estimated" tier (see rule 9b).
 2. duration: extract from the question (default 1).
 3. duration_unit: match the activity's unit (hours, queries, transactions, etc.).
 4. device_hint: one of phone, tablet, laptop, desktop, tv_55_led, tv_65_oled, projector, console, smart_speaker, none. Use the activity's default_device unless the user specifies otherwise.
@@ -82,6 +82,27 @@ RULES:
    The narrative should mention that this is an approximation based on the closest match. Example:
    {"activity_id": "facebook_per_hour", "duration": 1, "duration_unit": "hours", "approximate": true, "approximate_note": "LinkedIn isn't in our catalog yet, so we're using Facebook as the closest match — both are social feed platforms with similar data patterns.", "narrative": "LinkedIn isn't in our catalog yet, but we can estimate using Facebook as a proxy — both involve scrolling a social feed with similar server loads."}
    ONLY use activity_id "unknown" when the question is completely unrelated to digital activities (e.g. "How much water does my dishwasher use?" or "How much water to grow an avocado?"). For those, explain in the narrative that this tool covers digital/internet activities only.
+9b. ESTIMATED TIER (new activities not in catalog AND without an obvious substitute): If the user asks about a digital activity that is NOT in the catalog AND cannot be reasonably approximated by an existing entry (examples: "VR metaverse session", "Apple Vision Pro FaceTime", "autonomous car data upload per mile", "smart home speaker training"), return an estimated-tier classification instead of forcing a bad approximate mapping. Shape:
+   {
+     "estimated": true,
+     "activity_id": "estimated",
+     "suggested_activity_name": "VR metaverse session",
+     "estimated_kwh_per_hour": 0.25,
+     "reasoning": "Similar to cloud gaming based on comparable server rendering and sustained network throughput, but likely higher due to dual-eye rendering overhead.",
+     "similar_to": "cloud_gaming_per_hour",
+     "duration": 1,
+     "duration_unit": "hours",
+     "device_hint": "none",
+     "region_hint": "industry_average",
+     "narrative": "VR metaverse sessions aren't in our verified database yet — here's an estimate based on similar cloud-rendered activities."
+   }
+   Requirements for estimated entries:
+   - estimated_kwh_per_hour must be a realistic number between 0.001 and 50. When uncertain, ROUND UP — it is better to overestimate water cost than to understate it.
+   - reasoning must be 1-2 sentences explaining WHY you chose that number, grounded in similarity to known technologies. Never just guess blindly.
+   - similar_to must be an activity_id from the catalog above — the closest conceptual peer you used to anchor your estimate.
+   - suggested_activity_name is a short, human-readable label for the activity (e.g. "VR metaverse session", not "vr_session_per_hour").
+   - Use the estimated tier ONLY when no catalog entry is a reasonable substitute. If an approximate mapping is defensible, prefer rule 9 (approximate) over rule 9b (estimated).
+   - Still respect rules 4 and 5 for device_hint and region_hint.
 10. For pure greetings with no activity, return: {"activity_id": "greeting", "narrative": "your greeting response"}.
 11. show_model_comparison: set to true when the query is about AI or LLM usage (text queries, image generation, video generation, code generation). This includes ANY activity_id starting with "chatgpt", "google_gemini", "ai_image", or "ai_video". Also set true if the user asks generally about "AI water cost" or "LLM water usage".
 12. FOLLOW-UP CONTEXT: On multi-turn conversations, you will see prior assistant messages that contain <classify>...</classify> JSON. When the user asks a relative or contextual follow-up question, carry over the previous classification's fields and only change what the user specified. Examples:

@@ -306,7 +306,7 @@ function buildRawExport({ query, model, usage, data, params, calculatedResult, c
   };
 }
 
-export default function ResultCard({ data, query, model, usage, onTier2Submit, focusRequest = null }) {
+export default function ResultCard({ data, query, model, usage, onTier2Submit, focusRequest = null, onSuggestCorrection = null }) {
   const [expanded, setExpanded] = useState(false);
   const breakdownRef = useRef(null);
   const [highlightedField, setHighlightedField] = useState(null);
@@ -446,12 +446,45 @@ export default function ResultCard({ data, query, model, usage, onTier2Submit, f
               </p>
             )}
           </div>
+          {data.estimated && (
+            <div className="flex-shrink-0">
+              <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider px-2 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                AI Estimate
+              </span>
+            </div>
+          )}
         </div>
+
+        {/* Estimated-tier explanatory note */}
+        {data.estimated && (
+          <div className="mt-4 bg-amber-50 border border-amber-200 rounded-xl p-3 space-y-2">
+            <p className="text-xs text-amber-900 leading-relaxed">
+              This activity isn't in our verified database yet.
+              {data.estimated_similar_label && (
+                <> This estimate is based on similarity to <strong>{data.estimated_similar_label}</strong>.</>
+              )}{' '}
+              Have better data? Let us know.
+            </p>
+            {data.estimated_reasoning && (
+              <p className="text-[11px] text-amber-800 italic leading-relaxed">
+                <strong className="not-italic">Reasoning:</strong> {data.estimated_reasoning}
+              </p>
+            )}
+            <button
+              type="button"
+              onClick={() => onSuggestCorrection?.(data)}
+              className="text-[11px] font-semibold text-amber-900 hover:underline cursor-pointer"
+            >
+              Submit correction →
+            </button>
+          </div>
+        )}
 
         {/* Confidence */}
         <div className="mt-4">
           <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1.5">
-            Accuracy confidence
+            {data.estimated ? 'Confidence (capped — AI estimate)' : 'Accuracy confidence'}
           </p>
           <ConfidenceBar score={displayConfidence} />
         </div>

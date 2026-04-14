@@ -20,6 +20,31 @@ const EXAMPLE_QUESTIONS = [
 // Keeps token costs bounded and prevents treating the tool like a general chatbot.
 const MAX_USER_MESSAGES = 5;
 
+// Fire-and-forget: if the classifier returned an estimated-tier result,
+// log it to /api/suggest so admins can review what's missing from the catalog.
+function logEstimatedSuggestion(responseText, query) {
+  try {
+    const m = responseText.match(/<classify>\s*([\s\S]*?)\s*<\/classify>/);
+    if (!m) return;
+    const c = JSON.parse(m[1]);
+    if (c.estimated !== true) return;
+    fetch('/api/suggest', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'suggestion',
+        suggested_activity_name: c.suggested_activity_name,
+        estimated_kwh_per_hour: c.estimated_kwh_per_hour,
+        reasoning: c.reasoning,
+        similar_to: c.similar_to,
+        query,
+      }),
+    }).catch(() => {});
+  } catch {
+    // silent fail
+  }
+}
+
 export default function ChatPage() {
   const [messages, setMessages] = useState([]);
   const [usages, setUsages] = useState({});
@@ -34,6 +59,7 @@ export default function ChatPage() {
   // Signal to the latest ResultCard to expand its breakdown and scroll
   // to a specific editable field (device or region).
   const [focusRequest, setFocusRequest] = useState(null);
+  const [correctionTarget, setCorrectionTarget] = useState(null);
 
   // Global usage state
   const [bottleMl, setBottleMl] = useState(0);
@@ -139,6 +165,10 @@ export default function ChatPage() {
       if (!isRepeat) {
         reportUsage(text.trim(), data.usage);
       }
+
+      // Fire-and-forget: log estimated-tier classifications to /api/suggest
+      // so we can review what people are asking about that isn't in the catalog.
+      logEstimatedSuggestion(data.text, text.trim());
     } catch (err) {
       setMessages(prev => [
         ...prev,
@@ -337,6 +367,7 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
                   onFollowUpAction={handleFollowUpAction}
                   followUpsDisabled={loading}
                   focusRequest={i === lastAssistantIdx ? focusRequest : null}
+                  onSuggestCorrection={setCorrectionTarget}
                 />
               ))}
               {loading && <LoadingIndicator />}
