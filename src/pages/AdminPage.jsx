@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import evalTests from '../data/evalTests.json';
+import ReferenceDataPanel from '../components/admin/ReferenceDataPanel';
+import DataIngestionPanel from '../components/admin/DataIngestionPanel';
 
 const CATEGORIES = ['all', 'streaming', 'ai', 'social', 'gaming', 'crypto', 'email', 'edge_case', 'greeting', 'off_catalog', 'off_catalog_digital', 'general_energy'];
 
@@ -473,6 +475,8 @@ export default function AdminPage() {
   const [running, setRunning] = useState(false);
   const [progress, setProgress] = useState({ done: 0, total: 0 });
   const [categoryFilter, setCategoryFilter] = useState('all');
+  const [activeTab, setActiveTab] = useState('eval');
+  const [referenceRefreshKey, setReferenceRefreshKey] = useState(0);
 
   // Save results to localStorage when they change
   useEffect(() => {
@@ -606,7 +610,37 @@ export default function AdminPage() {
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
 
-          <SuggestionsPanel />
+          {/* Tabs */}
+          <div className="flex gap-1.5 flex-wrap border-b border-gray-200 pb-0">
+            {[
+              { id: 'eval', label: 'Classifier Eval' },
+              { id: 'suggestions', label: 'Suggestions' },
+              { id: 'reference', label: 'Reference Data' },
+              { id: 'ingest', label: 'Data Ingestion' },
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`text-xs px-3 py-2 rounded-t-lg border-b-2 cursor-pointer transition-colors ${
+                  activeTab === tab.id
+                    ? 'border-mw-water text-mw-water font-semibold'
+                    : 'border-transparent text-gray-500 hover:text-mw-water'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {activeTab === 'suggestions' && <SuggestionsPanel />}
+          {activeTab === 'reference' && <ReferenceDataPanel refreshKey={referenceRefreshKey} />}
+          {activeTab === 'ingest' && (
+            <DataIngestionPanel onSaved={() => setReferenceRefreshKey(k => k + 1)} />
+          )}
+
+          {activeTab === 'eval' && <>
+
+
 
           {/* Score overview */}
           <div className="bg-white rounded-2xl border border-gray-200 p-5">
@@ -722,6 +756,8 @@ export default function AdminPage() {
               <TestRow key={test.id} test={test} result={results[test.id]} />
             ))}
           </div>
+
+          </>}
 
         </div>
       </main>

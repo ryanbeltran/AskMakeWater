@@ -204,8 +204,31 @@ This project is in early development. If you'd like to help:
 <!-- CHANGELOG:START -->
 ## What's New
 
-### v1.0 — 2026-04-13
-Initial release
+### v1.3.0 — 2026-04-14
+Result-anchored chat, smarter follow-ups, and a repositioned donate button.
+- Conversations now center on your first result — up to 5 follow-up messages per session before a gentle reset
+- Follow-up chips 'Try a different device' and 'Change region' open the existing breakdown dropdowns instead of sending new messages (so Recent Searches stays clean)
+- 'Compare with another activity' chip opens a fresh comparison form
+- Classifier carries prior context so relative questions like 'what about on a laptop?' just work
+- Donate button moved to the right edge, 3/4 of the way up, as a vertical pill
+
+### v1.2.1 — 2026-04-14
+Simplified the result card by removing redundant refinement questions.
+- Removed the separate refinement questions block — the device and region dropdowns in the breakdown already cover the same ground
+
+### v1.2.0 — 2026-04-14
+New floating geometric background and off-catalog activities now return real results.
+- Added floating geometric shapes and accent circles to the background, inspired by makewater.org
+- Off-catalog digital activities (LinkedIn, Spotify, Twitch, WhatsApp, Disney+, Reddit, etc.) now map to the closest matching activity with a clearly labeled 'approximate match' notice, instead of returning a text-only fallback
+- New eval tests and 'off_catalog_digital' category in the admin dashboard to track approximation accuracy
+
+### v1.1.0 — 2026-04-13
+Ask about two things at once and see them side-by-side.
+- Multi-activity comparison mode: ask 'What costs more, an hour of Netflix or an hour of Zoom?' and get a single comparison table
+- Supports up to 5 items per comparison with shared narrative context
+
+### v1.0.0 — 2026-04-13
+Initial release.
 - 30 activity water cost calculator with natural language input
 - 40 global regions with specific Water Use Efficiency data
 - Token water calculator comparing 10 AI models
