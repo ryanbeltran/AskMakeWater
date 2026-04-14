@@ -45,21 +45,29 @@ function ask(question) {
   });
 }
 
-function getDiff() {
-  // Try staged + unstaged diff first
+function getDiff({ prePush = false } = {}) {
+  // Pre-push mode: diff the commits about to be pushed (ahead of upstream).
+  if (prePush) {
+    try {
+      const diff = execSync('git diff @{u}..HEAD', { cwd: ROOT, encoding: 'utf-8', maxBuffer: 1024 * 1024 });
+      return diff.trim();
+    } catch {
+      return '';
+    }
+  }
+
+  // Interactive mode: staged + unstaged → staged → last commit
   let diff = '';
   try {
     diff = execSync('git diff HEAD', { cwd: ROOT, encoding: 'utf-8', maxBuffer: 1024 * 1024 });
   } catch {}
 
-  // If nothing, try staged only
   if (!diff.trim()) {
     try {
       diff = execSync('git diff --cached', { cwd: ROOT, encoding: 'utf-8', maxBuffer: 1024 * 1024 });
     } catch {}
   }
 
-  // If still nothing, use last commit's diff
   if (!diff.trim()) {
     try {
       diff = execSync('git diff HEAD~1 HEAD', { cwd: ROOT, encoding: 'utf-8', maxBuffer: 1024 * 1024 });
@@ -135,23 +143,33 @@ ${truncatedDiff}
 }
 
 async function main() {
-  console.log('\n📋 ask makewater — Dev Log Update\n');
+  const nonInteractive = process.argv.includes('--yes') || process.argv.includes('-y');
+
+  if (!nonInteractive) console.log('\n📋 ask makewater — Dev Log Update\n');
 
   // Get diff
-  const diff = getDiff();
+  const diff = getDiff({ prePush: nonInteractive });
   if (!diff) {
-    console.log('No changes found (no diff, no staged changes, no recent commits).');
+    if (!nonInteractive) {
+      console.log('No changes found (no diff, no staged changes, no recent commits).');
+    }
     process.exit(0);
   }
 
-  console.log(`Found ${diff.split('\n').length} lines of diff.\n`);
-  console.log('Asking Claude to summarize...\n');
+  if (!nonInteractive) {
+    console.log(`Found ${diff.split('\n').length} lines of diff.\n`);
+    console.log('Asking Claude to summarize...\n');
+  }
 
   // Summarize with AI
   let result;
   try {
     result = await summarizeWithAI(diff);
   } catch (err) {
+    if (nonInteractive) {
+      console.error('Changelog auto-update failed:', err.message);
+      process.exit(0); // don't block the push on AI failure
+    }
     console.error('AI summarization failed:', err.message);
     console.log('\nFalling back to manual entry.\n');
     const summary = await ask('Summary (one sentence): ');
@@ -162,36 +180,40 @@ async function main() {
     };
   }
 
-  // Show result
-  console.log('─'.repeat(50));
-  console.log(`Summary: ${result.summary}`);
-  console.log('Changes:');
-  result.changes.forEach(c => console.log(`  • ${c}`));
-  console.log('─'.repeat(50));
+  if (!nonInteractive) {
+    // Show result
+    console.log('─'.repeat(50));
+    console.log(`Summary: ${result.summary}`);
+    console.log('Changes:');
+    result.changes.forEach(c => console.log(`  • ${c}`));
+    console.log('─'.repeat(50));
 
-  // Confirm or edit
-  const confirm = await ask('\nLooks good? (y to accept, e to edit, n to cancel): ');
-  if (confirm.toLowerCase() === 'n') {
-    console.log('Cancelled.');
-    process.exit(0);
-  }
+    // Confirm or edit
+    const confirm = await ask('\nLooks good? (y to accept, e to edit, n to cancel): ');
+    if (confirm.toLowerCase() === 'n') {
+      console.log('Cancelled.');
+      process.exit(0);
+    }
 
-  if (confirm.toLowerCase() === 'e') {
-    const newSummary = await ask(`Summary [${result.summary}]: `);
-    if (newSummary) result.summary = newSummary;
+    if (confirm.toLowerCase() === 'e') {
+      const newSummary = await ask(`Summary [${result.summary}]: `);
+      if (newSummary) result.summary = newSummary;
 
-    console.log('Current changes:');
-    result.changes.forEach((c, i) => console.log(`  ${i + 1}. ${c}`));
-    const newChanges = await ask('New changes (comma-separated, or Enter to keep): ');
-    if (newChanges.trim()) {
-      result.changes = newChanges.split(',').map(s => s.trim()).filter(Boolean);
+      console.log('Current changes:');
+      result.changes.forEach((c, i) => console.log(`  ${i + 1}. ${c}`));
+      const newChanges = await ask('New changes (comma-separated, or Enter to keep): ');
+      if (newChanges.trim()) {
+        result.changes = newChanges.split(',').map(s => s.trim()).filter(Boolean);
+      }
     }
   }
 
   // Version
   const lastVersion = getLastVersion();
   const defaultVersion = incrementVersion(lastVersion);
-  const version = await ask(`Version [${defaultVersion}]: `) || defaultVersion;
+  const version = nonInteractive
+    ? defaultVersion
+    : (await ask(`Version [${defaultVersion}]: `) || defaultVersion);
 
   // Build entry
   const entry = {

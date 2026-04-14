@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import changelog from '../data/changelog.json';
 
 const TABS = [
   { id: 'why', label: 'Why We Built This' },
+  { id: 'methodology', label: 'Our Methodology' },
   { id: 'faq', label: 'FAQ' },
   { id: 'new', label: "What's New" },
   { id: 'prompt', label: 'System Prompt' },
@@ -73,7 +74,11 @@ function FAQItem({ item }) {
 }
 
 export default function AboutPage() {
-  const [tab, setTab] = useState('why');
+  const [searchParams] = useSearchParams();
+  const initialTab = TABS.some(t => t.id === searchParams.get('tab'))
+    ? searchParams.get('tab')
+    : 'why';
+  const [tab, setTab] = useState(initialTab);
 
   return (
     <div className="flex flex-col min-h-screen bg-[#fafafa]">
@@ -114,21 +119,29 @@ export default function AboutPage() {
               <h1 className="text-2xl font-bold text-mw-base tracking-tight">Why We Built This</h1>
               <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-4 text-sm text-gray-700 leading-relaxed">
                 <p>
-                  I got frustrated wondering exactly how much water AI is using, among other digital things. There's data out there but the nitty gritty details end up slowing things down or making the water use less obvious than it should be.
+                  I got frustrated trying to figure out exactly how much water AI and other
+                  digital activities actually use. The research exists, but it's buried in
+                  academic papers and corporate sustainability reports — the kind of detail
+                  that makes the water cost easy to ignore instead of easy to see.
                 </p>
                 <p>
-                  So I built a tool. You can ask it how much water something costs — like streaming, scrolling TikTok, a ChatGPT conversation, whatever — and it gives you a best estimate with a confidence score. You can expand the answer to see how it was calculated, and there's an option to give more details to get a more accurate result.
+                  So I built a tool. You can ask it how much water something costs — streaming,
+                  scrolling TikTok, a ChatGPT conversation, whatever — and it gives you a best
+                  estimate with a confidence score. You can expand any answer to see exactly
+                  how it was calculated, and you can add more details to get a more accurate
+                  result.
                 </p>
                 <p>
-                  I used AI to build this (I know). But I've already learned some ways to reduce token, energy, and water usage and I'm going to keep optimizing. I want to cap the site to use no more than one bottle of water per day as a concept. It shows how much water it used to calculate your search right on screen — trying to be as transparent with this as possible.
-                </p>
-                <p>
-                  Next up I'm building a database to share what people are asking, so if someone already asked the same question it won't use AI to answer it again. It's not perfect and I say so on the site.
+                  I used AI to build this (I know). But I've already learned ways to reduce
+                  the tool's own token, energy, and water usage, and I'll keep optimizing. The
+                  goal is to cap the site to no more than one bottle of water per day — and
+                  every query shows its own water cost on screen, so the tradeoff is always
+                  visible.
                 </p>
               </div>
               <div className="bg-mw-water-light/30 rounded-xl p-5 text-center">
                 <p className="text-sm text-gray-600 leading-relaxed">
-                  This is a project of <strong>MakeWater</strong>, a 501(c)(3) nonprofit focused on water and environmental STEM education. We use hands-on water purification kits in classrooms and have reached over 10,000 participants in underserved Texas communities.
+                  This is a project of <strong>MakeWater</strong>, a 501(c)(3) nonprofit focused on water and environmental STEM education. We use hands-on, DIY and codable water purification kits in classrooms and have reached over 10,000 participants in underserved communities around the globe.
                 </p>
                 <a
                   href="https://www.makewater.org"
@@ -141,6 +154,9 @@ export default function AboutPage() {
               </div>
             </div>
           )}
+
+          {/* Our Methodology */}
+          {tab === 'methodology' && <MethodologyContent />}
 
           {/* FAQ */}
           {tab === 'faq' && (
@@ -191,6 +207,215 @@ export default function AboutPage() {
           )}
         </div>
       </main>
+    </div>
+  );
+}
+
+function MethodologyContent() {
+  return (
+    <div className="space-y-6">
+      <h1 className="text-2xl font-bold text-mw-base tracking-tight">Our Methodology</h1>
+
+      {/* Section 1: How We Calculate */}
+      <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-5 text-sm text-gray-700 leading-relaxed">
+        <div>
+          <h2 className="text-lg font-semibold text-mw-base mb-2">How We Calculate</h2>
+          <p>
+            We built this tool so every estimate is transparent, auditable, and grounded in
+            published research. Here's exactly how it works.
+          </p>
+        </div>
+
+        {/* Step 1 */}
+        <div className="border-l-2 border-mw-water pl-4 space-y-1.5">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-semibold text-mw-water bg-mw-water-light px-2 py-0.5 rounded-full tracking-wider uppercase">Step 1</span>
+            <h3 className="font-semibold text-gray-800">AI Classification (No Math)</h3>
+          </div>
+          <p>
+            When you ask a question, a small AI model (Claude Haiku) reads your query and
+            identifies four things: the <strong>activity</strong> (e.g. Netflix streaming), the
+            <strong> duration</strong>, the <strong>device type</strong>, and the
+            <strong> region</strong>. That's it. The AI never calculates anything — it only
+            matches your question to an item in our reference dataset. This is intentional:
+            if the AI can't invent a number, it can't hallucinate one.
+          </p>
+        </div>
+
+        {/* Step 2 */}
+        <div className="border-l-2 border-mw-water pl-4 space-y-1.5">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-semibold text-mw-water bg-mw-water-light px-2 py-0.5 rounded-full tracking-wider uppercase">Step 2</span>
+            <h3 className="font-semibold text-gray-800">Published Reference Data</h3>
+          </div>
+          <p>
+            All energy and water data lives in a static reference dataset you can read in the
+            open-source repo. It has three layers:
+          </p>
+          <ul className="space-y-1.5 mt-2">
+            <li className="flex gap-2">
+              <span className="text-mw-water flex-shrink-0">•</span>
+              <span>
+                <a
+                  href="https://github.com/ryanbeltran/AskMakeWater/blob/main/ask-makewater/src/data/water_cost_reference_data.json"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-mw-water hover:underline font-semibold"
+                >
+                  30 digital activities
+                </a>{' '}
+                with energy-per-unit data (kWh) sourced from organizations like the IEA,
+                peer-reviewed studies, and company sustainability reports.
+              </span>
+            </li>
+            <li className="flex gap-2">
+              <span className="text-mw-water flex-shrink-0">•</span>
+              <span>
+                <a
+                  href="https://github.com/ryanbeltran/AskMakeWater/blob/main/ask-makewater/src/data/recalculate.js#L20"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-mw-water hover:underline font-semibold"
+                >
+                  40 regions
+                </a>{' '}
+                with Water Use Efficiency (WUE) values from data center sustainability
+                disclosures (Google, Microsoft, Meta, AWS, and others).
+              </span>
+            </li>
+            <li className="flex gap-2">
+              <span className="text-mw-water flex-shrink-0">•</span>
+              <span>
+                <a
+                  href="https://github.com/ryanbeltran/AskMakeWater/blob/main/ask-makewater/src/data/recalculate.js#L4"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-mw-water hover:underline font-semibold"
+                >
+                  11 device types
+                </a>{' '}
+                with measured wattage data — phones, tablets, laptops, desktops, TVs, and
+                gaming consoles.
+              </span>
+            </li>
+          </ul>
+        </div>
+
+        {/* Step 3 */}
+        <div className="border-l-2 border-mw-water pl-4 space-y-1.5">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-semibold text-mw-water bg-mw-water-light px-2 py-0.5 rounded-full tracking-wider uppercase">Step 3</span>
+            <h3 className="font-semibold text-gray-800">The Formula</h3>
+          </div>
+          <p>The actual math is a single multiplication:</p>
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 my-2 font-mono text-xs text-gray-700 leading-relaxed">
+            (Activity energy × duration) + (Device energy × hours)
+            <br />
+            <span className="ml-4">× Regional WUE = Water (mL)</span>
+          </div>
+          <p>
+            Every calculation runs on the client side in your browser. It's deterministic,
+            auditable, and has zero AI involvement — you can open the breakdown on any result
+            and see every input we plugged in.
+          </p>
+        </div>
+      </div>
+
+      {/* Section 2: Confidence Scoring */}
+      <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-3 text-sm text-gray-700 leading-relaxed">
+        <h2 className="text-lg font-semibold text-mw-base">Confidence Scoring</h2>
+        <p>
+          Every result includes a confidence score from 0 to 100%. It's built from six factors:
+        </p>
+        <ul className="space-y-1.5">
+          <li className="flex gap-2"><span className="text-mw-water flex-shrink-0">•</span>Whether the underlying data comes from a published source</li>
+          <li className="flex gap-2"><span className="text-mw-water flex-shrink-0">•</span>Whether multiple independent sources agree</li>
+          <li className="flex gap-2"><span className="text-mw-water flex-shrink-0">•</span>Whether the figure is based on direct measurement (not extrapolation)</li>
+          <li className="flex gap-2"><span className="text-mw-water flex-shrink-0">•</span>How region-specific the WUE data is</li>
+          <li className="flex gap-2"><span className="text-mw-water flex-shrink-0">•</span>How recent the data is (within the last 2 years scores higher)</li>
+          <li className="flex gap-2"><span className="text-mw-water flex-shrink-0">•</span>Whether device-level energy data exists for your setup</li>
+        </ul>
+        <p className="bg-mw-water-light/40 rounded-lg p-3 text-xs">
+          <strong>Important:</strong> a lower confidence score doesn't mean the estimate is
+          wrong. It means there's less published data available to verify it. TikTok's server
+          costs, for example, are essentially a black box — a 40% confidence score there
+          reflects the state of public knowledge, not the quality of our math.
+        </p>
+      </div>
+
+      {/* Section 3: We Track Our Own Water Cost */}
+      <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-3 text-sm text-gray-700 leading-relaxed">
+        <h2 className="text-lg font-semibold text-mw-base">We Track Our Own Water Cost</h2>
+        <p>
+          Every query this tool runs uses a small amount of energy and water of its own —
+          we'd be hypocrites not to count it. We measure the cost of each AI call using:
+        </p>
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 font-mono text-xs text-gray-700">
+          0.14 Wh per 1,000 tokens × regional WUE
+        </div>
+        <p>
+          The shared water bottle on the home page shows the collective cost of every query
+          the site has run today, capped at <strong>500 mL — one standard water bottle</strong>.
+          It's a self-imposed ceiling that forces us to keep optimizing: cache repeated
+          questions, use the smallest model that works, and never run the AI for math we can
+          do in JavaScript.
+        </p>
+      </div>
+
+      {/* Section 4: Our Sources */}
+      <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-4 text-sm text-gray-700 leading-relaxed">
+        <h2 className="text-lg font-semibold text-mw-base">Our Sources</h2>
+        <p>
+          Every individual result card links to the specific sources used for that calculation —
+          expand the breakdown on any answer to see them. At a high level, our reference data
+          comes from four source categories:
+        </p>
+
+        <div className="space-y-3">
+          <div>
+            <h3 className="font-semibold text-gray-800 text-sm mb-1">Activity energy data</h3>
+            <p className="text-xs text-gray-600">
+              IEA streaming energy analysis, The Shift Project, peer-reviewed studies on
+              streaming, AI, and cryptocurrency energy consumption, Greenspector social media
+              energy measurements, and the Lawrence Berkeley National Lab 2024 Data Center
+              Energy Report.
+            </p>
+          </div>
+
+          <div>
+            <h3 className="font-semibold text-gray-800 text-sm mb-1">Water Use Efficiency (WUE) data</h3>
+            <p className="text-xs text-gray-600">
+              Google Environmental Reports, Microsoft Sustainability Reports, Meta
+              Sustainability Reports, AWS sustainability disclosures, and the UC Riverside
+              "Making AI Less Thirsty" study (Ren et al., 2023) for regional WUE estimates.
+            </p>
+          </div>
+
+          <div>
+            <h3 className="font-semibold text-gray-800 text-sm mb-1">Device wattage data</h3>
+            <p className="text-xs text-gray-600">
+              Published device wattage measurements from manufacturers, Energy Star certified
+              product data, and independent power-draw testing for phones, laptops, TVs, and
+              gaming consoles.
+            </p>
+          </div>
+
+          <div>
+            <h3 className="font-semibold text-gray-800 text-sm mb-1">AI model energy</h3>
+            <p className="text-xs text-gray-600">
+              Published estimates of energy per token and energy per query for major LLM
+              providers, including figures disclosed by Anthropic, OpenAI, and Google, and
+              independent academic analyses of transformer inference cost.
+            </p>
+          </div>
+        </div>
+
+        <p className="text-xs text-gray-400 pt-2 border-t border-gray-100">
+          The full reference dataset is open source and versioned in the repo — you can
+          inspect every number, its source citation, and the calculation that uses it on{' '}
+          <a href="https://github.com/ryanbeltran/AskMakeWater" className="text-mw-water hover:underline">GitHub</a>.
+        </p>
+      </div>
     </div>
   );
 }

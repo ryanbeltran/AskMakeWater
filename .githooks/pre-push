@@ -1,0 +1,64 @@
+#!/usr/bin/env sh
+# Auto-update changelog.json before pushing new commits.
+#
+# Runs `npm run log -- --yes` which diffs @{u}..HEAD (commits about to be
+# pushed) and generates a changelog entry via Claude Haiku. If a new entry
+# is added, we commit it and abort this push with a reminder to re-run
+# `git push` so both commits go together.
+#
+# Skip conditions:
+#  - SKIP_CHANGELOG=1 env var set
+#  - No upstream configured (first push of a new branch)
+#  - Nothing ahead of upstream
+#  - Pushing to a branch other than main
+
+if [ "$SKIP_CHANGELOG" = "1" ]; then
+  exit 0
+fi
+
+# Only run on main — feature branches don't need auto-changelog churn
+current_branch=$(git symbolic-ref --short HEAD 2>/dev/null)
+if [ "$current_branch" != "main" ]; then
+  exit 0
+fi
+
+# Need an upstream to diff against
+if ! git rev-parse --abbrev-ref '@{u}' >/dev/null 2>&1; then
+  exit 0
+fi
+
+# Nothing to push → nothing to log
+ahead=$(git rev-list --count '@{u}..HEAD' 2>/dev/null || echo 0)
+if [ "$ahead" = "0" ]; then
+  exit 0
+fi
+
+echo "→ pre-push: generating changelog entry for $ahead commit(s)..."
+
+# Stash any unrelated unstaged changes so the hook only touches changelog.json
+stashed=0
+if ! git diff --quiet || ! git diff --cached --quiet; then
+  git stash push --keep-index --include-untracked -m "pre-push-hook-autostash" >/dev/null 2>&1 && stashed=1
+fi
+
+npm run log --silent -- --yes
+status=$?
+
+# Check if changelog.json was modified
+if git diff --quiet -- src/data/changelog.json; then
+  if [ "$stashed" = "1" ]; then git stash pop >/dev/null 2>&1; fi
+  if [ "$status" != "0" ]; then
+    echo "→ pre-push: changelog script failed (exit $status), pushing anyway"
+  fi
+  exit 0
+fi
+
+git add src/data/changelog.json
+git commit -m "chore: update changelog" >/dev/null
+
+if [ "$stashed" = "1" ]; then git stash pop >/dev/null 2>&1; fi
+
+echo ""
+echo "✅ Changelog updated and committed."
+echo "   Re-run 'git push' to include the changelog commit."
+exit 1

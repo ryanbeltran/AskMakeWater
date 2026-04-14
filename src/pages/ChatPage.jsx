@@ -251,8 +251,8 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
                     What's the water cost of your digital life?
                   </h1>
                   <p className="text-gray-500 text-sm leading-relaxed">
-                    Every digital action has a hidden water cost. Ask anything — streaming, AI, gaming,
-                    crypto, social media — and we'll show you the water footprint with full transparency.
+                    Compare the hidden water and energy costs of streaming, gaming, AI, and more.
+                    We cap our queries to one bottle of water a day.
                   </p>
                 </div>
                 <div className="flex-shrink-0">
@@ -282,11 +282,10 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
                   </button>
                 </form>
                 <p className="text-[11px] text-gray-400 mt-2 text-center leading-relaxed">
-                  Every estimate is our best calculation based on published research. We show our work.
-                  Think we got something wrong?{' '}
-                  <a href="https://www.makewater.org/contact" target="_blank" rel="noopener noreferrer" className="text-mw-water hover:underline">
-                    Tell us
-                  </a>
+                  Estimates based on published research.{' '}
+                  <Link to="/about?tab=methodology" className="text-mw-water hover:underline">
+                    See our sources
+                  </Link>
                   .
                 </p>
               </div>

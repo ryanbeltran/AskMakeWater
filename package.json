@@ -10,7 +10,8 @@
     "build": "vite build && node scripts/inject-changelog.js",
     "lint": "eslint .",
     "preview": "vite preview",
-    "log": "node scripts/log-update.js"
+    "log": "node scripts/log-update.js",
+    "prepare": "git config core.hooksPath .githooks 2>/dev/null || true"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.88.0",
