@@ -9,6 +9,7 @@ import { calculateMetaWater } from '../data/recalculate';
 import TokenCalculator from '../components/TokenCalculator';
 import GeometricBackground from '../components/GeometricBackground';
 import SuggestCorrectionForm from '../components/SuggestCorrectionForm';
+import pkg from '../../package.json';
 
 const EXAMPLE_QUESTIONS = [
   'How much water does it cost to stream Netflix for 2 hours?',
@@ -441,6 +442,7 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
               MakeWater
             </a>
             {' '}501(c)(3)
+            <span className="ml-2 text-gray-300">· v{pkg.version} ({__APP_COMMIT__})</span>
           </p>
           <a
             href="https://www.makewater.org/contact"
