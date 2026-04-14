@@ -382,5 +382,50 @@
     "expected_comparison_count_min": 2,
     "category": "edge_case",
     "notes": "Cross-category comparison with different durations"
+  },
+  {
+    "id": 45,
+    "question": "How much water does uploading a file to Google Drive use?",
+    "expected_activity_id": "general_energy",
+    "category": "general_energy",
+    "notes": "Cloud upload — not in catalog, should fall through to general_energy tier"
+  },
+  {
+    "id": 46,
+    "question": "What's the water cost of running a 60-watt light bulb for an hour?",
+    "expected_activity_id": "general_energy",
+    "expected_duration": 1,
+    "expected_duration_unit": "hours",
+    "category": "general_energy",
+    "notes": "Physical device with explicit wattage — should not bounce as off-topic"
+  },
+  {
+    "id": 47,
+    "question": "How much water does it take to charge my Tesla?",
+    "expected_activity_id": "general_energy",
+    "category": "general_energy",
+    "notes": "EV charging — physical energy use"
+  },
+  {
+    "id": 48,
+    "question": "Water cost of using Spotify for 30 minutes?",
+    "expected_activity_id": "youtube_sd_per_hour",
+    "expected_approximate": true,
+    "category": "off_catalog_digital",
+    "notes": "Spotify should map to youtube_sd as closest approximate — only fall to general_energy if mapping becomes untenable"
+  },
+  {
+    "id": 49,
+    "question": "How much water does microwaving popcorn for 3 minutes use?",
+    "expected_activity_id": "general_energy",
+    "category": "general_energy",
+    "notes": "Physical appliance — must not bounce as off-topic"
+  },
+  {
+    "id": 50,
+    "question": "What is love?",
+    "expected_activity_id": "unknown",
+    "category": "edge_case",
+    "notes": "Truly nonsensical — one of the few queries that should bounce"
   }
 ]

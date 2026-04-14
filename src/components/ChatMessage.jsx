@@ -4,7 +4,7 @@ import FollowUpChips from './FollowUpChips';
 import MetaCost from './MetaCost';
 import WaterDrop from './WaterDrop';
 import { getActivity } from '../data/activityLookup';
-import { recalculate, recalculateConfidence, formatWater, getComparison, DEVICES, REGIONS, clampEstimatedKwh, buildEstimatedConfidence } from '../data/recalculate';
+import { recalculate, recalculateConfidence, formatWater, getComparison, DEVICES, REGIONS, clampEstimatedKwh, buildEstimatedConfidence, clampGeneralWatts, buildGeneralEnergyConfidence } from '../data/recalculate';
 import { getComparisonType } from '../data/aiModelComparison';
 
 /**
@@ -85,11 +85,89 @@ function buildEstimatedResult(classification) {
 }
 
 /**
+ * Build a result object for a general_energy classification — AI-supplied
+ * wattage (watts) for any energy-using activity (digital or physical).
+ * Converts watts to kWh/hour for the shared recalculate() math.
+ */
+function buildGeneralEnergyResult(classification) {
+  const duration = classification.duration || 1;
+  const durationUnit = classification.duration_unit || 'hours';
+  const deviceKey = classification.device_hint || 'none';
+  const regionKey = classification.region_hint || 'industry_average';
+  const name = classification.suggested_activity_name || 'Energy-using activity';
+  const energySource = classification.energy_source || null;
+  const confidenceNote = classification.confidence_note || 'AI-estimated wattage based on typical device ratings.';
+
+  const clamped = clampGeneralWatts(classification.estimated_watts);
+  // watts → kWh per hour
+  const kwhPerHour = clamped.value / 1000;
+
+  // For non-hour units we still treat the wattage as hourly power draw and
+  // set duration_hours to the numeric duration (e.g. 2 microwave cycles = 2 h
+  // would be wrong, so when unit != hours we default duration_hours to duration
+  // as a simple per-unit energy cost). The model should prefer hours when possible.
+  const durationHours = durationUnit === 'hours' ? duration : duration;
+
+  const calculated = recalculate({
+    activity_kwh: kwhPerHour,
+    duration: durationHours,
+    device_key: deviceKey,
+    region_key: regionKey,
+    duration_hours: durationHours,
+  });
+
+  const { factors: confidenceFactors, score: confidenceScore } = buildGeneralEnergyConfidence({
+    energySource,
+    deviceMeasured: deviceKey !== 'none' && DEVICES[deviceKey]?.kwh > 0,
+  });
+
+  return {
+    activity_id: 'general_energy',
+    activity: `${name}${duration > 1 ? ` (${duration} ${durationUnit})` : ''}`,
+    duration: `${duration} ${durationUnit}`,
+    water_ml: calculated.water_ml,
+    water_display: calculated.water_display,
+    comparison: calculated.comparison,
+    comparison_icon: calculated.comparison_icon,
+    confidence_score: confidenceScore,
+    confidence_factors: confidenceFactors,
+    sources: [],
+    editable_params: {
+      activity_kwh: kwhPerHour,
+      duration: durationHours,
+      duration_unit: 'hours',
+      duration_hours: durationHours,
+      device_key: deviceKey,
+      region_key: regionKey,
+    },
+    refinement_questions: [],
+    show_model_comparison: false,
+    comparison_type: null,
+    calculated,
+    approximate: false,
+    approximate_note: null,
+    // General-energy metadata
+    general_energy: true,
+    general_energy_name: name,
+    general_energy_watts: clamped.value,
+    general_energy_source: energySource,
+    general_energy_note: confidenceNote,
+    general_energy_clamped: clamped.clamped,
+  };
+}
+
+/**
  * Build a full result object from a single classification item.
  * Shared between single-query and comparison modes.
  */
 function buildResultFromClassification(classification) {
-  // Estimated tier — AI-supplied kWh value, no catalog entry
+  // General energy tier — AI-supplied wattage for any energy-using activity
+  if (classification.activity_id === 'general_energy') {
+    return buildGeneralEnergyResult(classification);
+  }
+
+  // Legacy estimated tier — kept for backward compatibility with any
+  // classifier responses that still emit the old shape.
   if (classification.estimated === true) {
     return buildEstimatedResult(classification);
   }

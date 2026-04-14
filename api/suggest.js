@@ -96,6 +96,11 @@ async function upsertSuggestion(r, payload) {
   entry.last_reasoning = trunc(payload.reasoning, 400);
   entry.last_similar_to = trunc(payload.similar_to, 60);
   entry.last_query = trunc(payload.query, 200);
+  if (payload.estimated_watts !== undefined) {
+    const w = Number(payload.estimated_watts);
+    if (Number.isFinite(w) && w > 0) entry.last_watts = Math.min(Math.max(w, 0.1), 50000);
+  }
+  if (payload.energy_source) entry.last_energy_source = trunc(payload.energy_source, 160);
 
   if (r) {
     await r.set(key, entry);

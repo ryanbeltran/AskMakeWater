@@ -29,18 +29,34 @@ function logEstimatedSuggestion(responseText, query) {
     const m = responseText.match(/<classify>\s*([\s\S]*?)\s*<\/classify>/);
     if (!m) return;
     const c = JSON.parse(m[1]);
-    if (c.estimated !== true) return;
+    const isGeneral = c.activity_id === 'general_energy';
+    const isLegacyEstimated = c.estimated === true;
+    if (!isGeneral && !isLegacyEstimated) return;
+
+    const payload = isGeneral
+      ? {
+          type: 'suggestion',
+          suggested_activity_name: c.suggested_activity_name,
+          estimated_watts: c.estimated_watts,
+          estimated_kwh_per_hour: (Number(c.estimated_watts) || 0) / 1000,
+          energy_source: c.energy_source,
+          reasoning: c.confidence_note,
+          similar_to: null,
+          query,
+        }
+      : {
+          type: 'suggestion',
+          suggested_activity_name: c.suggested_activity_name,
+          estimated_kwh_per_hour: c.estimated_kwh_per_hour,
+          reasoning: c.reasoning,
+          similar_to: c.similar_to,
+          query,
+        };
+
     fetch('/api/suggest', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        type: 'suggestion',
-        suggested_activity_name: c.suggested_activity_name,
-        estimated_kwh_per_hour: c.estimated_kwh_per_hour,
-        reasoning: c.reasoning,
-        similar_to: c.similar_to,
-        query,
-      }),
+      body: JSON.stringify(payload),
     }).catch(() => {});
   } catch {
     // silent fail

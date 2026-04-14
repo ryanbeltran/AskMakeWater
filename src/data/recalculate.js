@@ -370,6 +370,75 @@ export function recalculateConfidence(originalFactors, overrides = {}) {
   return { confidence_factors: factors, confidence_score: total };
 }
 
+// --- General-energy tier guardrails ---
+// AI-supplied wattage is clamped to this range to prevent hallucinated outliers.
+// 0.1 W = tiny IoT sensor. 50000 W = industrial equipment / EV fast charging.
+export const GENERAL_WATTS_MIN = 0.1;
+export const GENERAL_WATTS_MAX = 50000;
+export const GENERAL_CONFIDENCE_CAP = 45;
+
+/**
+ * Clamp an AI-supplied wattage value to a realistic range.
+ * Returns the clamped number (in watts) and a flag indicating whether clamping occurred.
+ */
+export function clampGeneralWatts(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n) || n <= 0) {
+    return { value: GENERAL_WATTS_MIN, clamped: true, reason: 'invalid' };
+  }
+  if (n < GENERAL_WATTS_MIN) return { value: GENERAL_WATTS_MIN, clamped: true, reason: 'below_min' };
+  if (n > GENERAL_WATTS_MAX) return { value: GENERAL_WATTS_MAX, clamped: true, reason: 'above_max' };
+  return { value: n, clamped: false, reason: null };
+}
+
+/**
+ * Build confidence factors for a general_energy result. All published-source
+ * credit is withheld, total is capped at GENERAL_CONFIDENCE_CAP.
+ */
+export function buildGeneralEnergyConfidence({ energySource, deviceMeasured = false }) {
+  const factors = {
+    energy_source_published: {
+      met: false,
+      detail: 'No published source — AI-estimated wattage from typical device ratings',
+      points: 0,
+    },
+    wue_provider_specific: {
+      met: false,
+      detail: 'Using industry average WUE (1.8 L/kWh)',
+      points: 0,
+    },
+    multi_source_verified: {
+      met: false,
+      detail: 'Single AI estimate, not multi-source verified',
+      points: 0,
+    },
+    direct_not_extrapolated: {
+      met: false,
+      detail: energySource ? `Extrapolated from ${energySource}` : 'Extrapolated from typical device wattage',
+      points: 0,
+    },
+    regional_specific: {
+      met: false,
+      detail: 'No region specified, using industry average',
+      points: 0,
+    },
+    data_under_2_years: {
+      met: true,
+      detail: 'Estimate generated now from current AI knowledge',
+      points: 10,
+    },
+    device_energy_measured: {
+      met: deviceMeasured,
+      detail: deviceMeasured ? 'Device energy from measured wattage data' : 'Estimated wattage, not measured',
+      points: deviceMeasured ? 5 : 0,
+    },
+  };
+
+  let total = Object.values(factors).reduce((sum, f) => sum + f.points, 0);
+  if (total > GENERAL_CONFIDENCE_CAP) total = GENERAL_CONFIDENCE_CAP;
+  return { factors, score: total };
+}
+
 // --- Estimated-tier guardrails ---
 // AI-supplied kWh values are clamped to this range to prevent hallucinated outliers.
 export const ESTIMATED_KWH_MIN = 0.001;

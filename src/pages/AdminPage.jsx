@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import evalTests from '../data/evalTests.json';
 
-const CATEGORIES = ['all', 'streaming', 'ai', 'social', 'gaming', 'crypto', 'email', 'edge_case', 'greeting', 'off_catalog', 'off_catalog_digital'];
+const CATEGORIES = ['all', 'streaming', 'ai', 'social', 'gaming', 'crypto', 'email', 'edge_case', 'greeting', 'off_catalog', 'off_catalog_digital', 'general_energy'];
 
 // Haiku pricing: $0.25/M input, $1.25/M output (as of 2025)
 const HAIKU_INPUT_COST_PER_TOKEN = 0.25 / 1_000_000;
@@ -276,9 +276,10 @@ function TestRow({ test, result }) {
 function buildCatalogSnippet(entry) {
   const slug = entry.slug || 'unknown';
   const label = (entry.name || slug).replace(/'/g, "\\'");
-  const kwh = entry.last_kwh || 0.05;
-  const similar = entry.last_similar_to || '';
+  const kwh = entry.last_kwh || (entry.last_watts ? entry.last_watts / 1000 : 0.05);
+  const similar = entry.last_similar_to || entry.last_energy_source || '';
   const reasoning = (entry.last_reasoning || '').replace(/'/g, "\\'").slice(0, 160);
+  const wattsNote = entry.last_watts ? ` (~${entry.last_watts}W)` : '';
   return `${slug}: {
   id: '${slug}',
   label: '${label}',
@@ -288,7 +289,7 @@ function buildCatalogSnippet(entry) {
   default_device: 'none',
   suggested_refinements: ['device', 'region'],
   source_id: 'estimated_v1',
-  source_title: 'Community-reviewed estimate${similar ? ` (similar to ${similar})` : ''}',
+  source_title: 'Community-reviewed estimate${similar ? ` (${similar})` : ''}${wattsNote}',
   source_year: ${new Date().getFullYear()},
   confidence_base: {
     energy_published: false,

@@ -454,7 +454,41 @@ export default function ResultCard({ data, query, model, usage, onTier2Submit, f
               </span>
             </div>
           )}
+          {data.general_energy && (
+            <div className="flex-shrink-0">
+              <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider px-2 py-1 rounded-full bg-yellow-100 text-yellow-800 border border-yellow-200">
+                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" /></svg>
+                General Estimate
+              </span>
+            </div>
+          )}
         </div>
+
+        {/* General-energy explanatory note */}
+        {data.general_energy && (
+          <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-xl p-3 space-y-2">
+            <p className="text-xs text-yellow-900 leading-relaxed">
+              Based on estimated wattage, not published activity data.
+              {data.general_energy_watts && (
+                <> Estimated draw: <strong>{data.general_energy_watts} W</strong>
+                  {data.general_energy_source && <> from <strong>{data.general_energy_source}</strong></>}
+                  .</>
+              )}
+            </p>
+            {data.general_energy_note && (
+              <p className="text-[11px] text-yellow-800 italic leading-relaxed">
+                <strong className="not-italic">Basis:</strong> {data.general_energy_note}
+              </p>
+            )}
+            <button
+              type="button"
+              onClick={() => onSuggestCorrection?.(data)}
+              className="text-[11px] font-semibold text-yellow-900 hover:underline cursor-pointer"
+            >
+              Submit correction →
+            </button>
+          </div>
+        )}
 
         {/* Estimated-tier explanatory note */}
         {data.estimated && (
@@ -484,7 +518,7 @@ export default function ResultCard({ data, query, model, usage, onTier2Submit, f
         {/* Confidence */}
         <div className="mt-4">
           <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1.5">
-            {data.estimated ? 'Confidence (capped — AI estimate)' : 'Accuracy confidence'}
+            {(data.estimated || data.general_energy) ? 'Confidence (capped — AI estimate)' : 'Accuracy confidence'}
           </p>
           <ConfidenceBar score={displayConfidence} />
         </div>
