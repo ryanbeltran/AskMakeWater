@@ -283,7 +283,8 @@ const COMPARISONS = [
   { max: 500, text: 'About a water bottle', icon: 'bottle' },
   { max: 1000, text: 'About 2 water bottles', icon: 'bottle' },
   { max: 5000, text: (ml) => `About ${Math.round(ml / 500)} water bottles`, icon: 'bottle' },
-  { max: 150000, text: (ml) => `About ${Math.round(ml / 150)} bathtubs`, icon: 'bathtub' },
+  { max: 74999, text: (ml) => `About ${Math.round(ml / 500)} water bottles`, icon: 'bottle' },
+  { max: 750000, text: (ml) => `About ${Math.round(ml / 150000)} bathtub${Math.round(ml / 150000) === 1 ? '' : 's'}`, icon: 'bathtub' },
   { max: Infinity, text: (ml) => `${(ml / 1000).toFixed(0)} liters`, icon: 'bathtub' },
 ];
 
