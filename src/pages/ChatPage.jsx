@@ -9,6 +9,7 @@ import { calculateMetaWater } from '../data/recalculate';
 import TokenCalculator from '../components/TokenCalculator';
 import GeometricBackground from '../components/GeometricBackground';
 import SuggestCorrectionForm from '../components/SuggestCorrectionForm';
+import EmailSignup from '../components/EmailSignup';
 import pkg from '../../package.json';
 
 const EXAMPLE_QUESTIONS = [
@@ -276,7 +277,13 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
               ask <span className="text-mw-water">makewater</span>
             </span>
           </button>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <Link
+              to="/sources"
+              className="text-xs px-3 py-1.5 border border-gray-200 text-gray-600 rounded-lg font-medium hover:border-mw-water hover:text-mw-water transition-colors no-underline"
+            >
+              Sources
+            </Link>
             <Link
               to="/about"
               className="text-xs px-3 py-1.5 border border-gray-200 text-gray-600 rounded-lg font-medium hover:border-mw-water hover:text-mw-water transition-colors no-underline"
@@ -331,7 +338,7 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
                 </form>
                 <p className="text-[11px] text-gray-400 mt-2 text-center leading-relaxed">
                   Estimates based on published research.{' '}
-                  <Link to="/about?tab=methodology" className="text-mw-water hover:underline">
+                  <Link to="/sources" className="text-mw-water hover:underline">
                     See our sources
                   </Link>
                   .
@@ -348,6 +355,11 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
                     {q}
                   </button>
                 ))}
+              </div>
+
+              {/* Email signup */}
+              <div className="w-full max-w-lg mb-8">
+                <EmailSignup />
               </div>
 
               {/* Token calculator */}
@@ -460,14 +472,23 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
             {' '}501(c)(3)
             <span className="ml-2 text-gray-300">· v{pkg.version} ({__APP_COMMIT__})</span>
           </p>
-          <a
-            href="https://www.makewater.org/contact"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[11px] px-3 py-1.5 border border-gray-200 text-gray-500 rounded-lg hover:border-mw-water hover:text-mw-water transition-colors no-underline"
-          >
-            Feedback / Contact
-          </a>
+          <div className="flex items-center gap-2">
+            <Link
+              to="/educators"
+              className="text-[11px] text-gray-500 hover:text-mw-water transition-colors no-underline"
+            >
+              For Educators
+            </Link>
+            <span className="text-gray-300">·</span>
+            <a
+              href="https://www.makewater.org/contact"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[11px] text-gray-500 hover:text-mw-water transition-colors no-underline"
+            >
+              Feedback
+            </a>
+          </div>
         </div>
       </footer>
     </div>
