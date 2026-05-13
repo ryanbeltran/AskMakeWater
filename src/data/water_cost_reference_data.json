@@ -1,7 +1,7 @@
 {
   "_metadata": {
-    "version": "1.0.0",
-    "last_updated": "2026-04-12",
+    "version": "1.1.0",
+    "last_updated": "2026-05-13",
     "compiled_by": "MakeWater",
     "disclaimer": "All values are best estimates based on published research, corporate sustainability reports, and peer-reviewed studies. Where data is unavailable, reasonable assumptions are noted. We welcome corrections and better data.",
     "primary_sources": [
@@ -53,6 +53,35 @@
         "institution": "Microsoft",
         "year": 2024,
         "url": "https://datacenters.microsoft.com/sustainability/efficiency/"
+      },
+      {
+        "id": "ut_compass_2025",
+        "title": "Water Use Requirements for Data Centers in Texas",
+        "authors": "Arzumanyan, Bahadur, Lin et al.",
+        "institution": "COMPASS Research Consortium, Bureau of Economic Geology, UT Austin",
+        "year": 2025,
+        "url": "https://compass.beg.utexas.edu/assets/publications/Water_Requirements_for_DC_White_Paper.pdf"
+      },
+      {
+        "id": "eia_crypto_2024",
+        "title": "Tracking electricity consumption from U.S. cryptocurrency mining operations",
+        "institution": "U.S. Energy Information Administration",
+        "year": 2024,
+        "url": "https://www.eia.gov/todayinenergy/detail.php?id=61364"
+      },
+      {
+        "id": "amazon_sustainability_2024",
+        "title": "Amazon Sustainability Report 2024",
+        "institution": "Amazon / AWS",
+        "year": 2024,
+        "url": "https://sustainability.aboutamazon.com/2024-amazon-sustainability-report.pdf"
+      },
+      {
+        "id": "uptime_tiers",
+        "title": "Uptime Institute Tier Classification System",
+        "institution": "Uptime Institute (via CoreSite explainer)",
+        "year": 2024,
+        "url": "https://www.coresite.com/blog/breaking-down-data-center-tiers-classifications"
       }
     ]
   },

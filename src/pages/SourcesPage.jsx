@@ -165,6 +165,25 @@ export default function SourcesPage() {
               <strong>Macknick, J. et al.</strong> "Operational Water Consumption and Withdrawal Factors for Electricity Generating Technologies."
               NREL/TP-6A20-50900, 2012.
             </li>
+            <li className="bg-white border border-gray-200 rounded-lg p-3">
+              <strong>University of Texas at Austin.</strong> "COMPASS: A Model for COst and Metrics of Power And Storage Systems."
+              UT Energy Institute, 2025.
+            </li>
+            <li className="bg-white border border-gray-200 rounded-lg p-3">
+              <strong>U.S. Energy Information Administration (EIA).</strong> "Cryptocurrency Mining and the U.S. Electric Grid." 2024.
+            </li>
+            <li className="bg-white border border-gray-200 rounded-lg p-3">
+              <strong>Amazon.</strong> "Amazon Sustainability Report 2024 — Water Stewardship."
+              Covering 2023 performance: 53% progress toward 2030 water-positive pledge (4.3 billion liters replenished).
+            </li>
+            <li className="bg-white border border-gray-200 rounded-lg p-3">
+              <strong>Uptime Institute.</strong> "Tier Standard: Topology — Tier I through IV."
+              Industry standard for data center redundancy and availability classification.
+            </li>
+            <li className="bg-white border border-gray-200 rounded-lg p-3">
+              <strong>Google.</strong> "Google 2025 Environmental Report."
+              Gemini energy-per-query data and sustainability reporting, 2025.
+            </li>
           </ul>
         </div>
       </main>

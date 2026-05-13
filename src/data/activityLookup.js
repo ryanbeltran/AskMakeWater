@@ -438,9 +438,10 @@ const ACTIVITIES = {
       data_recent: true,
     },
     source_id: 'digiconomist',
-    source_title: 'Digiconomist / Cambridge Bitcoin Electricity Consumption Index',
+    source_title: 'Digiconomist / Cambridge Bitcoin Electricity Consumption Index; EIA cryptocurrency mining report (2024)',
     source_year: 2024,
     suggested_refinements: ['region'],
+    note: 'Proof-of-work mechanism. Mining concentrated in Texas, Georgia, and New York per EIA.',
   },
   ethereum_transaction: {
     label: 'Ethereum transaction (post-Merge)',
@@ -451,14 +452,15 @@ const ACTIVITIES = {
     category: 'crypto',
     confidence_base: {
       energy_published: true,
-      multi_source: false,
+      multi_source: true,
       direct_data: true,
       data_recent: true,
     },
     source_id: 'ethereum_foundation',
-    source_title: 'Ethereum Foundation estimates post-Merge (Sep 2022)',
+    source_title: 'Ethereum Foundation estimates post-Merge (Sep 2022); EIA cryptocurrency mining report (2024)',
     source_year: 2022,
     suggested_refinements: ['region'],
+    note: 'Proof-of-stake mechanism uses ~0.005% of Bitcoin\'s power demand (per CBECI).',
   },
 };
 

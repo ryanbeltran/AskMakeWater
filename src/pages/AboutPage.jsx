@@ -48,6 +48,18 @@ const FAQ_ITEMS = [
     a: `Every result has a "suggest a correction" option. If you're a data center engineer, researcher, or just someone who spotted something off, we want to hear from you. The entire project is open source — the dataset, the system prompt, the calculation engine, everything. If you can build a better version, that's a win for the mission.`,
   },
   {
+    q: 'What does "water positive" mean when AWS, Google, or Microsoft claims it?',
+    a: `These companies pledge to replenish more water than they withdraw by a target year. Amazon's 2024 Sustainability Report shows 53% progress toward water-positive-by-2030, with 4.3 billion liters returned in 2024. The replenishment typically funds watershed restoration, wetland projects, or water access programs. However, offsets are not always returned to the same watershed being drained. Independent investigations — including SourceMaterial/Guardian reporting on Amazon's Spain facilities and Kairos Fellowship research on Google — have questioned whether replenishment math reflects local impact. The concept is promising but the accounting is still evolving.`,
+  },
+  {
+    q: 'How much water does a hyperscaler use compared to an average data center?',
+    a: `AWS reported a global WUE of 0.15 L/kWh in 2024, versus the industry average of roughly 1.8 L/kWh — about 12 times more water-efficient at the site level. Google and Microsoft report similarly low site-level WUE. However, this measures only direct water used for cooling at the facility. Indirect water consumed by the power plants generating the facility's electricity can equal or exceed the site number, depending on the local grid mix. A data center running on coal-heavy power may have excellent on-site WUE but high total water impact.`,
+  },
+  {
+    q: 'Are data center "tiers" related to water use?',
+    a: `Tiers I through IV, defined by the Uptime Institute, measure redundancy, fault tolerance, and guaranteed uptime — not water efficiency. A Tier IV facility has fully redundant infrastructure and 99.995% availability. Higher-tier facilities tend to be hyperscale operations that also invest in efficient cooling, so they often have lower WUE in practice. The informal "Tier V" designation, used by some operators, includes the requirement to operate without water-based cooling entirely — making water independence a design goal rather than a side effect.`,
+  },
+  {
     q: 'What is MakeWater?',
     a: `MakeWater is a 501(c)(3) nonprofit focused on water and environmental STEM education. Our core program uses hands-on water purification kits in classrooms, and we've reached over 10,000 participants in underserved Texas communities. This calculator is our expansion into helping everyone understand water's hidden role in our digital lives. Learn more at makewater.org.`,
   },
