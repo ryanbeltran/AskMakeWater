@@ -94,6 +94,99 @@
     ]
   },
 
+  "operator_classes": {
+    "_description": "Site WUE by operator type. Used when the classifier detects a specific cloud provider or facility type. industry_typical is the default fallback (same as regional WUE).",
+    "_unit": "L/kWh (site cooling water only)",
+    "industry_typical": {
+      "label": "Industry Average",
+      "siteWUE": 1.8,
+      "source": "Meta / Green Grid industry benchmark",
+      "notes": "Default. Represents average across all facility types and ages."
+    },
+    "hyperscaler_aws": {
+      "label": "AWS (Amazon)",
+      "siteWUE": 0.15,
+      "source": "amazon_sustainability_2024",
+      "notes": "AWS 2024 sustainability report. Lowest reported hyperscaler WUE."
+    },
+    "hyperscaler_msft": {
+      "label": "Microsoft Azure",
+      "siteWUE": 0.30,
+      "source": "microsoft_sustainability",
+      "notes": "Microsoft FY2024 global average WUE (0.30 L/kWh), 39% improvement from 2021."
+    },
+    "hyperscaler_gcp": {
+      "label": "Google Cloud",
+      "siteWUE": 1.10,
+      "source": "google_env_2024",
+      "notes": "Estimated from Google's 7B gallon freshwater consumption and reported total energy. Google reports PUE (1.09) but less transparent on WUE."
+    },
+    "hyperscaler_meta": {
+      "label": "Meta",
+      "siteWUE": 0.20,
+      "source": "Meta recent-build reports",
+      "notes": "Recent builds; older portfolio average is ~0.90 L/kWh."
+    },
+    "enterprise_on_prem": {
+      "label": "Enterprise / On-Prem",
+      "siteWUE": 2.40,
+      "source": "lbnl_2024",
+      "notes": "LBNL 2024 estimate for small/midsize enterprise data centers with less efficient cooling."
+    },
+    "crypto_mining_facility": {
+      "label": "Crypto Mining Facility",
+      "siteWUE": 0.0,
+      "source": "eia_crypto_2024",
+      "notes": "ASIC air-cooled; most crypto mining facilities use no evaporative cooling. Caveat: these are specialty facilities, not traditional data centers."
+    }
+  },
+
+  "cooling_technologies": {
+    "_description": "Site WUE override by cooling technology. When user selects a specific cooling method, it overrides the operator class default.",
+    "_unit": "L/kWh (site cooling water only)",
+    "auto": {
+      "label": "Auto (use operator default)",
+      "siteWUE": null,
+      "notes": "No override — uses the operator class WUE."
+    },
+    "air_cooling": {
+      "label": "Air Cooling (fans only)",
+      "siteWUE": 0.04,
+      "source": "ut_compass_2025",
+      "notes": "BEG 2025 Table 2. Minimal water use; relies entirely on fans and ambient air."
+    },
+    "heat_pump": {
+      "label": "Heat Pump / Mechanical",
+      "siteWUE": 0.40,
+      "source": "Various industry estimates",
+      "notes": "Closed-loop mechanical cooling with moderate water use for heat rejection."
+    },
+    "hybrid": {
+      "label": "Hybrid (air + evap)",
+      "siteWUE": 1.00,
+      "source": "Various industry estimates",
+      "notes": "Combination of air cooling and evaporative systems, switching based on temperature."
+    },
+    "indirect_evap_cooling_tower": {
+      "label": "Evaporative Cooling Tower",
+      "siteWUE": 2.10,
+      "source": "ut_compass_2025",
+      "notes": "BEG 2025 Table 2. Traditional indirect evaporative cooling, highest water consumer."
+    },
+    "direct_evap_adiabatic": {
+      "label": "Direct Evaporative / Adiabatic",
+      "siteWUE": 1.50,
+      "source": "Various industry estimates",
+      "notes": "Evaporates water directly into the air stream. Common in hot/dry climates."
+    },
+    "liquid_immersion": {
+      "label": "Liquid Immersion",
+      "siteWUE": 0.0,
+      "source": "Various industry estimates",
+      "notes": "Servers submerged in dielectric fluid. Zero water consumption for cooling."
+    }
+  },
+
   "wue_by_provider": {
     "_unit": "liters per kWh (L/kWh)",
     "_description": "Water Usage Effectiveness: liters of water consumed for cooling per kWh of IT energy. Lower = better. Industry average is ~1.8 L/kWh.",

@@ -384,6 +384,29 @@ export const REGIONS = {
 const DEFAULT_WUE = 1.8;
 const DEFAULT_GRID_WATER_INTENSITY = 4.54; // L/kWh, US national default (EESI 2023)
 
+// Operator class site WUE values (L/kWh, direct cooling water)
+export const OPERATOR_CLASSES = {
+  industry_typical: { label: 'Industry Average', siteWUE: 1.8, source: 'Meta / Green Grid' },
+  hyperscaler_aws:  { label: 'AWS (Amazon)',     siteWUE: 0.15, source: 'Amazon 2024 Sustainability Report' },
+  hyperscaler_msft: { label: 'Microsoft Azure',  siteWUE: 0.30, source: 'Microsoft FY2024 global avg' },
+  hyperscaler_gcp:  { label: 'Google Cloud',     siteWUE: 1.10, source: 'Google 2024 env report (est.)' },
+  hyperscaler_meta: { label: 'Meta',             siteWUE: 0.20, source: 'Meta recent-build reports' },
+  enterprise_on_prem: { label: 'Enterprise / On-Prem', siteWUE: 2.40, source: 'LBNL 2024' },
+  crypto_mining_facility: { label: 'Crypto Mining', siteWUE: 0.0, source: 'EIA 2024 — ASIC air-cooled' },
+};
+
+// Cooling technology site WUE overrides (L/kWh)
+// When set to anything other than 'auto', overrides the operator class WUE.
+export const COOLING_TECH = {
+  auto:                       { label: 'Auto (operator default)', siteWUE: null },
+  air_cooling:                { label: 'Air Cooling (fans only)', siteWUE: 0.04, source: 'BEG 2025 Table 2' },
+  heat_pump:                  { label: 'Heat Pump / Mechanical',  siteWUE: 0.40, source: 'Industry estimates' },
+  hybrid:                     { label: 'Hybrid (air + evap)',     siteWUE: 1.00, source: 'Industry estimates' },
+  indirect_evap_cooling_tower:{ label: 'Evaporative Cooling Tower', siteWUE: 2.10, source: 'BEG 2025 Table 2' },
+  direct_evap_adiabatic:      { label: 'Direct Evaporative',     siteWUE: 1.50, source: 'Industry estimates' },
+  liquid_immersion:           { label: 'Liquid Immersion',        siteWUE: 0.0,  source: 'Industry estimates' },
+};
+
 // Comparisons library
 const COMPARISONS = [
   { max: 5, text: 'About a teaspoon', icon: 'teaspoon' },
@@ -460,6 +483,8 @@ export function recalculate({
   custom_device_watts = 0,
   reference_data = null,
   water_per_kwh_override = null,
+  operator_class = null,
+  cooling_tech = null,
 }) {
   let device = DEVICES[device_key] || DEVICES.none;
   // Handle custom device wattage
@@ -473,14 +498,36 @@ export function recalculate({
   const total_kwh = base_kwh + device_kwh;
 
   // --- Site water (direct cooling at the data center) ---
+  // Resolution priority:
+  //   1. Explicit cooling_tech (not 'auto') → cooling tech WUE
+  //   2. Explicit operator_class (not null, not 'industry_typical') → operator WUE
+  //   3. Reference data regional override → published WUE
+  //   4. Regional default from REGIONS table → hardcoded WUE
   let siteWue = region.wue;
   let wue_source = 'hardcoded';
+
   if (reference_data) {
     const override = findRegionalWueOverride(region_key, reference_data);
     if (override) {
       siteWue = override.value;
       wue_source = 'reference_data';
     }
+  }
+
+  // Operator class override (when not industry_typical)
+  const resolvedOperator = operator_class || 'industry_typical';
+  const operatorObj = OPERATOR_CLASSES[resolvedOperator];
+  if (resolvedOperator !== 'industry_typical' && operatorObj) {
+    siteWue = operatorObj.siteWUE;
+    wue_source = `operator:${resolvedOperator}`;
+  }
+
+  // Cooling tech override (when not auto)
+  const resolvedCooling = cooling_tech || 'auto';
+  const coolingObj = COOLING_TECH[resolvedCooling];
+  if (resolvedCooling !== 'auto' && coolingObj && coolingObj.siteWUE != null) {
+    siteWue = coolingObj.siteWUE;
+    wue_source = `cooling:${resolvedCooling}`;
   }
 
   // --- Grid water (indirect, from electricity generation) ---
@@ -517,6 +564,10 @@ export function recalculate({
     gridSource,
     gridEstimated: water_per_kwh_override != null ? false : (region.gridEstimated ?? true),
     wue_source,
+    operator_class: resolvedOperator,
+    operator_label: operatorObj?.label || 'Industry Average',
+    cooling_tech: resolvedCooling,
+    cooling_label: coolingObj?.label || 'Auto',
     region_label: region.label,
     water_stress: region.water_stress,
     region_estimated: region.estimated || false,

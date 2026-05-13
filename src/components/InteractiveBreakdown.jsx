@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { DEVICES, REGIONS } from '../data/recalculate';
+import { DEVICES, REGIONS, OPERATOR_CLASSES, COOLING_TECH } from '../data/recalculate';
 import { lookupZipRegion, isValidUSZip, REGION_CONTEXT } from '../data/zipRegions';
 import { getServiceRouting, getLocationRelevanceLabel } from '../data/serviceRouting';
 
@@ -42,6 +42,7 @@ export default function InteractiveBreakdown({
 }) {
   const [zipCode, setZipCode] = useState('');
   const [zipResult, setZipResult] = useState(null);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
 
   const deviceOptions = Object.entries(DEVICES)
     .filter(([key]) => key !== 'custom')
@@ -192,6 +193,65 @@ export default function InteractiveBreakdown({
             * Estimated WUE based on climate and infrastructure data. Confidence is lower for estimated regions.
           </p>
         )}
+
+        {/* Advanced toggle */}
+        <div>
+          <button
+            onClick={() => setAdvancedOpen(!advancedOpen)}
+            className="text-[11px] font-medium text-gray-400 hover:text-mw-water transition-colors cursor-pointer flex items-center gap-1 ml-[108px]"
+          >
+            <svg className={`w-3 h-3 transition-transform ${advancedOpen ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+            Advanced
+          </button>
+
+          {advancedOpen && (
+            <div className="mt-2 space-y-2.5">
+              {/* Operator class selector */}
+              <div className="flex items-center gap-2">
+                <label className="text-xs text-gray-500 min-w-[100px]">Operator</label>
+                <select
+                  value={params.operator_class || 'industry_typical'}
+                  onChange={e => {
+                    const val = e.target.value === 'industry_typical' ? null : e.target.value;
+                    onParamChange({ operator_class: val });
+                  }}
+                  className="flex-1 px-2 py-1 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-mw-water focus:ring-1 focus:ring-mw-water/30 bg-white"
+                >
+                  {Object.entries(OPERATOR_CLASSES).map(([key, op]) => (
+                    <option key={key} value={key}>
+                      {op.label} ({op.siteWUE} L/kWh)
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Cooling tech selector */}
+              <div className="flex items-center gap-2">
+                <label className="text-xs text-gray-500 min-w-[100px]">Cooling</label>
+                <select
+                  value={params.cooling_tech || 'auto'}
+                  onChange={e => {
+                    const val = e.target.value === 'auto' ? null : e.target.value;
+                    onParamChange({ cooling_tech: val });
+                  }}
+                  className="flex-1 px-2 py-1 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-mw-water focus:ring-1 focus:ring-mw-water/30 bg-white"
+                >
+                  {Object.entries(COOLING_TECH).map(([key, ct]) => (
+                    <option key={key} value={key}>
+                      {ct.label}{ct.siteWUE != null ? ` (${ct.siteWUE} L/kWh)` : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <p className="text-[10px] text-gray-400 ml-[108px] leading-relaxed">
+                Operator class sets the site WUE for a specific cloud provider. Cooling technology overrides it with a specific cooling method's WUE.
+              </p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Service routing context */}
@@ -222,7 +282,13 @@ export default function InteractiveBreakdown({
           <p>Activity energy: {calculatedResult.base_kwh.toFixed(4)} kWh</p>
           <p>Device energy: {calculatedResult.device_kwh.toFixed(4)} kWh</p>
           <p>Total energy: {calculatedResult.total_kwh.toFixed(4)} kWh</p>
-          <p className="border-t border-gray-200 pt-1 mt-1">Site WUE: {calculatedResult.wue} L/kWh ({calculatedResult.region_label})</p>
+          <p className="border-t border-gray-200 pt-1 mt-1">Site WUE: {calculatedResult.wue} L/kWh
+            <span className="text-xs text-gray-400 font-sans">
+              {' '}({calculatedResult.wue_source.startsWith('operator:') ? calculatedResult.operator_label
+                : calculatedResult.wue_source.startsWith('cooling:') ? calculatedResult.cooling_label
+                : calculatedResult.region_label})
+            </span>
+          </p>
           <p>
             Site water (cooling): {calculatedResult.total_kwh.toFixed(4)} × {calculatedResult.wue} × 1000 = {calculatedResult.siteWater_mL.toFixed(1)} mL
           </p>

@@ -17,7 +17,7 @@ const FAQ_ITEMS = [
   },
   {
     q: 'Does my location affect the water cost?',
-    a: `Yes, significantly. Data centers in hot, arid places like Arizona need heavy evaporative cooling and use much more water per kWh than facilities in cool climates like Scandinavia or the Pacific Northwest. Your location also affects which data center likely serves your request, though the exact routing depends on the service. Netflix uses CDN edge servers close to you, so your location matters a lot. ChatGPT runs on specialized GPU clusters in specific regions, so your location matters less. You can enter your US zip code for a more location-specific estimate.`,
+    a: `Yes, significantly. Data centers in hot, arid places like Arizona need heavy evaporative cooling and use much more water per kWh than facilities in cool climates like Scandinavia or the Pacific Northwest. Your location also affects which data center likely serves your request, though the exact routing depends on the service. Netflix uses CDN edge servers close to you, so your location matters a lot. ChatGPT runs on specialized GPU clusters in specific regions, so your location matters less. You can enter your US zip code for a more location-specific estimate. For even more control, expand the Advanced section to set the operator class (hyperscaler vs enterprise) and cooling technology — these directly change the site water calculation.`,
   },
   {
     q: 'Which data center handles my request?',
@@ -29,7 +29,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Didn't you use AI to build this? Isn't that ironic?",
-    a: `Yes, I built this in about 2 hours with Claude Code. I see the irony. But I've already learned real techniques to reduce the tool's own water and energy footprint — we use a small efficient model (Haiku) for most queries, the AI only classifies your question while the math happens in your browser with zero AI involvement, we cache results so repeat questions don't use any AI at all, and we show the water cost of every query on screen. The goal isn't zero water usage — it's making the usage visible and minimizing it where we can.`,
+    a: `Yes, I built this in about 2 hours with Claude Code. I see the irony. But I've already learned real techniques to reduce the tool's own water and energy footprint — we use a small efficient model (Haiku) for most queries, the AI only classifies your question while the math happens in your browser with zero AI involvement, we cache results so repeat questions don't use any AI at all, and we show the water cost of every query on screen. The tool now also auto-detects which cloud provider runs each service (Netflix → AWS, ChatGPT → Azure, YouTube → Google Cloud) and applies their published WUE instead of the industry average — so you see realistic numbers for hyperscaler infrastructure. The goal isn't zero water usage — it's making the usage visible and minimizing it where we can.`,
   },
   {
     q: 'What\'s the "one water bottle per day" thing?',

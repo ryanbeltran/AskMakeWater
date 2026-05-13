@@ -23,6 +23,7 @@ SINGLE ACTIVITY (most queries):
   "duration_unit": "hours",
   "device_hint": "tv_55_led",
   "region_hint": "industry_average",
+  "operator_class": "hyperscaler_aws",
   "show_model_comparison": false,
   "narrative": "Here's the water cost of streaming Netflix for 2 hours."
 }
@@ -40,6 +41,7 @@ COMPARISON (when user asks to compare 2+ activities):
       "duration_unit": "hours",
       "device_hint": "tv_55_led",
       "region_hint": "industry_average",
+      "operator_class": "hyperscaler_aws",
       "show_model_comparison": false
     },
     {
@@ -48,6 +50,7 @@ COMPARISON (when user asks to compare 2+ activities):
       "duration_unit": "hours",
       "device_hint": "phone",
       "region_hint": "industry_average",
+      "operator_class": null,
       "show_model_comparison": false
     },
     {
@@ -56,6 +59,7 @@ COMPARISON (when user asks to compare 2+ activities):
       "duration_unit": "hours",
       "device_hint": "phone",
       "region_hint": "industry_average",
+      "operator_class": "hyperscaler_gcp",
       "show_model_comparison": false
     }
   ]
@@ -70,6 +74,7 @@ RULES:
 3. duration_unit: match the activity's unit (hours, queries, transactions, etc.).
 4. device_hint: one of phone, tablet, laptop, desktop, tv_55_led, tv_65_oled, projector, console, smart_speaker, none. Use the activity's default_device unless the user specifies otherwise.
 5. region_hint: one of industry_average, us_northeast, us_virginia, us_southeast, us_chicago, us_iowa, us_texas_san_antonio, us_southwest_arizona, us_oregon, us_california, canada, mexico, brazil, chile, nordics, ireland, netherlands, germany, uk, southern_europe, middle_east_uae, israel, north_africa, west_africa, south_africa, india_mumbai, singapore, southeast_asia, china_east, china_west, japan, south_korea, australia, new_zealand. Default: industry_average.
+5b. operator_class: which cloud provider or facility type runs the service. Set this ONLY when the query mentions a specific service with a known operator. Values: hyperscaler_aws (Netflix, Twitch, Slack, Airbnb, Reddit, Claude/Anthropic), hyperscaler_msft (ChatGPT, OpenAI, Bing, Office365, GitHub, LinkedIn, Xbox cloud gaming), hyperscaler_gcp (YouTube, Gmail, Google Search, Gemini, Google Drive, Spotify), hyperscaler_meta (Facebook, Instagram, WhatsApp, Threads), crypto_mining_facility (Bitcoin mining), enterprise_on_prem (if user mentions on-prem/self-hosted). Default: null (generic/ambiguous queries like "AI", "streaming", "social media" should return null). Do NOT set cooling_tech — that is user-only via the advanced toggle.
 6. narrative: 1-2 friendly sentences contextualizing the activity. Do NOT include water numbers — the frontend calculates those.
 7. COMPARISON MODE: When a user asks to compare, contrast, or evaluate 2+ distinct activities (e.g. "Netflix vs TikTok", "compare streaming to gaming", "which uses more water"), set "comparison": true and return an "items" array with each activity classified separately. Maximum 5 items. If the user mentions a vague category instead of a specific service, pick the most representative activity (e.g. "streaming" → netflix_hd_per_hour, "gaming" → cloud_gaming_per_hour, "social media" → tiktok_per_hour, "AI" → chatgpt_single_query). Apply the same duration and region to all items when the user specifies them globally (e.g. "compare X vs Y for 2 hours in Texas").
 8. SINGLE MODE: If only one activity is detected, do NOT use comparison mode — return the standard single-activity format. Never return comparison: true with only 1 item.

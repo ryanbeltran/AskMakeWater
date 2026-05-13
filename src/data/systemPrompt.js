@@ -69,8 +69,14 @@ COMPARISONS LIBRARY (use these for relatable comparisons):
 - Olympic swimming pool: 2,500,000 liters
 
 CALCULATION FORMULA:
-water_liters = energy_kWh × WUE_L_per_kWh
-Default WUE = 1.8 L/kWh (industry average)
+siteWater_liters = energy_kWh × siteWUE_L_per_kWh
+gridWater_liters = energy_kWh × gridWaterIntensity_L_per_kWh
+totalWater_liters = siteWater_liters + gridWater_liters
+
+Default siteWUE = 1.8 L/kWh (industry average)
+Default gridWaterIntensity = 4.54 L/kWh (US national avg, EESI 2023)
+
+siteWUE is overridden by operator class (hyperscaler_aws: 0.15, hyperscaler_msft: 0.30, etc.) when a specific cloud provider is detected, and further overridden by cooling technology if the user selects one.
 
 If user specifies a region, apply the regional multiplier:
 regional_water = default_water × (regional_wue / 1.8)

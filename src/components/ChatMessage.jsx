@@ -180,12 +180,16 @@ function buildResultFromClassification(classification) {
   const deviceKey = classification.device_hint || activity.default_device || 'none';
   const regionKey = classification.region_hint || 'industry_average';
 
+  // operator_class auto-detected from classifier or service mapping
+  const operatorClass = classification.operator_class || null;
+
   const calculated = recalculate({
     activity_kwh: activity.kwh,
     duration,
     device_key: deviceKey,
     region_key: regionKey,
     duration_hours: activity.unit === 'hours' ? duration : 0,
+    operator_class: operatorClass,
   });
 
   const cb = activity.confidence_base;
@@ -267,6 +271,8 @@ function buildResultFromClassification(classification) {
       duration_hours: activity.unit === 'hours' ? duration : 0,
       device_key: deviceKey,
       region_key: regionKey,
+      operator_class: operatorClass,
+      cooling_tech: null,
     },
     refinement_questions: refinementQuestions,
     show_model_comparison: classification.show_model_comparison || !!getComparisonType(classification.activity_id),

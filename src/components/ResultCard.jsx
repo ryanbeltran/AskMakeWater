@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import WaterDrop from './WaterDrop';
 import InteractiveBreakdown from './InteractiveBreakdown';
-import { recalculate, recalculateConfidence, calculateMetaWater, formatWater, DEVICES, REGIONS, calculatePowerSourceVariants } from '../data/recalculate';
+import { recalculate, recalculateConfidence, calculateMetaWater, formatWater, DEVICES, REGIONS, OPERATOR_CLASSES, COOLING_TECH, calculatePowerSourceVariants } from '../data/recalculate';
 import AIModelComparison from './AIModelComparison';
 import PowerSourceChart from './PowerSourceChart';
 import { getReferenceData } from '../data/referenceDataClient';
@@ -347,6 +347,8 @@ export default function ResultCard({ data, query, model, usage, onTier2Submit, f
       region_key: parsed.region_key || 'industry_average',
       resolution_multiplier: 1.0,
       custom_device_watts: 0,
+      operator_class: parsed.operator_class || null,
+      cooling_tech: parsed.cooling_tech || null,
     };
   }, [data]);
 
@@ -386,6 +388,8 @@ export default function ResultCard({ data, query, model, usage, onTier2Submit, f
       custom_device_watts: params.custom_device_watts,
       duration_hours: params.duration_hours,
       reference_data: referenceData,
+      operator_class: params.operator_class,
+      cooling_tech: params.cooling_tech,
     });
   }, [params, referenceData]);
 
@@ -440,7 +444,9 @@ export default function ResultCard({ data, query, model, usage, onTier2Submit, f
     params.region_key !== initialParams.region_key ||
     params.duration !== initialParams.duration ||
     params.resolution_multiplier !== 1.0 ||
-    (params.device_key === 'custom' && params.custom_device_watts > 0);
+    (params.device_key === 'custom' && params.custom_device_watts > 0) ||
+    params.operator_class !== initialParams.operator_class ||
+    params.cooling_tech !== initialParams.cooling_tech;
 
   // Display values: use recalculated if modified, otherwise original
   const displayWater = isModified ? calculatedResult.water_display : data.water_display;
@@ -562,6 +568,14 @@ export default function ResultCard({ data, query, model, usage, onTier2Submit, f
           </p>
           <ConfidenceBar score={displayConfidence} />
         </div>
+
+        {/* Operator class auto-detection note */}
+        {initialParams.operator_class && initialParams.operator_class !== 'industry_typical' && OPERATOR_CLASSES[initialParams.operator_class] && (
+          <p className="mt-2 text-[11px] text-gray-500 bg-gray-50 rounded-lg px-3 py-1.5">
+            Detected: <strong>{data.activity_id?.replace(/_/g, ' ')}</strong> → {OPERATOR_CLASSES[initialParams.operator_class].label} (hyperscaler).
+            <span className="text-gray-400"> You can change this in Advanced.</span>
+          </p>
+        )}
       </div>
 
       {/* Power source comparison — collapsed by default, only renders when

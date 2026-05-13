@@ -173,4 +173,52 @@ export function getLocationRelevanceLabel(activityId) {
   return labels[routing.location_relevance] || null;
 }
 
+/**
+ * Maps activity_ids and well-known service names to operator classes.
+ * Used by the classifier and UI to auto-detect which hyperscaler runs
+ * the service, which determines the site WUE applied to the calculation.
+ */
+export const SERVICE_TO_OPERATOR = {
+  // AWS — Netflix, Twitch, Pinterest, Slack, Airbnb, Reddit, Anthropic Claude
+  netflix_hd_per_hour: 'hyperscaler_aws',
+  netflix_4k_per_hour: 'hyperscaler_aws',
+  // Note: Claude runs on AWS but we don't have a claude activity_id
+
+  // Microsoft Azure — ChatGPT, OpenAI, Bing, Office365, GitHub, LinkedIn, Xbox Cloud
+  chatgpt_single_query: 'hyperscaler_msft',
+  chatgpt_conversation: 'hyperscaler_msft',
+
+  // Google Cloud — YouTube, Gmail, Google Search, Gemini, Google Drive, Spotify (partial)
+  youtube_hd_per_hour: 'hyperscaler_gcp',
+  youtube_sd_per_hour: 'hyperscaler_gcp',
+  google_search: 'hyperscaler_gcp',
+  google_ai_overview_search: 'hyperscaler_gcp',
+  google_gemini_query: 'hyperscaler_gcp',
+
+  // Meta — Facebook, Instagram, WhatsApp, Threads
+  facebook_per_hour: 'hyperscaler_meta',
+  instagram_per_hour: 'hyperscaler_meta',
+
+  // Crypto mining — specialty air-cooled facilities
+  bitcoin_transaction: 'crypto_mining_facility',
+  // Note: ethereum_transaction (post-Merge, proof-of-stake) uses standard infra
+
+  // Unknown/mixed → null (use industry_typical default)
+  // TikTok, Discord, Snapchat, Twitter/X, generic AI image gen
+  tiktok_per_hour: null,
+  twitter_per_hour: null,
+  snapchat_per_hour: null,
+  ai_image_generation: null,
+  ai_video_generation_5sec: null,
+};
+
+/**
+ * Look up the operator class for an activity_id.
+ * Returns the operator key (e.g. 'hyperscaler_aws') or null if unknown.
+ */
+export function getOperatorForActivity(activityId) {
+  if (!activityId || !(activityId in SERVICE_TO_OPERATOR)) return null;
+  return SERVICE_TO_OPERATOR[activityId];
+}
+
 export default SERVICE_ROUTING;

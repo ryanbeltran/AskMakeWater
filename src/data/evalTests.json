@@ -427,5 +427,53 @@
     "expected_activity_id": "unknown",
     "category": "edge_case",
     "notes": "Truly nonsensical — one of the few queries that should bounce"
+  },
+  {
+    "id": 51,
+    "question": "How much water does ChatGPT use for 1 hour of conversation?",
+    "expected_activity_id": "chatgpt_conversation",
+    "expected_duration": 1,
+    "expected_duration_unit": "conversations",
+    "expected_operator_class": "hyperscaler_msft",
+    "category": "operator_detection",
+    "notes": "ChatGPT runs on Microsoft Azure — should detect hyperscaler_msft"
+  },
+  {
+    "id": 52,
+    "question": "Water cost of watching Netflix for 2 hours",
+    "expected_activity_id": "netflix_hd_per_hour",
+    "expected_duration": 2,
+    "expected_duration_unit": "hours",
+    "expected_operator_class": "hyperscaler_aws",
+    "category": "operator_detection",
+    "notes": "Netflix runs on AWS — should detect hyperscaler_aws"
+  },
+  {
+    "id": 53,
+    "question": "How much water does scrolling Instagram for 30 minutes cost?",
+    "expected_activity_id": "instagram_per_hour",
+    "expected_duration": 0.5,
+    "expected_duration_unit": "hours",
+    "expected_operator_class": "hyperscaler_meta",
+    "category": "operator_detection",
+    "notes": "Instagram runs on Meta infrastructure — should detect hyperscaler_meta"
+  },
+  {
+    "id": 54,
+    "question": "What's the water cost of a Bitcoin transaction?",
+    "expected_activity_id": "bitcoin_transaction",
+    "expected_duration": 1,
+    "expected_duration_unit": "transactions",
+    "expected_operator_class": "crypto_mining_facility",
+    "category": "operator_detection",
+    "notes": "Bitcoin mining uses specialty ASIC facilities — should detect crypto_mining_facility"
+  },
+  {
+    "id": 55,
+    "question": "How much water does AI use?",
+    "expected_operator_class": null,
+    "expected_show_model_comparison": true,
+    "category": "operator_detection",
+    "notes": "Generic AI query — no specific service, operator_class should be null"
   }
 ]
