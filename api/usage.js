@@ -6,6 +6,14 @@
  *
  * Storage: Upstash Redis (persists across deploys and cold starts).
  * Falls back to in-memory for local dev when Redis env vars are not set.
+ *
+ * DESIGN DECISION — Meta-cost / daily water bottle stays site-only.
+ * The formula is: 0.14 Wh per 1,000 tokens × regional WUE (1.8 L/kWh
+ * default) = water per query. This deliberately excludes indirect grid
+ * water (power-generation water) to keep the bottle metric stable and
+ * comparable across sessions. The main result card DOES include grid
+ * water in the headline total (site + grid), but the meta layer
+ * (cost-of-using-this-tool) uses site water only.
  */
 
 import { Redis } from '@upstash/redis';

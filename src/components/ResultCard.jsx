@@ -419,11 +419,17 @@ export default function ResultCard({ data, query, model, usage, onTier2Submit, f
     }
     // If user picked a specific region (not global average)
     if (params.region_key !== 'industry_average') {
-      // Published data regions get full credit; estimated regions get partial
+      // Full credit requires both site WUE and grid water intensity to be
+      // region-specific. If grid water uses the national default, we give
+      // partial credit (handled by halving the points in recalculateConfidence
+      // when met is 'partial').
       const region = REGIONS[params.region_key];
-      overrides.regional_specific = region && !region.estimated;
-      // Even estimated regions are more specific than global average,
-      // but we don't award the full confidence points
+      if (region && !region.estimated && !region.gridEstimated) {
+        overrides.regional_specific = true;  // full 10 points
+      } else if (region && !region.estimated) {
+        overrides.regional_specific = 'partial'; // 5 points — site-specific but grid estimated
+      }
+      // Estimated site WUE regions get no regional credit (default)
     }
 
     return recalculateConfidence(data.confidence_factors, overrides);

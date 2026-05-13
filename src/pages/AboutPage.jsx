@@ -53,7 +53,7 @@ const FAQ_ITEMS = [
   },
   {
     q: 'How much water does a hyperscaler use compared to an average data center?',
-    a: `AWS reported a global WUE of 0.15 L/kWh in 2024, versus the industry average of roughly 1.8 L/kWh — about 12 times more water-efficient at the site level. Google and Microsoft report similarly low site-level WUE. However, this measures only direct water used for cooling at the facility. Indirect water consumed by the power plants generating the facility's electricity can equal or exceed the site number, depending on the local grid mix. A data center running on coal-heavy power may have excellent on-site WUE but high total water impact.`,
+    a: `AWS reported a global WUE of 0.15 L/kWh in 2024, versus the industry average of roughly 1.8 L/kWh — about 12 times more water-efficient at the site level. Google and Microsoft report similarly low site-level WUE. However, this measures only direct water used for cooling at the facility. This calculator now includes both: the headline number you see is site water (cooling) plus grid water (power generation). The grid water component uses 4.54 L/kWh as the US national default (EESI 2023 analysis of LBNL/EIA data), scaled by each region's renewable fraction. Expand any result to see the site vs grid breakdown. A data center running on coal-heavy power may have excellent on-site WUE but high total water impact.`,
   },
   {
     q: 'Are data center "tiers" related to water use?',

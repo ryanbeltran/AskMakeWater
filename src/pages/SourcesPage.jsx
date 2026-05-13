@@ -184,6 +184,10 @@ export default function SourcesPage() {
               <strong>Google.</strong> "Google 2025 Environmental Report."
               Gemini energy-per-query data and sustainability reporting, 2025.
             </li>
+            <li className="bg-white border border-gray-200 rounded-lg p-3">
+              <strong>Environmental and Energy Study Institute (EESI).</strong> "Energy and Water Use in the U.S. Electric Grid."
+              Analysis of LBNL and EIA data. National average: 4.54 L/kWh grid water consumption, 2023.
+            </li>
           </ul>
         </div>
       </main>

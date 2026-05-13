@@ -82,6 +82,14 @@
         "institution": "Uptime Institute (via CoreSite explainer)",
         "year": 2024,
         "url": "https://www.coresite.com/blog/breaking-down-data-center-tiers-classifications"
+      },
+      {
+        "id": "eesi_2023",
+        "title": "Fact Sheet — Energy and Water Use in the U.S. Electric Grid",
+        "institution": "Environmental and Energy Study Institute (EESI), analysis of LBNL and EIA data",
+        "year": 2023,
+        "url": "https://www.eesi.org/papers/view/fact-sheet-energy-and-water",
+        "notes": "US national average grid water consumption: 4.54 L/kWh (1.2 gal/kWh). Used as default gridWaterIntensity."
       }
     ]
   },

@@ -222,11 +222,25 @@ export default function InteractiveBreakdown({
           <p>Activity energy: {calculatedResult.base_kwh.toFixed(4)} kWh</p>
           <p>Device energy: {calculatedResult.device_kwh.toFixed(4)} kWh</p>
           <p>Total energy: {calculatedResult.total_kwh.toFixed(4)} kWh</p>
-          <p>WUE: {calculatedResult.wue} L/kWh ({calculatedResult.region_label})</p>
-          <p className="font-semibold text-mw-base">
-            Water: {calculatedResult.total_kwh.toFixed(4)} kWh × {calculatedResult.wue} L/kWh × 1000 = {calculatedResult.water_ml.toFixed(1)} mL
+          <p className="border-t border-gray-200 pt-1 mt-1">Site WUE: {calculatedResult.wue} L/kWh ({calculatedResult.region_label})</p>
+          <p>
+            Site water (cooling): {calculatedResult.total_kwh.toFixed(4)} × {calculatedResult.wue} × 1000 = {calculatedResult.siteWater_mL.toFixed(1)} mL
+          </p>
+          <p className="border-t border-gray-200 pt-1 mt-1">Grid water intensity: {calculatedResult.gridWaterIntensity} L/kWh
+            <span className="text-xs text-gray-400 font-sans">
+              {' '}({calculatedResult.gridEstimated ? 'estimated' : calculatedResult.gridSource === 'ut_compass_2025' ? 'UT COMPASS 2025' : 'EESI 2023'})
+            </span>
+          </p>
+          <p>
+            Grid water (power gen): {calculatedResult.total_kwh.toFixed(4)} × {calculatedResult.gridWaterIntensity} × 1000 = {calculatedResult.gridWater_mL.toFixed(1)} mL
+          </p>
+          <p className="font-semibold text-mw-base border-t border-gray-200 pt-1 mt-1">
+            Total: {calculatedResult.siteWater_mL.toFixed(1)} + {calculatedResult.gridWater_mL.toFixed(1)} = {calculatedResult.water_ml.toFixed(1)} mL
           </p>
         </div>
+        <p className="text-[10px] text-gray-400 mt-1.5 leading-relaxed">
+          Site water = direct cooling at the data center. Grid water = water consumed by power plants generating the facility's electricity (EESI 2023 analysis of LBNL/EIA data, national default 4.54 L/kWh).
+        </p>
       </div>
 
       {/* Confidence breakdown */}

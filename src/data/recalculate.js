@@ -17,6 +17,14 @@ export const DEVICES = {
 
 // Regions — organized by continent/area with clean labels
 // Includes both data-backed regions (from reference JSON) and estimated regions
+//
+// wue = site WUE (direct cooling water at the data center, L/kWh)
+// gridWaterIntensity = indirect water consumed by electricity generation (L/kWh)
+//   - US national default: 4.54 L/kWh (= 1.2 gal/kWh, per EESI 2023 / LBNL / EIA)
+//   - Texas: 3.63 L/kWh (UT COMPASS 2025, Table 5)
+//   - Other US states: scaled from 4.54 by (1 − renewable fraction)
+//   - Non-US: estimated from grid mix; 4.54 used where uncertain
+// gridEstimated = true if gridWaterIntensity uses national default or rough estimate
 export const REGIONS = {
   // Global default
   industry_average: {
@@ -25,6 +33,9 @@ export const REGIONS = {
     multiplier: 1.0,
     water_stress: 'varies',
     estimated: false,
+    gridWaterIntensity: 4.54,  // US national default (EESI 2023 analysis of LBNL/EIA data)
+    gridEstimated: false,
+    gridSource: 'eesi_2023',
   },
 
   // North America
@@ -34,6 +45,9 @@ export const REGIONS = {
     multiplier: 0.84,
     water_stress: 'critical',
     estimated: false,
+    gridWaterIntensity: 3.86,  // ~15% solar; rest nuclear/gas/coal (EIA thermoelectric)
+    gridEstimated: true,
+    gridSource: 'eia_thermoelectric',
   },
   us_virginia: {
     label: 'US — East Coast (Virginia)',
@@ -41,6 +55,9 @@ export const REGIONS = {
     multiplier: 0.78,
     water_stress: 'moderate',
     estimated: false,
+    gridWaterIntensity: 4.31,  // ~5% renewable; heavy nuclear + gas (EIA thermoelectric)
+    gridEstimated: true,
+    gridSource: 'eia_thermoelectric',
   },
   us_iowa: {
     label: 'US — Midwest (Iowa)',
@@ -48,6 +65,9 @@ export const REGIONS = {
     multiplier: 0.56,
     water_stress: 'low_to_moderate',
     estimated: false,
+    gridWaterIntensity: 2.04,  // ~55% wind; 4.54 × 0.45 (EIA thermoelectric)
+    gridEstimated: true,
+    gridSource: 'eia_thermoelectric',
   },
   us_texas_san_antonio: {
     label: 'US — Texas (San Antonio)',
@@ -55,6 +75,9 @@ export const REGIONS = {
     multiplier: 0.72,
     water_stress: 'moderate_to_high',
     estimated: false,
+    gridWaterIntensity: 3.63,  // UT COMPASS 2025, Table 5 (0.96 gal/kWh)
+    gridEstimated: false,
+    gridSource: 'ut_compass_2025',
   },
   us_oregon: {
     label: 'US — Pacific Northwest (Oregon)',
@@ -62,6 +85,9 @@ export const REGIONS = {
     multiplier: 0.44,
     water_stress: 'low',
     estimated: false,
+    gridWaterIntensity: 1.36,  // ~70% hydro + wind; 4.54 × 0.30 (EIA thermoelectric)
+    gridEstimated: true,
+    gridSource: 'eia_thermoelectric',
   },
   us_california: {
     label: 'US — California',
@@ -69,6 +95,9 @@ export const REGIONS = {
     multiplier: 0.81,
     water_stress: 'high',
     estimated: true,
+    gridWaterIntensity: 2.27,  // ~50% solar + wind; 4.54 × 0.50 (EIA thermoelectric)
+    gridEstimated: true,
+    gridSource: 'eia_thermoelectric',
   },
   us_northeast: {
     label: 'US — Northeast (NYC/NJ)',
@@ -76,6 +105,9 @@ export const REGIONS = {
     multiplier: 0.67,
     water_stress: 'low_to_moderate',
     estimated: true,
+    gridWaterIntensity: 3.86,  // ~15% renewable; nuclear + gas dominant (EIA thermoelectric)
+    gridEstimated: true,
+    gridSource: 'eia_thermoelectric',
   },
   us_chicago: {
     label: 'US — Chicago Metro',
@@ -83,6 +115,9 @@ export const REGIONS = {
     multiplier: 0.61,
     water_stress: 'low_to_moderate',
     estimated: true,
+    gridWaterIntensity: 3.63,  // ~20% wind + nuclear heavy; 4.54 × 0.80 (EIA thermoelectric)
+    gridEstimated: true,
+    gridSource: 'eia_thermoelectric',
   },
   us_southeast: {
     label: 'US — Southeast (Atlanta)',
@@ -90,6 +125,9 @@ export const REGIONS = {
     multiplier: 0.75,
     water_stress: 'moderate',
     estimated: true,
+    gridWaterIntensity: 4.31,  // ~5% renewable; coal + gas + nuclear (EIA thermoelectric)
+    gridEstimated: true,
+    gridSource: 'eia_thermoelectric',
   },
   canada: {
     label: 'Canada',
@@ -97,6 +135,9 @@ export const REGIONS = {
     multiplier: 0.39,
     water_stress: 'low',
     estimated: true,
+    gridWaterIntensity: 1.36,  // ~65% hydro + 5% wind; 4.54 × 0.30
+    gridEstimated: true,
+    gridSource: 'eesi_default',
   },
   mexico: {
     label: 'Mexico',
@@ -104,6 +145,9 @@ export const REGIONS = {
     multiplier: 1.06,
     water_stress: 'moderate_to_high',
     estimated: true,
+    gridWaterIntensity: 3.63,  // ~20% renewable; gas + some coal
+    gridEstimated: true,
+    gridSource: 'eesi_default',
   },
 
   // South America
@@ -113,6 +157,9 @@ export const REGIONS = {
     multiplier: 0.83,
     water_stress: 'moderate',
     estimated: true,
+    gridWaterIntensity: 1.36,  // ~65% hydro; minimal thermal
+    gridEstimated: true,
+    gridSource: 'eesi_default',
   },
   chile: {
     label: 'Chile',
@@ -120,6 +167,9 @@ export const REGIONS = {
     multiplier: 0.89,
     water_stress: 'moderate_to_high',
     estimated: true,
+    gridWaterIntensity: 2.27,  // ~50% solar + hydro
+    gridEstimated: true,
+    gridSource: 'eesi_default',
   },
 
   // Europe
@@ -129,6 +179,9 @@ export const REGIONS = {
     multiplier: 0.17,
     water_stress: 'minimal',
     estimated: false,
+    gridWaterIntensity: 0.45,  // ~90% hydro + wind + nuclear; 4.54 × 0.10
+    gridEstimated: true,
+    gridSource: 'eesi_default',
   },
   ireland: {
     label: 'Western Europe (Ireland)',
@@ -136,6 +189,9 @@ export const REGIONS = {
     multiplier: 0.33,
     water_stress: 'low',
     estimated: false,
+    gridWaterIntensity: 2.72,  // ~40% wind; rest gas (lower thermal water than coal)
+    gridEstimated: true,
+    gridSource: 'eesi_default',
   },
   netherlands: {
     label: 'Western Europe (Netherlands)',
@@ -143,6 +199,9 @@ export const REGIONS = {
     multiplier: 0.28,
     water_stress: 'low',
     estimated: false,
+    gridWaterIntensity: 2.72,  // ~40% renewable; rest gas
+    gridEstimated: true,
+    gridSource: 'eesi_default',
   },
   germany: {
     label: 'Central Europe (Germany)',
@@ -150,6 +209,9 @@ export const REGIONS = {
     multiplier: 0.31,
     water_stress: 'low',
     estimated: true,
+    gridWaterIntensity: 2.27,  // ~50% renewable; coal + gas remainder
+    gridEstimated: true,
+    gridSource: 'eesi_default',
   },
   uk: {
     label: 'United Kingdom',
@@ -157,6 +219,9 @@ export const REGIONS = {
     multiplier: 0.31,
     water_stress: 'low',
     estimated: true,
+    gridWaterIntensity: 2.27,  // ~50% renewable + nuclear; gas remainder
+    gridEstimated: true,
+    gridSource: 'eesi_default',
   },
   southern_europe: {
     label: 'Southern Europe (Spain, Italy)',
@@ -164,6 +229,9 @@ export const REGIONS = {
     multiplier: 0.67,
     water_stress: 'moderate',
     estimated: true,
+    gridWaterIntensity: 3.18,  // ~30% renewable; gas + some coal
+    gridEstimated: true,
+    gridSource: 'eesi_default',
   },
 
   // Middle East & Africa
@@ -173,6 +241,9 @@ export const REGIONS = {
     multiplier: 1.33,
     water_stress: 'extreme',
     estimated: false,
+    gridWaterIntensity: 4.54,  // gas-dominant but uncertain; national default applied
+    gridEstimated: true,
+    gridSource: 'eesi_default',
   },
   israel: {
     label: 'Middle East (Israel)',
@@ -180,6 +251,9 @@ export const REGIONS = {
     multiplier: 1.0,
     water_stress: 'high',
     estimated: true,
+    gridWaterIntensity: 4.54,  // gas + solar; uncertain; national default applied
+    gridEstimated: true,
+    gridSource: 'eesi_default',
   },
   south_africa: {
     label: 'Southern Africa',
@@ -187,6 +261,9 @@ export const REGIONS = {
     multiplier: 0.94,
     water_stress: 'high',
     estimated: true,
+    gridWaterIntensity: 4.54,  // ~80% coal; national default applied
+    gridEstimated: true,
+    gridSource: 'eesi_default',
   },
   north_africa: {
     label: 'North Africa (Egypt, Morocco)',
@@ -194,6 +271,9 @@ export const REGIONS = {
     multiplier: 1.22,
     water_stress: 'high',
     estimated: true,
+    gridWaterIntensity: 4.54,  // gas-dominant; uncertain; national default applied
+    gridEstimated: true,
+    gridSource: 'eesi_default',
   },
   west_africa: {
     label: 'West Africa (Nigeria, Ghana)',
@@ -201,6 +281,9 @@ export const REGIONS = {
     multiplier: 1.11,
     water_stress: 'moderate_to_high',
     estimated: true,
+    gridWaterIntensity: 4.54,  // mixed; uncertain; national default applied
+    gridEstimated: true,
+    gridSource: 'eesi_default',
   },
 
   // Asia
@@ -210,6 +293,9 @@ export const REGIONS = {
     multiplier: 1.11,
     water_stress: 'high',
     estimated: false,
+    gridWaterIntensity: 4.54,  // ~70% coal; national default applied
+    gridEstimated: true,
+    gridSource: 'eesi_default',
   },
   singapore: {
     label: 'Southeast Asia (Singapore)',
@@ -217,6 +303,9 @@ export const REGIONS = {
     multiplier: 0.11,
     water_stress: 'managed',
     estimated: false,
+    gridWaterIntensity: 4.54,  // ~95% gas; uncertain; national default applied
+    gridEstimated: true,
+    gridSource: 'eesi_default',
   },
   southeast_asia: {
     label: 'Southeast Asia (Indonesia, Thailand)',
@@ -224,6 +313,9 @@ export const REGIONS = {
     multiplier: 1.0,
     water_stress: 'moderate',
     estimated: true,
+    gridWaterIntensity: 4.54,  // coal + gas mix; uncertain; national default applied
+    gridEstimated: true,
+    gridSource: 'eesi_default',
   },
   china_east: {
     label: 'East Asia (China — coastal)',
@@ -231,6 +323,9 @@ export const REGIONS = {
     multiplier: 0.78,
     water_stress: 'moderate',
     estimated: true,
+    gridWaterIntensity: 3.18,  // ~30% renewable (hydro + wind + solar); rest coal
+    gridEstimated: true,
+    gridSource: 'eesi_default',
   },
   china_west: {
     label: 'East Asia (China — inland)',
@@ -238,6 +333,9 @@ export const REGIONS = {
     multiplier: 1.17,
     water_stress: 'high',
     estimated: true,
+    gridWaterIntensity: 4.09,  // ~10% renewable; coal-dominant
+    gridEstimated: true,
+    gridSource: 'eesi_default',
   },
   japan: {
     label: 'East Asia (Japan)',
@@ -245,6 +343,9 @@ export const REGIONS = {
     multiplier: 0.50,
     water_stress: 'low',
     estimated: true,
+    gridWaterIntensity: 3.63,  // ~20% renewable; nuclear + gas + coal
+    gridEstimated: true,
+    gridSource: 'eesi_default',
   },
   south_korea: {
     label: 'East Asia (South Korea)',
@@ -252,6 +353,9 @@ export const REGIONS = {
     multiplier: 0.56,
     water_stress: 'low_to_moderate',
     estimated: true,
+    gridWaterIntensity: 4.09,  // ~10% renewable; nuclear + coal + gas
+    gridEstimated: true,
+    gridSource: 'eesi_default',
   },
 
   // Oceania
@@ -261,6 +365,9 @@ export const REGIONS = {
     multiplier: 0.83,
     water_stress: 'moderate_to_high',
     estimated: true,
+    gridWaterIntensity: 3.18,  // ~30% renewable (solar + wind); coal + gas
+    gridEstimated: true,
+    gridSource: 'eesi_default',
   },
   new_zealand: {
     label: 'New Zealand',
@@ -268,10 +375,14 @@ export const REGIONS = {
     multiplier: 0.33,
     water_stress: 'low',
     estimated: true,
+    gridWaterIntensity: 0.91,  // ~80% hydro + geothermal + wind
+    gridEstimated: true,
+    gridSource: 'eesi_default',
   },
 };
 
 const DEFAULT_WUE = 1.8;
+const DEFAULT_GRID_WATER_INTENSITY = 4.54; // L/kWh, US national default (EESI 2023)
 
 // Comparisons library
 const COMPARISONS = [
@@ -335,9 +446,10 @@ function findRegionalWueOverride(regionKey, referenceData) {
  * defaults silently — the calculator must never break because reference data
  * is unavailable.
  *
- * Optional `water_per_kwh_override`: force a specific water-per-kWh value
- * (used by calculatePowerSourceVariants to run the same activity against
- * every power source in the reference data).
+ * Optional `water_per_kwh_override`: force a specific grid water intensity
+ * value (used by calculatePowerSourceVariants to run the same activity
+ * against every power source in the reference data). Overrides only the
+ * grid portion — site WUE stays constant.
  */
 export function recalculate({
   activity_kwh,
@@ -360,33 +472,50 @@ export function recalculate({
   const device_kwh = device.kwh * duration_hours;
   const total_kwh = base_kwh + device_kwh;
 
-  let wue = region.wue;
+  // --- Site water (direct cooling at the data center) ---
+  let siteWue = region.wue;
   let wue_source = 'hardcoded';
-  if (water_per_kwh_override != null && Number.isFinite(Number(water_per_kwh_override))) {
-    wue = Number(water_per_kwh_override);
-    wue_source = 'override';
-  } else if (reference_data) {
+  if (reference_data) {
     const override = findRegionalWueOverride(region_key, reference_data);
     if (override) {
-      wue = override.value;
+      siteWue = override.value;
       wue_source = 'reference_data';
     }
   }
 
-  const water_liters = total_kwh * wue;
-  const water_ml = water_liters * 1000;
+  // --- Grid water (indirect, from electricity generation) ---
+  let gridWaterIntensity = region.gridWaterIntensity ?? DEFAULT_GRID_WATER_INTENSITY;
+  let gridSource = region.gridSource || 'eesi_default';
+  if (water_per_kwh_override != null && Number.isFinite(Number(water_per_kwh_override))) {
+    gridWaterIntensity = Number(water_per_kwh_override);
+    gridSource = 'override';
+  }
+
+  // --- Combined water calculation ---
+  const siteWater_liters = total_kwh * siteWue;
+  const gridWater_liters = total_kwh * gridWaterIntensity;
+  const totalWater_liters = siteWater_liters + gridWater_liters;
+  const water_ml = totalWater_liters * 1000;
+  const siteWater_mL = siteWater_liters * 1000;
+  const gridWater_mL = gridWater_liters * 1000;
 
   const comp = getComparison(water_ml);
 
   return {
-    water_ml,
+    water_ml,           // total (site + grid) — headline number
+    siteWater_mL,       // site cooling water only
+    gridWater_mL,       // grid (power generation) water only
+    totalWater_mL: water_ml,  // alias for clarity
     water_display: formatWater(water_ml),
     comparison: comp.text,
     comparison_icon: comp.icon,
     total_kwh,
     base_kwh,
     device_kwh,
-    wue,
+    wue: siteWue,       // site WUE (L/kWh) — kept as 'wue' for backward compat
+    gridWaterIntensity, // grid water intensity (L/kWh)
+    gridSource,
+    gridEstimated: water_per_kwh_override != null ? false : (region.gridEstimated ?? true),
     wue_source,
     region_label: region.label,
     water_stress: region.water_stress,
@@ -478,9 +607,15 @@ export function recalculateConfidence(originalFactors, overrides = {}) {
   for (const [key, original] of Object.entries(originalFactors)) {
     const override = overrides[key];
     if (override !== undefined) {
-      const met = override;
-      const points = met ? maxPoints[key] : 0;
-      factors[key] = { ...original, met, points, detail: original.detail };
+      const met = override === 'partial' ? true : override;
+      // 'partial' gives half credit (e.g. site-specific WUE but estimated grid water)
+      const points = override === 'partial'
+        ? Math.round(maxPoints[key] / 2)
+        : (met ? maxPoints[key] : 0);
+      const detail = override === 'partial'
+        ? (original.detail || '') + ' (grid water uses national default — partial credit)'
+        : original.detail;
+      factors[key] = { ...original, met, points, detail };
     } else {
       factors[key] = { ...original };
     }
@@ -631,6 +766,12 @@ export function buildEstimatedConfidence({ similarTo, deviceMeasured = false }) 
 
 /**
  * Calculate meta water cost from token count.
+ *
+ * DESIGN DECISION: Meta-cost stays site-only (WUE × energy). The daily
+ * water bottle tracks direct cooling water, not grid-generation water.
+ * This keeps the bottle metric comparable across sessions and avoids
+ * inflating the "cost of using this tool" with upstream grid water that
+ * the user has no control over.
  */
 export function calculateMetaWater(totalTokens, wue = DEFAULT_WUE) {
   const wh = totalTokens * 0.14 / 1000;
