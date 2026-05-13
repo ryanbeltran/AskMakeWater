@@ -39,13 +39,15 @@
         "id": "trg_2025",
         "title": "Carbon Footprint of Digital Activities Study",
         "institution": "TRG Datacenters",
-        "year": 2025
+        "year": 2025,
+        "url": "https://www.trgdatacenters.com/resource/what-is-driving-data-center-sustainability-today/"
       },
       {
         "id": "google_env_2024",
         "title": "Google Environmental Report 2024",
         "institution": "Google / Alphabet",
-        "year": 2024
+        "year": 2024,
+        "url": "https://sustainability.google/reports/google-2025-environmental-report/"
       },
       {
         "id": "microsoft_sustainability",

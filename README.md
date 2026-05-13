@@ -204,6 +204,33 @@ This project is in early development. If you'd like to help:
 <!-- CHANGELOG:START -->
 ## What's New
 
+### v1.8.0 — 2026-05-13
+Polish: clickable sources, shared footer, sticky footer layout.
+- All 11 sources in the Additional Sources section on /sources are now clickable links that open the original paper or report in a new tab, with external-link icons
+- Shared SiteFooter component used across all pages — consistent MakeWater attribution, version tag, and feedback link everywhere
+- Sticky footer layout via PageLayout wrapper — footer pins to the bottom of the viewport on short-content pages and flows naturally on long ones
+- Removed redundant 'For Educators' link from the homepage footer (already in the top nav)
+- Added missing canonical URLs for Google Environmental Report 2024 and TRG Datacenters 2025 in the reference data
+
+### v1.7.0 — 2026-05-13
+Unified navigation, operator class and cooling technology controls, and hidden Recent Searches.
+- Shared site header across all pages — About, Sources, For Educators — with active-page highlighting and mobile hamburger menu
+- New Advanced controls on every result: set the operator class (AWS, Azure, Google Cloud, Meta, enterprise, crypto mining) and cooling technology (evaporative, air-cooled, liquid, hybrid, dry) to override the default site WUE
+- Auto-detection of cloud providers: queries about Netflix apply AWS WUE, ChatGPT applies Azure WUE, YouTube applies Google Cloud WUE, and so on
+- Recent Searches hidden from the public homepage to keep the interface clean
+
+### v1.6.0 — 2026-05-13
+Indirect grid water added to every estimate — the headline number now includes water consumed by power plants.
+- Total water cost now includes both site water (direct cooling) and grid water (power generation) — every result shows the split
+- 40 regions updated with grid water intensity values based on EESI 2023 analysis of LBNL/EIA data, scaled by each region's renewable energy fraction
+- US national default grid water intensity: 4.54 L/kWh; Texas-specific value from UT COMPASS 2025: 3.63 L/kWh
+- Calculation chain in the interactive breakdown shows the full site + grid decomposition with labeled sources
+
+### v1.5.0 — 2026-05-13
+Five new reference sources and expanded FAQ content.
+- Added EESI 2023 water-energy nexus analysis, UT Austin COMPASS 2025 Texas grid study, SourceMaterial/Guardian Amazon investigation, Kairos Fellowship Google water research, and Amazon 2024 Sustainability Report to the sources page
+- Updated FAQ entries on hyperscaler water use, location impact, and the project's own AI usage to reflect the new site + grid breakdown and operator class features
+
 ### v1.4.0 — 2026-04-14
 Reference data system, AI-powered ingestion, and a new power source bar chart on every result.
 - New 'Same activity, different power source' chart on every result — re-runs the calculation against every published power source (solar, wind, natural gas, coal, nuclear, hydro, US grid mix) and shows a horizontal bar chart from lowest to highest water cost, with the US grid mix baseline outlined for reference
@@ -217,29 +244,6 @@ Reference data system, AI-powered ingestion, and a new power source bar chart on
 - New 'General Estimate' tier: queries like 'uploading a file to Google Drive', 'running a 60-watt light bulb', or 'charging my Tesla' now return calculated water costs based on AI-estimated wattage instead of bouncing as off-topic — if it uses electricity, we estimate it
 - Off-catalog queries are logged for admin review with a built-in correction form, and the admin suggestions panel generates catalog snippets that can be copied directly into the verified activity list
 - App footer now shows the current version and commit SHA so you can always see exactly which build is live
-
-### v1.3.0 — 2026-04-14
-Result-anchored chat, smarter follow-ups, and a repositioned donate button.
-- Conversations now center on your first result — up to 5 follow-up messages per session before a gentle reset
-- Follow-up chips 'Try a different device' and 'Change region' open the existing breakdown dropdowns instead of sending new messages (so Recent Searches stays clean)
-- 'Compare with another activity' chip opens a fresh comparison form
-- Classifier carries prior context so relative questions like 'what about on a laptop?' just work
-- Donate button moved to the right edge, 3/4 of the way up, as a vertical pill
-
-### v1.2.1 — 2026-04-14
-Simplified the result card by removing redundant refinement questions.
-- Removed the separate refinement questions block — the device and region dropdowns in the breakdown already cover the same ground
-
-### v1.2.0 — 2026-04-14
-New floating geometric background and off-catalog activities now return real results.
-- Added floating geometric shapes and accent circles to the background, inspired by makewater.org
-- Off-catalog digital activities (LinkedIn, Spotify, Twitch, WhatsApp, Disney+, Reddit, etc.) now map to the closest matching activity with a clearly labeled 'approximate match' notice, instead of returning a text-only fallback
-- New eval tests and 'off_catalog_digital' category in the admin dashboard to track approximation accuracy
-
-### v1.1.0 — 2026-04-13
-Ask about two things at once and see them side-by-side.
-- Multi-activity comparison mode: ask 'What costs more, an hour of Netflix or an hour of Zoom?' and get a single comparison table
-- Supports up to 5 items per comparison with shared narrative context
 <!-- CHANGELOG:END -->
 
 ---

@@ -1,26 +1,11 @@
 import { Link } from 'react-router-dom';
 import EmailSignup from '../components/EmailSignup';
+import PageLayout from '../components/PageLayout';
 
 export default function EducatorsPage() {
   return (
-    <div className="min-h-screen bg-[#fafafa]">
-      <header className="border-b border-gray-200 bg-white">
-        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 no-underline">
-            <span className="font-bold text-mw-base tracking-tight text-lg">
-              ask <span className="text-mw-water">makewater</span>
-            </span>
-          </Link>
-          <Link
-            to="/"
-            className="text-xs px-3 py-1.5 border border-gray-200 text-gray-600 rounded-lg font-medium hover:border-mw-water hover:text-mw-water transition-colors no-underline"
-          >
-            Try the calculator
-          </Link>
-        </div>
-      </header>
-
-      <main className="max-w-3xl mx-auto px-4 py-12">
+    <PageLayout>
+      <div className="max-w-3xl mx-auto px-4 py-12">
         <div className="text-center mb-10">
           <span className="inline-block text-[10px] font-bold uppercase tracking-widest text-mw-water bg-mw-water-light px-3 py-1 rounded-full mb-4">
             Coming Soon
@@ -91,19 +76,7 @@ export default function EducatorsPage() {
             </li>
           </ul>
         </div>
-      </main>
-
-      <footer className="border-t border-gray-100 bg-white/80 mt-8">
-        <div className="max-w-3xl mx-auto px-4 py-3 text-center">
-          <p className="text-[11px] text-gray-400">
-            A project of{' '}
-            <a href="https://www.makewater.org" target="_blank" rel="noopener noreferrer" className="text-mw-water hover:underline">
-              MakeWater
-            </a>
-            {' '}501(c)(3)
-          </p>
-        </div>
-      </footer>
-    </div>
+      </div>
+    </PageLayout>
   );
 }

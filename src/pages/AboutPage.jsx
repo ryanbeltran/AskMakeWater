@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import changelog from '../data/changelog.json';
+import PageLayout from '../components/PageLayout';
 
 const TABS = [
   { id: 'why', label: 'Why We Built This' },
@@ -93,21 +94,8 @@ export default function AboutPage() {
   const [tab, setTab] = useState(initialTab);
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#fafafa]">
-      <header className="flex-shrink-0 border-b border-gray-200 bg-white">
-        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 no-underline">
-            <span className="font-bold text-mw-base tracking-tight text-lg">
-              ask <span className="text-mw-water">makewater</span>
-            </span>
-          </Link>
-          <div className="flex items-center gap-3">
-          </div>
-        </div>
-      </header>
-
-      <main className="flex-1 overflow-y-auto">
-        <div className="max-w-2xl mx-auto px-4 py-8">
+    <PageLayout>
+      <div className="max-w-2xl mx-auto px-4 py-8">
           {/* Tab bar */}
           <div className="flex gap-1 bg-gray-100 rounded-xl p-1 mb-8">
             {TABS.map(t => (
@@ -217,9 +205,8 @@ export default function AboutPage() {
               <PromptContent />
             </div>
           )}
-        </div>
-      </main>
-    </div>
+      </div>
+    </PageLayout>
   );
 }
 

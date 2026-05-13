@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { getReferenceData, getPowerSourceWaterPerKwh } from '../data/referenceDataClient';
+import PageLayout from '../components/PageLayout';
 
 const CATEGORY_LABELS = {
   power_sources: 'Power Sources',
@@ -87,25 +87,37 @@ export default function SourcesPage() {
 
   const totalDatasets = categories.reduce((sum, c) => sum + c.datasets.length, 0);
 
-  return (
-    <div className="min-h-screen bg-[#fafafa]">
-      <header className="border-b border-gray-200 bg-white">
-        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 no-underline">
-            <span className="font-bold text-mw-base tracking-tight text-lg">
-              ask <span className="text-mw-water">makewater</span>
-            </span>
-          </Link>
-          <Link
-            to="/"
-            className="text-xs px-3 py-1.5 border border-gray-200 text-gray-600 rounded-lg font-medium hover:border-mw-water hover:text-mw-water transition-colors no-underline"
-          >
-            Back to calculator
-          </Link>
-        </div>
-      </header>
+  // Canonical URLs for the Additional Sources section
+  const SOURCE_URLS = {
+    ren_2023: 'https://arxiv.org/abs/2304.03271',
+    iea_2020: 'https://www.iea.org/commentaries/the-carbon-footprint-of-streaming-video-fact-checking-the-headlines',
+    lbnl_2024: 'https://eta-publications.lbl.gov/sites/default/files/2024-12/lbnl-2024-united-states-data-center-energy-usage-report_1.pdf',
+    greenspector_2023: 'https://greenspector.com/en/what-is-the-environmental-footprint-of-social-networking-applications-2023/',
+    macknick_2012: 'https://docs.nrel.gov/docs/fy11osti/50900.pdf',
+    ut_compass_2025: 'https://compass.beg.utexas.edu/assets/publications/Water_Requirements_for_DC_White_Paper.pdf',
+    eia_crypto_2024: 'https://www.eia.gov/todayinenergy/detail.php?id=61364',
+    amazon_2024: 'https://sustainability.aboutamazon.com/2024-amazon-sustainability-report.pdf',
+    uptime_tiers: 'https://www.coresite.com/blog/breaking-down-data-center-tiers-classifications',
+    google_env_2025: 'https://sustainability.google/reports/google-2025-environmental-report/',
+    eesi_2023: 'https://www.eesi.org/papers/view/fact-sheet-energy-and-water',
+  };
 
-      <main className="max-w-3xl mx-auto px-4 py-8 space-y-8">
+  function SourceLink({ id, children }) {
+    const url = SOURCE_URLS[id];
+    if (!url) return <>{children}</>;
+    return (
+      <a href={url} target="_blank" rel="noopener noreferrer" className="text-mw-water hover:underline inline-flex items-center gap-1">
+        {children}
+        <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+        </svg>
+      </a>
+    );
+  }
+
+  return (
+    <PageLayout>
+      <div className="max-w-3xl mx-auto px-4 py-8 space-y-8">
         <div>
           <h1 className="text-2xl font-bold text-mw-base tracking-tight mb-2">Our Data Sources</h1>
           <p className="text-sm text-gray-500 leading-relaxed max-w-xl">
@@ -149,63 +161,63 @@ export default function SourcesPage() {
           </p>
           <ul className="text-xs text-gray-600 space-y-2 list-none">
             <li className="bg-white border border-gray-200 rounded-lg p-3">
-              <strong>Ren, S. et al.</strong> "Making AI Less Thirsty: Uncovering and Addressing the Secret Water Footprint of AI Models."
+              <strong>Ren, S. et al.</strong>{' '}
+              <SourceLink id="ren_2023">"Making AI Less Thirsty: Uncovering and Addressing the Secret Water Footprint of AI Models."</SourceLink>{' '}
               University of California Riverside, 2023.
             </li>
             <li className="bg-white border border-gray-200 rounded-lg p-3">
-              <strong>International Energy Agency (IEA).</strong> "The Carbon Footprint of Streaming Video: Fact-Checking the Headlines." 2020.
+              <strong>International Energy Agency (IEA).</strong>{' '}
+              <SourceLink id="iea_2020">"The Carbon Footprint of Streaming Video: Fact-Checking the Headlines."</SourceLink>{' '}
+              2020.
             </li>
             <li className="bg-white border border-gray-200 rounded-lg p-3">
-              <strong>Shehabi, A. et al.</strong> "United States Data Center Energy Usage Report." Lawrence Berkeley National Laboratory, 2024.
+              <strong>Shehabi, A. et al.</strong>{' '}
+              <SourceLink id="lbnl_2024">"United States Data Center Energy Usage Report."</SourceLink>{' '}
+              Lawrence Berkeley National Laboratory, 2024.
             </li>
             <li className="bg-white border border-gray-200 rounded-lg p-3">
-              <strong>Greenspector.</strong> "Environmental Impact of Social Media Apps." 2023.
+              <strong>Greenspector.</strong>{' '}
+              <SourceLink id="greenspector_2023">"Environmental Impact of Social Media Apps."</SourceLink>{' '}
+              2023.
             </li>
             <li className="bg-white border border-gray-200 rounded-lg p-3">
-              <strong>Macknick, J. et al.</strong> "Operational Water Consumption and Withdrawal Factors for Electricity Generating Technologies."
+              <strong>Macknick, J. et al.</strong>{' '}
+              <SourceLink id="macknick_2012">"Operational Water Consumption and Withdrawal Factors for Electricity Generating Technologies."</SourceLink>{' '}
               NREL/TP-6A20-50900, 2012.
             </li>
             <li className="bg-white border border-gray-200 rounded-lg p-3">
-              <strong>University of Texas at Austin.</strong> "COMPASS: A Model for COst and Metrics of Power And Storage Systems."
+              <strong>University of Texas at Austin.</strong>{' '}
+              <SourceLink id="ut_compass_2025">"COMPASS: A Model for COst and Metrics of Power And Storage Systems."</SourceLink>{' '}
               UT Energy Institute, 2025.
             </li>
             <li className="bg-white border border-gray-200 rounded-lg p-3">
-              <strong>U.S. Energy Information Administration (EIA).</strong> "Cryptocurrency Mining and the U.S. Electric Grid." 2024.
+              <strong>U.S. Energy Information Administration (EIA).</strong>{' '}
+              <SourceLink id="eia_crypto_2024">"Cryptocurrency Mining and the U.S. Electric Grid."</SourceLink>{' '}
+              2024.
             </li>
             <li className="bg-white border border-gray-200 rounded-lg p-3">
-              <strong>Amazon.</strong> "Amazon Sustainability Report 2024 — Water Stewardship."
+              <strong>Amazon.</strong>{' '}
+              <SourceLink id="amazon_2024">"Amazon Sustainability Report 2024 — Water Stewardship."</SourceLink>{' '}
               Covering 2023 performance: 53% progress toward 2030 water-positive pledge (4.3 billion liters replenished).
             </li>
             <li className="bg-white border border-gray-200 rounded-lg p-3">
-              <strong>Uptime Institute.</strong> "Tier Standard: Topology — Tier I through IV."
+              <strong>Uptime Institute.</strong>{' '}
+              <SourceLink id="uptime_tiers">"Tier Standard: Topology — Tier I through IV."</SourceLink>{' '}
               Industry standard for data center redundancy and availability classification.
             </li>
             <li className="bg-white border border-gray-200 rounded-lg p-3">
-              <strong>Google.</strong> "Google 2025 Environmental Report."
+              <strong>Google.</strong>{' '}
+              <SourceLink id="google_env_2025">"Google 2025 Environmental Report."</SourceLink>{' '}
               Gemini energy-per-query data and sustainability reporting, 2025.
             </li>
             <li className="bg-white border border-gray-200 rounded-lg p-3">
-              <strong>Environmental and Energy Study Institute (EESI).</strong> "Energy and Water Use in the U.S. Electric Grid."
+              <strong>Environmental and Energy Study Institute (EESI).</strong>{' '}
+              <SourceLink id="eesi_2023">"Energy and Water Use in the U.S. Electric Grid."</SourceLink>{' '}
               Analysis of LBNL and EIA data. National average: 4.54 L/kWh grid water consumption, 2023.
             </li>
           </ul>
         </div>
-      </main>
-
-      <footer className="border-t border-gray-100 bg-white/80 mt-8">
-        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
-          <p className="text-[11px] text-gray-400">
-            A project of{' '}
-            <a href="https://www.makewater.org" target="_blank" rel="noopener noreferrer" className="text-mw-water hover:underline">
-              MakeWater
-            </a>
-            {' '}501(c)(3)
-          </p>
-          <Link to="/about?tab=methodology" className="text-[11px] text-gray-500 hover:text-mw-water no-underline">
-            Full methodology
-          </Link>
-        </div>
-      </footer>
-    </div>
+      </div>
+    </PageLayout>
   );
 }

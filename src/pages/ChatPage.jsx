@@ -4,13 +4,13 @@ import ChatMessage from '../components/ChatMessage';
 import LoadingIndicator from '../components/LoadingIndicator';
 import WaterDrop from '../components/WaterDrop';
 import WaterBottle from '../components/WaterBottle';
-import RecentSearches from '../components/RecentSearches';
+import SiteHeader from '../components/SiteHeader';
+import SiteFooter from '../components/SiteFooter';
 import { calculateMetaWater } from '../data/recalculate';
 import TokenCalculator from '../components/TokenCalculator';
 import GeometricBackground from '../components/GeometricBackground';
 import SuggestCorrectionForm from '../components/SuggestCorrectionForm';
 import EmailSignup from '../components/EmailSignup';
-import pkg from '../../package.json';
 
 const EXAMPLE_QUESTIONS = [
   'How much water does it cost to stream Netflix for 2 hours?',
@@ -266,33 +266,7 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
     <div className="flex flex-col h-screen bg-[#fafafa] relative">
       <GeometricBackground />
 
-      {/* Header */}
-      <header className="flex-shrink-0 border-b border-gray-200 bg-white relative z-10">
-        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
-          <button
-            onClick={resetConversation}
-            className="flex items-center gap-2 cursor-pointer bg-transparent border-none p-0"
-          >
-            <span className="font-bold text-mw-base tracking-tight text-lg">
-              ask <span className="text-mw-water">makewater</span>
-            </span>
-          </button>
-          <div className="flex items-center gap-2">
-            <Link
-              to="/sources"
-              className="text-xs px-3 py-1.5 border border-gray-200 text-gray-600 rounded-lg font-medium hover:border-mw-water hover:text-mw-water transition-colors no-underline"
-            >
-              Sources
-            </Link>
-            <Link
-              to="/about"
-              className="text-xs px-3 py-1.5 border border-gray-200 text-gray-600 rounded-lg font-medium hover:border-mw-water hover:text-mw-water transition-colors no-underline"
-            >
-              FAQ
-            </Link>
-          </div>
-        </div>
-      </header>
+      <SiteHeader onLogoClick={resetConversation} />
 
       {/* Messages area */}
       <main className="flex-1 overflow-y-auto relative z-10">
@@ -376,10 +350,7 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
                 )}
               </div>
 
-              {/* Recent searches */}
-              {recentQueries.length > 0 && (
-                <RecentSearches queries={recentQueries} onQueryClick={(q) => sendMessage(q, { isRepeat: true })} />
-              )}
+              {/* RecentSearches intentionally hidden from public view */}
 
             </div>
           ) : (
@@ -461,36 +432,7 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
       {/* Correction modal */}
       <SuggestCorrectionForm target={correctionTarget} onClose={() => setCorrectionTarget(null)} />
 
-      {/* Footer */}
-      <footer className="flex-shrink-0 border-t border-gray-100 bg-white/80 relative z-10">
-        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
-          <p className="text-[11px] text-gray-400">
-            A project of{' '}
-            <a href="https://www.makewater.org" target="_blank" rel="noopener noreferrer" className="text-mw-water hover:underline">
-              MakeWater
-            </a>
-            {' '}501(c)(3)
-            <span className="ml-2 text-gray-300">· v{pkg.version} ({__APP_COMMIT__})</span>
-          </p>
-          <div className="flex items-center gap-2">
-            <Link
-              to="/educators"
-              className="text-[11px] text-gray-500 hover:text-mw-water transition-colors no-underline"
-            >
-              For Educators
-            </Link>
-            <span className="text-gray-300">·</span>
-            <a
-              href="https://www.makewater.org/contact"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[11px] text-gray-500 hover:text-mw-water transition-colors no-underline"
-            >
-              Feedback
-            </a>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

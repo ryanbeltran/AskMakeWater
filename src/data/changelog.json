@@ -1,5 +1,48 @@
 [
   {
+    "date": "2026-05-13",
+    "version": "v1.8.0",
+    "summary": "Polish: clickable sources, shared footer, sticky footer layout.",
+    "changes": [
+      "All 11 sources in the Additional Sources section on /sources are now clickable links that open the original paper or report in a new tab, with external-link icons",
+      "Shared SiteFooter component used across all pages — consistent MakeWater attribution, version tag, and feedback link everywhere",
+      "Sticky footer layout via PageLayout wrapper — footer pins to the bottom of the viewport on short-content pages and flows naturally on long ones",
+      "Removed redundant 'For Educators' link from the homepage footer (already in the top nav)",
+      "Added missing canonical URLs for Google Environmental Report 2024 and TRG Datacenters 2025 in the reference data"
+    ]
+  },
+  {
+    "date": "2026-05-13",
+    "version": "v1.7.0",
+    "summary": "Unified navigation, operator class and cooling technology controls, and hidden Recent Searches.",
+    "changes": [
+      "Shared site header across all pages — About, Sources, For Educators — with active-page highlighting and mobile hamburger menu",
+      "New Advanced controls on every result: set the operator class (AWS, Azure, Google Cloud, Meta, enterprise, crypto mining) and cooling technology (evaporative, air-cooled, liquid, hybrid, dry) to override the default site WUE",
+      "Auto-detection of cloud providers: queries about Netflix apply AWS WUE, ChatGPT applies Azure WUE, YouTube applies Google Cloud WUE, and so on",
+      "Recent Searches hidden from the public homepage to keep the interface clean"
+    ]
+  },
+  {
+    "date": "2026-05-13",
+    "version": "v1.6.0",
+    "summary": "Indirect grid water added to every estimate — the headline number now includes water consumed by power plants.",
+    "changes": [
+      "Total water cost now includes both site water (direct cooling) and grid water (power generation) — every result shows the split",
+      "40 regions updated with grid water intensity values based on EESI 2023 analysis of LBNL/EIA data, scaled by each region's renewable energy fraction",
+      "US national default grid water intensity: 4.54 L/kWh; Texas-specific value from UT COMPASS 2025: 3.63 L/kWh",
+      "Calculation chain in the interactive breakdown shows the full site + grid decomposition with labeled sources"
+    ]
+  },
+  {
+    "date": "2026-05-13",
+    "version": "v1.5.0",
+    "summary": "Five new reference sources and expanded FAQ content.",
+    "changes": [
+      "Added EESI 2023 water-energy nexus analysis, UT Austin COMPASS 2025 Texas grid study, SourceMaterial/Guardian Amazon investigation, Kairos Fellowship Google water research, and Amazon 2024 Sustainability Report to the sources page",
+      "Updated FAQ entries on hyperscaler water use, location impact, and the project's own AI usage to reflect the new site + grid breakdown and operator class features"
+    ]
+  },
+  {
     "date": "2026-04-14",
     "version": "v1.4.0",
     "summary": "Reference data system, AI-powered ingestion, and a new power source bar chart on every result.",
