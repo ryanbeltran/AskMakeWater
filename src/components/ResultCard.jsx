@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import WaterDrop from './WaterDrop';
 import InteractiveBreakdown from './InteractiveBreakdown';
+import ImproveModal from './ImproveModal';
 import { recalculate, recalculateConfidence, calculateMetaWater, formatWater, DEVICES, REGIONS, OPERATOR_CLASSES, COOLING_TECH, calculatePowerSourceVariants } from '../data/recalculate';
 import AIModelComparison from './AIModelComparison';
 import PowerSourceChart from './PowerSourceChart';
@@ -312,6 +313,8 @@ export default function ResultCard({ data, query, model, usage, onTier2Submit, f
   const [expanded, setExpanded] = useState(false);
   const breakdownRef = useRef(null);
   const [highlightedField, setHighlightedField] = useState(null);
+  const [improveOpen, setImproveOpen] = useState(false);
+  const [researchBadge, setResearchBadge] = useState(null); // 'pending_review' after accepting
 
   // Respond to focusRequest: expand breakdown, scroll to the target field,
   // focus its native control, and briefly highlight it.
@@ -469,6 +472,19 @@ export default function ResultCard({ data, query, model, usage, onTier2Submit, f
     if (result) setTier2Narrative(result);
   }
 
+  // Handle research acceptance — update the card with researched values
+  function handleResearchAccept(research) {
+    onParamChange({
+      activity_kwh: research.kwh_per_hour,
+      duration: research.duration_hours,
+      duration_hours: research.duration_hours,
+    });
+    setResearchBadge('pending_review');
+  }
+
+  // Show "Improve this estimate" CTA when confidence < 40%
+  const showImproveCTA = (data.general_energy || data.estimated) && displayConfidence < 40;
+
   return (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
       {/* Main result */}
@@ -569,6 +585,31 @@ export default function ResultCard({ data, query, model, usage, onTier2Submit, f
           <ConfidenceBar score={displayConfidence} />
         </div>
 
+        {/* Research badge */}
+        {researchBadge && (
+          <div className="mt-2">
+            <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider px-2 py-1 rounded-full bg-blue-100 text-blue-800 border border-blue-200">
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Researched (pending review)
+            </span>
+          </div>
+        )}
+
+        {/* Improve this estimate CTA */}
+        {showImproveCTA && !researchBadge && (
+          <button
+            onClick={() => setImproveOpen(true)}
+            className="mt-3 w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-mw-water border border-mw-water/30 rounded-xl hover:bg-mw-water-light transition-colors cursor-pointer bg-transparent"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            Improve this estimate
+          </button>
+        )}
+
         {/* Operator class auto-detection note */}
         {initialParams.operator_class && initialParams.operator_class !== 'industry_typical' && OPERATOR_CLASSES[initialParams.operator_class] && (
           <p className="mt-2 text-[11px] text-gray-500 bg-gray-50 rounded-lg px-3 py-1.5">
@@ -663,6 +704,14 @@ export default function ResultCard({ data, query, model, usage, onTier2Submit, f
           </div>
         )}
       </div>
+
+      {/* Deep-research modal */}
+      <ImproveModal
+        open={improveOpen}
+        onClose={() => setImproveOpen(false)}
+        data={data}
+        onAccept={handleResearchAccept}
+      />
     </div>
   );
 }

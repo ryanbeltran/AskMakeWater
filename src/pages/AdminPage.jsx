@@ -134,6 +134,171 @@ function parseClassifyJson(text) {
   }
 }
 
+/**
+ * Research Drafts panel — lists drafts from deep-research CTA.
+ * Admin can view, promote to attributed/cited, or reject.
+ */
+function ResearchDraftsPanel() {
+  const [drafts, setDrafts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [actionMsg, setActionMsg] = useState(null);
+
+  useEffect(() => {
+    loadDrafts();
+  }, []);
+
+  async function loadDrafts() {
+    setLoading(true);
+    try {
+      const password = sessionStorage.getItem('admin_password') || '';
+      const res = await fetch('/api/research?action=list_drafts', {
+        headers: { 'X-Admin-Password': password },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setDrafts(data.drafts || []);
+      }
+    } catch {
+      // silent fail
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handlePromote(draftId, visibility) {
+    const password = sessionStorage.getItem('admin_password') || '';
+    try {
+      const res = await fetch('/api/research', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Password': password },
+        body: JSON.stringify({ draft_id: draftId, action: 'promote', visibility }),
+      });
+      if (res.ok) {
+        setActionMsg(`Promoted to ${visibility}`);
+        setTimeout(() => setActionMsg(null), 3000);
+        loadDrafts();
+      }
+    } catch { /* silent */ }
+  }
+
+  async function handleReject(draftId) {
+    const password = sessionStorage.getItem('admin_password') || '';
+    try {
+      const res = await fetch('/api/research', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Password': password },
+        body: JSON.stringify({ draft_id: draftId, action: 'reject' }),
+      });
+      if (res.ok) {
+        setActionMsg('Draft rejected');
+        setTimeout(() => setActionMsg(null), 3000);
+        loadDrafts();
+      }
+    } catch { /* silent */ }
+  }
+
+  if (loading) return <p className="text-sm text-gray-400">Loading research drafts...</p>;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-semibold text-gray-800 uppercase tracking-wider">
+          Research Drafts ({drafts.length})
+        </h2>
+        <button
+          onClick={loadDrafts}
+          className="text-xs px-3 py-1.5 border border-gray-200 text-gray-600 rounded-lg hover:border-mw-water hover:text-mw-water transition-colors cursor-pointer"
+        >
+          Refresh
+        </button>
+      </div>
+
+      {actionMsg && (
+        <div className="bg-green-50 border border-green-200 rounded-lg px-3 py-2 text-xs text-green-700">
+          {actionMsg}
+        </div>
+      )}
+
+      {drafts.length === 0 && (
+        <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center">
+          <p className="text-sm text-gray-500">No research drafts pending review.</p>
+          <p className="text-xs text-gray-400 mt-1">
+            Drafts appear here when users run the "Improve this estimate" research flow on low-confidence results.
+          </p>
+        </div>
+      )}
+
+      {drafts.map(draft => (
+        <div key={draft.id} className="bg-white rounded-2xl border border-gray-200 p-5 space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-gray-800">{draft.activity_query}</h3>
+            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+              Pending Review
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 text-xs">
+            <div className="bg-gray-50 rounded-lg p-2.5">
+              <p className="text-gray-400 font-medium">Original</p>
+              <p className="text-gray-700 mt-1">{draft.current_watts || '?'}W × {formatDraftDuration(draft.current_duration_seconds)}</p>
+            </div>
+            <div className="bg-blue-50 rounded-lg p-2.5">
+              <p className="text-blue-600 font-medium">Researched</p>
+              <p className="text-gray-700 mt-1">{draft.proposed_watts}W × {formatDraftDuration(draft.proposed_duration_seconds)}</p>
+            </div>
+          </div>
+
+          {draft.confidence_note && (
+            <p className="text-xs text-gray-500 italic">{draft.confidence_note}</p>
+          )}
+
+          {draft.sources && draft.sources.length > 0 && (
+            <div className="space-y-1">
+              {draft.sources.map((src, i) => (
+                <a key={i} href={src.url} target="_blank" rel="noopener noreferrer" className="block text-xs text-mw-water hover:underline truncate">
+                  {src.title} ({src.publisher}, {src.year})
+                </a>
+              ))}
+            </div>
+          )}
+
+          <p className="text-[10px] text-gray-400">
+            Submitted {new Date(draft.submitted_at).toLocaleString()}
+          </p>
+
+          <div className="flex gap-2 pt-2 border-t border-gray-100">
+            <button
+              onClick={() => handlePromote(draft.id, 'attributed')}
+              className="text-xs px-3 py-1.5 bg-yellow-100 text-yellow-800 border border-yellow-200 rounded-lg hover:bg-yellow-200 cursor-pointer"
+            >
+              Promote → Attributed
+            </button>
+            <button
+              onClick={() => handlePromote(draft.id, 'cited')}
+              className="text-xs px-3 py-1.5 bg-green-100 text-green-800 border border-green-200 rounded-lg hover:bg-green-200 cursor-pointer"
+            >
+              Promote → Cited
+            </button>
+            <button
+              onClick={() => handleReject(draft.id)}
+              className="text-xs px-3 py-1.5 bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 cursor-pointer ml-auto"
+            >
+              Reject
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function formatDraftDuration(sec) {
+  if (!sec) return '?';
+  if (sec < 60) return `${Math.round(sec)}s`;
+  if (sec < 3600) return `${Math.round(sec / 60)}min`;
+  return `${(sec / 3600).toFixed(1)}h`;
+}
+
 function PasswordGate({ onAuth }) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -617,6 +782,7 @@ export default function AdminPage() {
               { id: 'suggestions', label: 'Suggestions' },
               { id: 'reference', label: 'Reference Data' },
               { id: 'ingest', label: 'Data Ingestion' },
+              { id: 'research', label: 'Research Drafts' },
             ].map(tab => (
               <button
                 key={tab.id}
@@ -637,6 +803,7 @@ export default function AdminPage() {
           {activeTab === 'ingest' && (
             <DataIngestionPanel onSaved={() => setReferenceRefreshKey(k => k + 1)} />
           )}
+          {activeTab === 'research' && <ResearchDraftsPanel />}
 
           {activeTab === 'eval' && <>
 

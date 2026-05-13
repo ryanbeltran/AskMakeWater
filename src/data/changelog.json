@@ -1,6 +1,18 @@
 [
   {
     "date": "2026-05-13",
+    "version": "v1.9.0",
+    "summary": "Deep-research CTA for low-confidence results + duration extraction fix.",
+    "changes": [
+      "New 'Improve this estimate' button on low-confidence (<40%) results — uses Sonnet + web search to find published wattage data, with side-by-side comparison, source cards, and edit-before-saving flow",
+      "Rate-limited deep research: 3 runs per IP per day, 20 site-wide, with upfront water charging and refund on failure",
+      "Confidence tiering: Quick estimates capped at 15%, researched results at 50%, admin-verified data at 60%+",
+      "Admin Research Drafts tab: review, promote (attributed/cited), or reject AI-researched energy data before it enters the reference dataset",
+      "Fixed duration extraction bug: short-duration activities (elevator per floor, microwave per use) no longer default to 1 hour — seconds and minutes are properly converted to fractional hours"
+    ]
+  },
+  {
+    "date": "2026-05-13",
     "version": "v1.8.0",
     "summary": "Polish: clickable sources, shared footer, sticky footer layout.",
     "changes": [

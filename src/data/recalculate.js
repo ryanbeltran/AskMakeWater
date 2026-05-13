@@ -681,7 +681,13 @@ export function recalculateConfidence(originalFactors, overrides = {}) {
 // 0.1 W = tiny IoT sensor. 50000 W = industrial equipment / EV fast charging.
 export const GENERAL_WATTS_MIN = 0.1;
 export const GENERAL_WATTS_MAX = 50000;
-export const GENERAL_CONFIDENCE_CAP = 45;
+// Confidence tier caps:
+//   Quick estimate (general_energy, AI wattage only): 15%
+//   Researched (Sonnet + sources, draft in Redis):    50%
+//   Verified (admin promoted to attributed/cited):    60%+
+export const GENERAL_CONFIDENCE_CAP = 15;
+export const RESEARCHED_CONFIDENCE_CAP = 50;
+export const VERIFIED_CONFIDENCE_FLOOR = 60;
 
 /**
  * Clamp an AI-supplied wattage value to a realistic range.

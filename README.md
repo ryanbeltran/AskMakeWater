@@ -204,6 +204,14 @@ This project is in early development. If you'd like to help:
 <!-- CHANGELOG:START -->
 ## What's New
 
+### v1.9.0 — 2026-05-13
+Deep-research CTA for low-confidence results + duration extraction fix.
+- New 'Improve this estimate' button on low-confidence (<40%) results — uses Sonnet + web search to find published wattage data, with side-by-side comparison, source cards, and edit-before-saving flow
+- Rate-limited deep research: 3 runs per IP per day, 20 site-wide, with upfront water charging and refund on failure
+- Confidence tiering: Quick estimates capped at 15%, researched results at 50%, admin-verified data at 60%+
+- Admin Research Drafts tab: review, promote (attributed/cited), or reject AI-researched energy data before it enters the reference dataset
+- Fixed duration extraction bug: short-duration activities (elevator per floor, microwave per use) no longer default to 1 hour — seconds and minutes are properly converted to fractional hours
+
 ### v1.8.0 — 2026-05-13
 Polish: clickable sources, shared footer, sticky footer layout.
 - All 11 sources in the Additional Sources section on /sources are now clickable links that open the original paper or report in a new tab, with external-link icons
@@ -230,20 +238,6 @@ Indirect grid water added to every estimate — the headline number now includes
 Five new reference sources and expanded FAQ content.
 - Added EESI 2023 water-energy nexus analysis, UT Austin COMPASS 2025 Texas grid study, SourceMaterial/Guardian Amazon investigation, Kairos Fellowship Google water research, and Amazon 2024 Sustainability Report to the sources page
 - Updated FAQ entries on hyperscaler water use, location impact, and the project's own AI usage to reflect the new site + grid breakdown and operator class features
-
-### v1.4.0 — 2026-04-14
-Reference data system, AI-powered ingestion, and a new power source bar chart on every result.
-- New 'Same activity, different power source' chart on every result — re-runs the calculation against every published power source (solar, wind, natural gas, coal, nuclear, hydro, US grid mix) and shows a horizontal bar chart from lowest to highest water cost, with the US grid mix baseline outlined for reference
-- Reference data system: power sources, cooling methods, and regional WUE values are now stored in a live database and feed directly into public calculations — with graceful fallback to hardcoded defaults if the data is unavailable
-- Regional WUE values from reference data automatically override hardcoded defaults when a published source exists for the selected region
-- New admin Reference Data tab: list, filter, edit, delete, and export any dataset. Prominent red/yellow/green visibility banners show at a glance which entries need citations, which are private sources, and which are public-linked
-- New admin Data Ingestion tab: paste raw content from a paper, report, or webpage, and Claude Sonnet extracts quantitative data points + citation fields for review. Supports all 8 source types (research paper, government report, industry whitepaper, conference, personal communication, proprietary, website, dataset)
-- Citation completeness now automatically determines whether a dataset is 'cited' (public link available), 'attributed' (private source), or 'draft' (needs citation) — and drafts are never used in public calculations
-- Unit normalization helpers: gallons↔liters, MWh↔kWh, BTU↔kWh, and compound 'liters per kWh' conversions shown inline during ingestion review
-- Reference data is cached for 5 minutes server-side and fetched once per browser session for fast subsequent calculations
-- New 'General Estimate' tier: queries like 'uploading a file to Google Drive', 'running a 60-watt light bulb', or 'charging my Tesla' now return calculated water costs based on AI-estimated wattage instead of bouncing as off-topic — if it uses electricity, we estimate it
-- Off-catalog queries are logged for admin review with a built-in correction form, and the admin suggestions panel generates catalog snippets that can be copied directly into the verified activity list
-- App footer now shows the current version and commit SHA so you can always see exactly which build is live
 <!-- CHANGELOG:END -->
 
 ---

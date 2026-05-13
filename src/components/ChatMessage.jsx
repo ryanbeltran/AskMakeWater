@@ -102,11 +102,18 @@ function buildGeneralEnergyResult(classification) {
   // watts → kWh per hour
   const kwhPerHour = clamped.value / 1000;
 
-  // For non-hour units we still treat the wattage as hourly power draw and
-  // set duration_hours to the numeric duration (e.g. 2 microwave cycles = 2 h
-  // would be wrong, so when unit != hours we default duration_hours to duration
-  // as a simple per-unit energy cost). The model should prefer hours when possible.
-  const durationHours = durationUnit === 'hours' ? duration : duration;
+  // Convert duration to fractional hours for the math engine. The wattage is
+  // a power draw (W → kWh/hour), so duration must be in hours regardless of
+  // what unit the classifier returned.
+  let durationHours;
+  if (durationUnit === 'seconds') {
+    durationHours = duration / 3600;
+  } else if (durationUnit === 'minutes') {
+    durationHours = duration / 60;
+  } else {
+    // hours, or any other unit (treat as hours for safety)
+    durationHours = duration;
+  }
 
   const calculated = recalculate({
     activity_kwh: kwhPerHour,
@@ -123,7 +130,7 @@ function buildGeneralEnergyResult(classification) {
 
   return {
     activity_id: 'general_energy',
-    activity: `${name}${duration > 1 ? ` (${duration} ${durationUnit})` : ''}`,
+    activity: `${name}${duration > 1 || durationUnit !== 'hours' ? ` (${duration} ${durationUnit})` : ''}`,
     duration: `${duration} ${durationUnit}`,
     water_ml: calculated.water_ml,
     water_display: calculated.water_display,
@@ -137,6 +144,9 @@ function buildGeneralEnergyResult(classification) {
       duration: durationHours,
       duration_unit: 'hours',
       duration_hours: durationHours,
+      // Preserve original classifier values for display
+      original_duration: duration,
+      original_duration_unit: durationUnit,
       device_key: deviceKey,
       region_key: regionKey,
     },

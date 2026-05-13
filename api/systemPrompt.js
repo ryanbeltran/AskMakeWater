@@ -107,7 +107,13 @@ RULES:
    - energy_source: a short phrase describing WHAT is consuming the power (e.g. "LED bulb", "Microwave oven magnetron + control board", "Level 2 EV charger", "Home Wi-Fi router + cable modem", "Cloud data center ingest pipeline").
    - confidence_note: 1-2 sentences explaining WHY you chose that wattage, grounded in typical device ratings or published energy-use data. Never guess blindly.
    - suggested_activity_name: short human-readable label (e.g. "Charging a Tesla Model 3", not "tesla_charge").
-   - duration/duration_unit: extract from the query (default 1 hour). For instantaneous actions ("send an email"), assume 1 as the count and set duration_unit appropriately.
+   - duration/duration_unit: extract from the query (default 1 hour). Use the CORRECT time unit — this is critical for short-duration events:
+     * "per floor" (elevator ride) → duration: 12, duration_unit: "seconds"
+     * "per use" (microwave, blender) → duration: 3, duration_unit: "minutes"
+     * "per search" / "per query" → duration: 0.5, duration_unit: "seconds"
+     * "per cycle" (dishwasher, washer) → duration: 60, duration_unit: "minutes"
+     * "for an hour" → duration: 1, duration_unit: "hours"
+     DO NOT default short-duration events to 1 hour. Use "seconds" or "minutes" when the activity clearly takes less than an hour. The math engine converts to hours internally.
    - device_hint: default to "none" unless the user explicitly references a personal device as the energy source. The estimated_watts already includes whatever is running.
    - Still respect rule 5 for region_hint.
    - Use general_energy freely. It is ALWAYS preferable to rejecting a query with "unknown".

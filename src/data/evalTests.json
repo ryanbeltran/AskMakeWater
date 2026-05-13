@@ -475,5 +475,22 @@
     "expected_show_model_comparison": true,
     "category": "operator_detection",
     "notes": "Generic AI query — no specific service, operator_class should be null"
+  },
+  {
+    "id": 56,
+    "question": "How much water does an elevator use per floor?",
+    "expected_activity_id": "general_energy",
+    "expected_duration_unit": "seconds",
+    "category": "general_energy",
+    "notes": "Short-duration event — elevator ride is ~10-15 seconds per floor. Duration must NOT default to 1 hour. Expected result: ~100-300 mL, not 47 L."
+  },
+  {
+    "id": 57,
+    "question": "Water cost of microwaving something for 2 minutes?",
+    "expected_activity_id": "general_energy",
+    "expected_duration": 2,
+    "expected_duration_unit": "minutes",
+    "category": "general_energy",
+    "notes": "Short-duration event — 2 minutes of microwave, should use minutes not hours"
   }
 ]
