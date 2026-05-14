@@ -165,11 +165,21 @@ export default function ChatPage() {
         body: JSON.stringify({ messages: newMessages }),
       });
 
-      const data = await res.json();
-
       if (!res.ok) {
-        throw new Error(data.error || 'Something went wrong');
+        let errorMsg = `Server error (${res.status})`;
+        try {
+          const errData = await res.json();
+          errorMsg = errData.error || errorMsg;
+        } catch {
+          // Non-JSON error response (e.g. proxy failure)
+          if (res.status === 502 || res.status === 504) {
+            errorMsg = 'API server is not running. Start it with: npm run dev:full';
+          }
+        }
+        throw new Error(errorMsg);
       }
+
+      const data = await res.json();
 
       const assistantMessage = { role: 'assistant', content: data.text };
       const msgIndex = newMessages.length;
@@ -216,8 +226,12 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
         }),
       });
 
+      if (!res.ok) {
+        let msg = `Server error (${res.status})`;
+        try { const e = await res.json(); msg = e.error || msg; } catch {}
+        throw new Error(msg);
+      }
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
 
       return data.text.replace(/<classify>[\s\S]*?<\/classify>/, '').replace(/<water-result>[\s\S]*?<\/water-result>/, '').trim();
     } catch (err) {
