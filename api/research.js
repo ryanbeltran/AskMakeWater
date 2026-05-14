@@ -15,9 +15,18 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 import { Redis } from '@upstash/redis';
-import { calculateMetaWater } from '../src/data/recalculate.js';
+
+// Vercel serverless function config — Sonnet + web_search needs up to 60s
+export const config = { maxDuration: 60 };
 
 const RESEARCH_MODEL = 'claude-sonnet-4-20250514';
+
+// Inline from recalculate.js to avoid importing the full frontend module
+// (which pulls in water_cost_reference_data.json and breaks Vercel bundling)
+function calculateMetaWater(totalTokens, wue = 1.8) {
+  const wh = totalTokens * 0.14 / 1000;
+  return wh * wue;
+}
 const PER_IP_CAP = 3;
 const SITE_CAP = parseInt(process.env.RESEARCH_DAILY_CAP || '20', 10);
 // Estimated water cost for a Sonnet + web_search call (~5000 tokens)
@@ -118,6 +127,20 @@ async function saveDraft(r, draft) {
 }
 
 export default async function handler(req, res) {
+  try {
+    return await handleRequest(req, res);
+  } catch (err) {
+    // Top-level safety net — ensures Vercel NEVER returns a non-JSON response
+    console.error('Unhandled research API error:', err);
+    return res.status(500).json({
+      success: false,
+      error: err.message || 'Unexpected server error',
+      water_cost_ml: 0,
+    });
+  }
+}
+
+async function handleRequest(req, res) {
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, OPTIONS');

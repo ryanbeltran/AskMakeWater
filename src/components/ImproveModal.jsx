@@ -36,8 +36,8 @@ export default function ImproveModal({ open, onClose, data, onAccept }) {
     setError(null);
     setPhaseIdx(0);
     fetch('/api/research')
-      .then(r => r.json())
-      .then(setBudget)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => d && setBudget(d))
       .catch(() => setBudget(null));
   }, [open]);
 
@@ -75,7 +75,14 @@ export default function ImproveModal({ open, onClose, data, onAccept }) {
         }),
       });
 
-      const json = await res.json();
+      let json;
+      try {
+        json = await res.json();
+      } catch {
+        setError(res.status === 504 ? 'Research timed out — try again' : `Server error (${res.status})`);
+        setStage('confirm');
+        return;
+      }
 
       if (!res.ok || !json.success) {
         setError(json.message || json.error || 'Research failed');
