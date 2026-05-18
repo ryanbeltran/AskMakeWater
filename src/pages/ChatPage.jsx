@@ -11,6 +11,7 @@ import TokenCalculator from '../components/TokenCalculator';
 import GeometricBackground from '../components/GeometricBackground';
 import SuggestCorrectionForm from '../components/SuggestCorrectionForm';
 import EmailSignup from '../components/EmailSignup';
+import { computeChangelogTotals, getFoundingCost, formatWater, formatEnergy } from '../data/changelogCost';
 
 const EXAMPLE_QUESTIONS = [
   'How much water does it cost to stream Netflix for 2 hours?',
@@ -302,6 +303,27 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
                   <WaterBottle currentMl={bottleMl} maxMl={bottleMax} />
                 </div>
               </div>
+
+              {/* Build-cost transparency widget */}
+              {(() => {
+                const totals = computeChangelogTotals();
+                const founding = getFoundingCost();
+                return (
+                  <div className="w-full max-w-lg mb-6 text-left">
+                    <div className="bg-white/80 border border-gray-100 rounded-xl px-4 py-3 text-[11px] text-gray-400 leading-relaxed space-y-0.5">
+                      <p>
+                        Launching v1.0.0 cost {formatWater(founding?.water_ml || 0)} of water and {formatEnergy(founding?.energy_wh || 0)}.
+                      </p>
+                      <p>
+                        {totals.versions} updates later, cumulative build cost: {formatWater(totals.totalWaterMl)} water, {formatEnergy(totals.totalEnergyWh)}.
+                      </p>
+                      <p>
+                        <a href="/about?tab=new" className="text-mw-water hover:underline">See per-version costs →</a>
+                      </p>
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Input area */}
               <div className="w-full max-w-lg mb-8 bg-white rounded-2xl border border-gray-200 p-4 shadow-sm">

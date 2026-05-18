@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import changelog from '../data/changelog.json';
+import { computeCostFromTokens, formatTokens, formatWater, formatEnergy } from '../data/changelogCost';
 import PageLayout from '../components/PageLayout';
 
 const TABS = [
@@ -192,6 +193,14 @@ export default function AboutPage() {
                         </li>
                       ))}
                     </ul>
+                    {entry.tokens_estimated > 0 && (() => {
+                      const cost = computeCostFromTokens(entry.tokens_estimated);
+                      return (
+                        <p className="text-[11px] text-gray-400 mt-3 pt-2 border-t border-gray-100">
+                          Built with {formatTokens(cost.tokens)} tokens · {formatWater(cost.water_ml)} water · {formatEnergy(cost.energy_wh)}
+                        </p>
+                      );
+                    })()}
                   </div>
                 ))}
               </div>
