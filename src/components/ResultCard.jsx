@@ -3,6 +3,8 @@ import WaterDrop from './WaterDrop';
 import InteractiveBreakdown from './InteractiveBreakdown';
 import ImproveModal from './ImproveModal';
 import WaterTrace from './WaterTrace';
+import JourneyMap from './JourneyMap';
+import useJourneyContext from '../hooks/useJourneyContext';
 import { recalculate, recalculateConfidence, calculateMetaWater, formatWater, DEVICES, REGIONS, OPERATOR_CLASSES, COOLING_TECH, calculatePowerSourceVariants } from '../data/recalculate';
 import AIModelComparison from './AIModelComparison';
 import PowerSourceChart from './PowerSourceChart';
@@ -317,29 +319,8 @@ export default function ResultCard({ data, query, model, usage, onTier2Submit, f
   const [improveOpen, setImproveOpen] = useState(false);
   const [researchBadge, setResearchBadge] = useState(null); // 'pending_review' after accepting
   const [traceOpen, setTraceOpen] = useState(false);
-
-  // Read user ZIP for dual-region water math (synced with WaterTrace's localStorage)
-  const [userZip, setUserZip] = useState(() => {
-    try { return localStorage.getItem('mw_user_zip') || ''; }
-    catch { return ''; }
-  });
-
-  // Listen for ZIP changes from WaterTrace (which writes to localStorage)
-  useEffect(() => {
-    function handleStorage(e) {
-      if (e.key === 'mw_user_zip') setUserZip(e.newValue || '');
-    }
-    window.addEventListener('storage', handleStorage);
-    // Also poll on trace open/close since same-tab storage events don't fire
-    const checkZip = () => {
-      try {
-        const z = localStorage.getItem('mw_user_zip') || '';
-        setUserZip(prev => prev !== z ? z : prev);
-      } catch { /* ignore */ }
-    };
-    const interval = setInterval(checkZip, 1000);
-    return () => { window.removeEventListener('storage', handleStorage); clearInterval(interval); };
-  }, []);
+  const [zipEditing, setZipEditing] = useState(false);
+  const [zipInput, setZipInput] = useState('');
 
   // Respond to focusRequest: expand breakdown, scroll to the target field,
   // focus its native control, and briefly highlight it.
@@ -393,6 +374,15 @@ export default function ResultCard({ data, query, model, usage, onTier2Submit, f
     return () => { cancelled = true; };
   }, []);
 
+  // Shared journey context — drives the always-visible map + WaterTrace detail
+  const journeyCtx = useJourneyContext({
+    activityId: data.activity_id || null,
+    activityName: data.activity || 'digital activity',
+    activityKwh: params.activity_kwh,
+    durationHours: params.duration_hours,
+    operatorClass: params.operator_class,
+  });
+
   const onParamChange = useCallback((updates) => {
     setParams(prev => {
       const next = { ...prev, ...updates };
@@ -418,10 +408,10 @@ export default function ResultCard({ data, query, model, usage, onTier2Submit, f
       reference_data: referenceData,
       operator_class: params.operator_class,
       cooling_tech: params.cooling_tech,
-      user_zip: userZip || null,
+      user_zip: journeyCtx.effectiveZip || null,
       activity_id: data.activity_id || null,
     });
-  }, [params, referenceData, userZip, data.activity_id]);
+  }, [params, referenceData, journeyCtx.effectiveZip, data.activity_id]);
 
   // Power source variants — one recalculation per published power source in
   // the reference data. Empty array until reference data loads or if no
@@ -646,11 +636,108 @@ export default function ResultCard({ data, query, model, usage, onTier2Submit, f
         )}
       </div>
 
-      {/* Power source comparison — collapsed by default, only renders when
-          cited/attributed power_sources reference data is available */}
-      <PowerSourceChart variants={powerSourceVariants} />
+      {/* ─── Always-visible JourneyMap ─── */}
+      {journeyCtx.journey && (
+        <div className="border-t border-gray-100 px-5 pt-4 pb-2 space-y-2">
+          <JourneyMap
+            activityEmoji={journeyCtx.journey.emoji}
+            activityName={data.activity || 'digital activity'}
+            userCity={`${journeyCtx.journey.loc.city}, ${journeyCtx.journey.loc.state}`}
+            userUtility={journeyCtx.journey.userGrid.primary_utilities[0] || journeyCtx.journey.loc.primary_utility}
+            userWatershed={journeyCtx.journey.loc.watershed_hint}
+            userDroughtLabel={journeyCtx.journey.userDrought?.label?.toLowerCase() || ''}
+            dcLabel={`Data center · ${journeyCtx.journey.dcRegion.operator_label} ${journeyCtx.journey.dcRegion.region_id}`}
+            dcTypeLabel="Data center"
+            dcCity={`${journeyCtx.journey.dcRegion.city}, ${journeyCtx.journey.dcRegion.state}`}
+            dcUtility={journeyCtx.journey.dcGrid.primary_utilities[0] || 'Grid operator'}
+            dcWaterUtility={journeyCtx.journey.dcRegion.water_utility}
+            dcWatershed={journeyCtx.journey.dcRegion.watershed_name}
+            dcDroughtLabel={journeyCtx.journey.dcDrought?.label?.toLowerCase() || ''}
+            distanceMi={journeyCtx.journey.dcRegion.distance_mi}
+          />
 
-      {/* Water & Energy Journey View — real per-ZIP data */}
+          {/* ZIP context line */}
+          {journeyCtx.isDefault ? (
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-xs text-gray-500">
+                📍 Showing default location: <strong className="text-gray-700">{journeyCtx.journey.loc.city}, {journeyCtx.journey.loc.state} {journeyCtx.effectiveZip}</strong>
+              </span>
+              <span className="text-xs text-gray-400">—</span>
+              <button
+                onClick={() => { setZipEditing(true); setZipInput(''); }}
+                className="text-sm font-semibold text-mw-water hover:text-mw-water-dark transition-colors cursor-pointer flex items-center gap-0.5"
+              >
+                Enter your ZIP
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-xs text-gray-500">
+                📍 Showing for your location: <strong className="text-gray-700">{journeyCtx.journey.loc.city}, {journeyCtx.journey.loc.state} {journeyCtx.effectiveZip}</strong>
+              </span>
+              <span className="text-xs text-gray-400">—</span>
+              <button
+                onClick={() => { setZipEditing(true); setZipInput(''); }}
+                className="text-xs text-mw-water hover:underline cursor-pointer"
+              >
+                change
+              </button>
+            </div>
+          )}
+
+          {/* Inline ZIP editor */}
+          {zipEditing && (
+            <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-3 shadow-sm">
+              <p className="text-sm font-medium text-gray-700">Enter your US ZIP code to personalize</p>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const val = zipInput.trim();
+                  if (/^\d{5}$/.test(val)) {
+                    journeyCtx.setZip(val);
+                    setZipEditing(false);
+                    setZipInput('');
+                  }
+                }}
+                className="flex items-center gap-2"
+              >
+                <input
+                  type="text"
+                  value={zipInput}
+                  onChange={(e) => setZipInput(e.target.value)}
+                  placeholder="e.g. 78228"
+                  maxLength={5}
+                  pattern="\d{5}"
+                  autoFocus
+                  className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-mw-water focus:ring-1 focus:ring-mw-water/30 min-w-0 max-w-[160px]"
+                />
+                <button
+                  type="submit"
+                  disabled={!/^\d{5}$/.test(zipInput.trim())}
+                  className="px-4 py-2 text-sm font-medium text-white bg-mw-water rounded-lg hover:bg-mw-water-dark disabled:opacity-40 transition-colors cursor-pointer disabled:cursor-not-allowed"
+                >
+                  Update
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setZipEditing(false)}
+                  className="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+              </form>
+              <p className="text-[10px] text-gray-400">
+                Stored locally on your device only — not sent to any server
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ─── Water & Energy Journey Detail (expandable) ─── */}
       <div className="border-t border-gray-100">
         <button
           onClick={() => setTraceOpen(!traceOpen)}
@@ -660,7 +747,7 @@ export default function ResultCard({ data, query, model, usage, onTier2Submit, f
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l5.447 2.724A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
             </svg>
-            Water &amp; Energy Journey View
+            Data path &amp; resource breakdown
           </span>
           <svg
             className={`w-4 h-4 transition-transform duration-200 ${traceOpen ? 'rotate-180' : ''}`}
@@ -675,15 +762,17 @@ export default function ResultCard({ data, query, model, usage, onTier2Submit, f
         {traceOpen && (
           <div className="px-5 pb-5">
             <WaterTrace
-              activityId={data.activity_id || null}
+              journey={journeyCtx.journey}
+              effectiveZip={journeyCtx.effectiveZip}
+              formatGridMix={journeyCtx.formatGridMix}
               activityName={data.activity || 'digital activity'}
-              activityKwh={params.activity_kwh}
-              durationHours={params.duration_hours}
-              operatorClass={params.operator_class}
             />
           </div>
         )}
       </div>
+
+      {/* Power source comparison — collapsed by default */}
+      <PowerSourceChart variants={powerSourceVariants} />
 
       {/* Expandable breakdown */}
       <div className="border-t border-gray-100">
@@ -738,7 +827,6 @@ export default function ResultCard({ data, query, model, usage, onTier2Submit, f
                 primaryActivityId={data.activity_id}
               />
             )}
-
 
             {/* Tier 2 response */}
             {tier2Narrative && (

@@ -204,6 +204,15 @@ This project is in early development. If you'd like to help:
 <!-- CHANGELOG:START -->
 ## What's New
 
+### v1.13.0 — 2026-05-18
+Map promoted to always-visible on every result with default ZIP fallback.
+- The journey map now appears on every result right below the confidence meter — no expansion needed
+- Detailed data breakdown (data path and resource cards) moved to the first expandable, so the visual and the data live together
+- First-time visitors see a Dallas, TX default location with a prominent invite to enter their own ZIP for personalized routing
+- ZIP context line under the map clearly labels whether you're seeing the default or your own location, with inline ZIP editor
+- Journey computation extracted to shared useJourneyContext hook so the map and the expanded detail always show consistent data
+- Expandable reordered: journey detail first, then power source comparison, then calculation breakdown
+
 ### v1.12.0 — 2026-05-18
 Journey View wired to real per-ZIP data with interactive map.
 - The Water & Energy Journey View now uses your actual ZIP code to compute real data: local utility, grid mix, nearest data center for the service you queried, drought/stress conditions, and haversine distance
@@ -237,14 +246,6 @@ Deep-research CTA for low-confidence results + duration extraction fix.
 - Confidence tiering: Quick estimates capped at 15%, researched results at 50%, admin-verified data at 60%+
 - Admin Research Drafts tab: review, promote (attributed/cited), or reject AI-researched energy data before it enters the reference dataset
 - Fixed duration extraction bug: short-duration activities (elevator per floor, microwave per use) no longer default to 1 hour — seconds and minutes are properly converted to fractional hours
-
-### v1.8.0 — 2026-05-13
-Polish: clickable sources, shared footer, sticky footer layout.
-- All 11 sources in the Additional Sources section on /sources are now clickable links that open the original paper or report in a new tab, with external-link icons
-- Shared SiteFooter component used across all pages — consistent MakeWater attribution, version tag, and feedback link everywhere
-- Sticky footer layout via PageLayout wrapper — footer pins to the bottom of the viewport on short-content pages and flows naturally on long ones
-- Removed redundant 'For Educators' link from the homepage footer (already in the top nav)
-- Added missing canonical URLs for Google Environmental Report 2024 and TRG Datacenters 2025 in the reference data
 <!-- CHANGELOG:END -->
 
 ---
