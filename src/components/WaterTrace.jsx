@@ -6,6 +6,7 @@
  */
 import { useState } from 'react';
 import TraceStage from './TraceStage';
+import WaterSourceBadges from './WaterSourceBadges';
 
 // ─── Hardcoded preview journey data ───────────────────────────────
 // San Antonio 78201 → Netflix HD streaming (1 hr, 65" OLED TV)
@@ -78,10 +79,13 @@ const TRACE_STAGES = [
     title: 'Power source',
     subtitle: 'Dominion Energy Virginia',
     facts: [
-      '33% gas, 31% nuclear, 12% coal, 6% solar, 18% other',
-      'Grid water intensity ~4.2 L/kWh',
       'Renewable PPA claims ≠ delivered grid power',
     ],
+    // Energy source parallel display data (rendered as compact two-line block)
+    energyDisplay: {
+      gridMix: '33% gas, 31% nuclear, 12% coal, 6% solar, 18% other',
+      waterIntensity: '4.2 L/kWh',
+    },
     confidence: 'high',
     source: {
       label: 'EIA Form 923 (2024)',
@@ -92,18 +96,35 @@ const TRACE_STAGES = [
     // Stage 5: Water source
     // Loudoun Water serves Loudoun County VA (data center corridor).
     // Source: Potomac River watershed.
-    // Drought status from US Drought Monitor.
+    // Drought status from US Drought Monitor (D0 — Abnormally dry, 2026-05-13).
+    // Aqueduct baseline stress: Medium-high (WRI Aqueduct 4.0).
     // Projection: Loudoun County Comprehensive Plan projects data
     // center water demand tripling by 2030.
     stageNumber: 5,
     title: 'Water source',
     subtitle: 'Loudoun Water · Potomac watershed',
     facts: [
-      'Drought status: D0 abnormally dry',
       'Data center water demand projected to triple by 2030',
       'Returns to Potomac — different watershed than viewer\'s',
       'Your water comes from Edwards Aquifer; data center pulls from Potomac',
     ],
+    // Standardized water condition badges (rendered via WaterSourceBadges)
+    waterData: {
+      drought: {
+        code: 'D0',
+        label: 'Abnormally dry',
+        color_key: 'yellow',
+        regional_addendum: null,
+        source: 'US Drought Monitor',
+        as_of: '2026-05-13',
+      },
+      stress: {
+        code: 'Medium-high',
+        label: 'Moderate stress',
+        color_key: 'light-orange',
+        source: 'WRI Aqueduct',
+      },
+    },
     confidence: 'high',
     source: {
       label: 'US Drought Monitor',
@@ -186,14 +207,41 @@ export default function WaterTrace() {
             Real per-location routing is coming soon.
           </p>
 
-          {/* 5-stage trace */}
+          {/* 5-stage journey */}
           <div>
             {TRACE_STAGES.map((stage, i) => (
               <TraceStage
                 key={stage.stageNumber}
-                {...stage}
+                stageNumber={stage.stageNumber}
+                title={stage.title}
+                subtitle={stage.subtitle}
+                facts={stage.facts}
+                confidence={stage.confidence}
+                source={stage.source}
                 isLast={i === TRACE_STAGES.length - 1}
-              />
+              >
+                {/* Stage 4: Energy source parallel display */}
+                {stage.energyDisplay && (
+                  <div className="bg-white border border-gray-200 rounded-lg px-3 py-2 space-y-0.5">
+                    <p className="text-[10px] text-gray-500 leading-relaxed">
+                      <span className="font-semibold text-gray-600">Grid mix:</span>{' '}
+                      {stage.energyDisplay.gridMix}
+                    </p>
+                    <p className="text-[10px] text-gray-500 leading-relaxed">
+                      <span className="font-semibold text-gray-600">Water intensity:</span>{' '}
+                      {stage.energyDisplay.waterIntensity}
+                    </p>
+                  </div>
+                )}
+
+                {/* Stage 5: Water source standardized badges */}
+                {stage.waterData && (
+                  <WaterSourceBadges
+                    drought={stage.waterData.drought}
+                    stress={stage.waterData.stress}
+                  />
+                )}
+              </TraceStage>
             ))}
           </div>
 

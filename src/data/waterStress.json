@@ -1,0 +1,134 @@
+{
+  "_meta": {
+    "description": "WRI Aqueduct baseline water stress for US states and major data center counties. Baseline stress reflects long-term structural water availability independent of short-term drought.",
+    "source": "World Resources Institute Aqueduct Water Risk Atlas (https://www.wri.org/aqueduct)",
+    "version": "Aqueduct 4.0 (2023 baseline)",
+    "refresh_cadence": "annual"
+  },
+  "scale": [
+    { "code": "Low", "label": "Low stress", "color_key": "green" },
+    { "code": "Low-medium", "label": "Low-med stress", "color_key": "yellow" },
+    { "code": "Medium-high", "label": "Moderate stress", "color_key": "light-orange" },
+    { "code": "High", "label": "High stress", "color_key": "orange" },
+    { "code": "Extreme", "label": "Extreme stress", "color_key": "red" },
+    { "code": "Arid", "label": "Arid / very low water", "color_key": "dark-red" }
+  ],
+  "counties": {
+    "loudoun_va": {
+      "fips": "51107",
+      "code": "Medium-high",
+      "label": "Moderate stress",
+      "color_key": "light-orange",
+      "notes": "Potomac watershed — competing municipal, agricultural, and DC demand"
+    },
+    "prince_william_va": {
+      "fips": "51153",
+      "code": "Medium-high",
+      "label": "Moderate stress",
+      "color_key": "light-orange"
+    },
+    "fairfax_va": {
+      "fips": "51059",
+      "code": "Medium-high",
+      "label": "Moderate stress",
+      "color_key": "light-orange"
+    },
+    "maricopa_az": {
+      "fips": "04013",
+      "code": "Extreme",
+      "label": "Extreme stress",
+      "color_key": "red",
+      "notes": "Salt River / Colorado River — structural deficit, groundwater depletion"
+    },
+    "bexar_tx": {
+      "fips": "48029",
+      "code": "High",
+      "label": "High stress",
+      "color_key": "orange",
+      "notes": "Edwards Aquifer — sole-source aquifer under Stage 2 restrictions"
+    },
+    "dallas_tx": {
+      "fips": "48113",
+      "code": "Medium-high",
+      "label": "Moderate stress",
+      "color_key": "light-orange"
+    },
+    "santa_clara_ca": {
+      "fips": "06085",
+      "code": "High",
+      "label": "High stress",
+      "color_key": "orange",
+      "notes": "Hetch Hetchy / state water project — drought-sensitive supply"
+    },
+    "deschutes_or": {
+      "fips": "41017",
+      "code": "Low-medium",
+      "label": "Low-med stress",
+      "color_key": "yellow"
+    },
+    "the_dalles_or": {
+      "fips": "41065",
+      "code": "Low",
+      "label": "Low stress",
+      "color_key": "green",
+      "notes": "Columbia River — abundant supply"
+    },
+    "council_bluffs_ia": {
+      "fips": "19155",
+      "code": "Low",
+      "label": "Low stress",
+      "color_key": "green"
+    },
+    "new_albany_oh": {
+      "fips": "39049",
+      "code": "Low",
+      "label": "Low stress",
+      "color_key": "green"
+    },
+    "chicago_il": {
+      "fips": "17031",
+      "code": "Low",
+      "label": "Low stress",
+      "color_key": "green",
+      "notes": "Lake Michigan — abundant Great Lakes supply"
+    },
+    "quincy_wa": {
+      "fips": "53025",
+      "code": "Low-medium",
+      "label": "Low-med stress",
+      "color_key": "yellow",
+      "notes": "Columbia Basin — irrigated agriculture competes"
+    },
+    "elk_grove_ca": {
+      "fips": "06067",
+      "code": "High",
+      "label": "High stress",
+      "color_key": "orange"
+    },
+    "papillion_ne": {
+      "fips": "31153",
+      "code": "Low",
+      "label": "Low stress",
+      "color_key": "green"
+    },
+    "douglas_ga": {
+      "fips": "13097",
+      "code": "Low-medium",
+      "label": "Low-med stress",
+      "color_key": "yellow"
+    }
+  },
+  "states": {
+    "VA": { "code": "Medium-high", "label": "Moderate stress", "color_key": "light-orange" },
+    "TX": { "code": "High", "label": "High stress", "color_key": "orange" },
+    "AZ": { "code": "Extreme", "label": "Extreme stress", "color_key": "red" },
+    "CA": { "code": "High", "label": "High stress", "color_key": "orange" },
+    "OR": { "code": "Low", "label": "Low stress", "color_key": "green" },
+    "WA": { "code": "Low-medium", "label": "Low-med stress", "color_key": "yellow" },
+    "IA": { "code": "Low", "label": "Low stress", "color_key": "green" },
+    "OH": { "code": "Low", "label": "Low stress", "color_key": "green" },
+    "IL": { "code": "Low", "label": "Low stress", "color_key": "green" },
+    "GA": { "code": "Low-medium", "label": "Low-med stress", "color_key": "yellow" },
+    "NE": { "code": "Low", "label": "Low stress", "color_key": "green" }
+  }
+}

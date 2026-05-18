@@ -1,0 +1,220 @@
+{
+  "_meta": {
+    "description": "US Drought Monitor snapshot for major data center counties and state-level rollups. Manual quarterly refresh until Phase 2B automates via USDM API.",
+    "source": "US Drought Monitor (https://droughtmonitor.unl.edu)",
+    "as_of": "2026-05-13",
+    "refresh_cadence": "quarterly manual"
+  },
+  "scale": [
+    { "code": "None", "label": "Normal conditions", "color_key": "green" },
+    { "code": "D0", "label": "Abnormally dry", "color_key": "yellow" },
+    { "code": "D1", "label": "Moderate drought", "color_key": "light-orange" },
+    { "code": "D2", "label": "Severe drought", "color_key": "orange" },
+    { "code": "D3", "label": "Extreme drought", "color_key": "red" },
+    { "code": "D4", "label": "Exceptional drought", "color_key": "dark-red" }
+  ],
+  "counties": {
+    "loudoun_va": {
+      "fips": "51107",
+      "name": "Loudoun County",
+      "state": "VA",
+      "code": "D0",
+      "label": "Abnormally dry",
+      "color_key": "yellow",
+      "as_of": "2026-05-13",
+      "notes": "Data Center Alley — highest DC concentration in US"
+    },
+    "prince_william_va": {
+      "fips": "51153",
+      "name": "Prince William County",
+      "state": "VA",
+      "code": "None",
+      "label": "Normal conditions",
+      "color_key": "green",
+      "as_of": "2026-05-13"
+    },
+    "fairfax_va": {
+      "fips": "51059",
+      "name": "Fairfax County",
+      "state": "VA",
+      "code": "D0",
+      "label": "Abnormally dry",
+      "color_key": "yellow",
+      "as_of": "2026-05-13"
+    },
+    "douglas_ga": {
+      "fips": "13097",
+      "name": "Douglas County",
+      "state": "GA",
+      "code": "None",
+      "label": "Normal conditions",
+      "color_key": "green",
+      "as_of": "2026-05-13",
+      "notes": "Google / Facebook / Microsoft campuses"
+    },
+    "maricopa_az": {
+      "fips": "04013",
+      "name": "Maricopa County",
+      "state": "AZ",
+      "code": "D2",
+      "label": "Severe drought",
+      "color_key": "orange",
+      "as_of": "2026-05-13",
+      "notes": "Phoenix metro — Apple, Microsoft, CyrusOne DCs"
+    },
+    "bexar_tx": {
+      "fips": "48029",
+      "name": "Bexar County",
+      "state": "TX",
+      "code": "D2",
+      "label": "Severe drought",
+      "color_key": "orange",
+      "regional_addendum": "Stage 2",
+      "as_of": "2026-05-13",
+      "notes": "San Antonio — Edwards Aquifer, CPS Energy service territory"
+    },
+    "dallas_tx": {
+      "fips": "48113",
+      "name": "Dallas County",
+      "state": "TX",
+      "code": "D1",
+      "label": "Moderate drought",
+      "color_key": "light-orange",
+      "regional_addendum": "Stage 1",
+      "as_of": "2026-05-13",
+      "notes": "CyrusOne, DataBank, Aligned DCs"
+    },
+    "deschutes_or": {
+      "fips": "41017",
+      "name": "Deschutes County",
+      "state": "OR",
+      "code": "None",
+      "label": "Normal conditions",
+      "color_key": "green",
+      "as_of": "2026-05-13",
+      "notes": "Prineville — Apple, Facebook DCs"
+    },
+    "the_dalles_or": {
+      "fips": "41065",
+      "name": "Wasco County",
+      "state": "OR",
+      "code": "None",
+      "label": "Normal conditions",
+      "color_key": "green",
+      "as_of": "2026-05-13",
+      "notes": "The Dalles — Google DC"
+    },
+    "council_bluffs_ia": {
+      "fips": "19155",
+      "name": "Pottawattamie County",
+      "state": "IA",
+      "code": "None",
+      "label": "Normal conditions",
+      "color_key": "green",
+      "as_of": "2026-05-13",
+      "notes": "Google / Facebook DCs"
+    },
+    "linn_or": {
+      "fips": "41043",
+      "name": "Linn County",
+      "state": "OR",
+      "code": "None",
+      "label": "Normal conditions",
+      "color_key": "green",
+      "as_of": "2026-05-13",
+      "notes": "Facebook DC"
+    },
+    "santa_clara_ca": {
+      "fips": "06085",
+      "name": "Santa Clara County",
+      "state": "CA",
+      "code": "D0",
+      "label": "Abnormally dry",
+      "color_key": "yellow",
+      "as_of": "2026-05-13",
+      "notes": "Silicon Valley — Equinix, CoreSite"
+    },
+    "new_albany_oh": {
+      "fips": "39049",
+      "name": "Franklin County",
+      "state": "OH",
+      "code": "None",
+      "label": "Normal conditions",
+      "color_key": "green",
+      "as_of": "2026-05-13",
+      "notes": "New Albany — AWS, Google, Facebook DCs"
+    },
+    "chicago_il": {
+      "fips": "17031",
+      "name": "Cook County",
+      "state": "IL",
+      "code": "None",
+      "label": "Normal conditions",
+      "color_key": "green",
+      "as_of": "2026-05-13",
+      "notes": "Digital Realty, Equinix, CyrusOne"
+    },
+    "quincy_wa": {
+      "fips": "53025",
+      "name": "Grant County",
+      "state": "WA",
+      "code": "None",
+      "label": "Normal conditions",
+      "color_key": "green",
+      "as_of": "2026-05-13",
+      "notes": "Microsoft, Yahoo DCs — hydro-cooled"
+    },
+    "elk_grove_ca": {
+      "fips": "06067",
+      "name": "Sacramento County",
+      "state": "CA",
+      "code": "D0",
+      "label": "Abnormally dry",
+      "color_key": "yellow",
+      "as_of": "2026-05-13"
+    },
+    "mesa_az": {
+      "fips": "04013",
+      "name": "Maricopa County (Mesa)",
+      "state": "AZ",
+      "code": "D2",
+      "label": "Severe drought",
+      "color_key": "orange",
+      "as_of": "2026-05-13",
+      "notes": "Apple, Google DCs"
+    },
+    "papillion_ne": {
+      "fips": "31153",
+      "name": "Sarpy County",
+      "state": "NE",
+      "code": "None",
+      "label": "Normal conditions",
+      "color_key": "green",
+      "as_of": "2026-05-13",
+      "notes": "Facebook DC"
+    },
+    "north_virginia": {
+      "fips": "51107",
+      "name": "Northern Virginia (aggregate)",
+      "state": "VA",
+      "code": "D0",
+      "label": "Abnormally dry",
+      "color_key": "yellow",
+      "as_of": "2026-05-13",
+      "notes": "AWS, Microsoft, Google — densest DC region globally"
+    }
+  },
+  "states": {
+    "VA": { "code": "D0", "label": "Abnormally dry", "color_key": "yellow" },
+    "TX": { "code": "D2", "label": "Severe drought", "color_key": "orange", "regional_addendum": "Stage 2" },
+    "AZ": { "code": "D2", "label": "Severe drought", "color_key": "orange" },
+    "CA": { "code": "D0", "label": "Abnormally dry", "color_key": "yellow" },
+    "OR": { "code": "None", "label": "Normal conditions", "color_key": "green" },
+    "WA": { "code": "None", "label": "Normal conditions", "color_key": "green" },
+    "IA": { "code": "None", "label": "Normal conditions", "color_key": "green" },
+    "OH": { "code": "None", "label": "Normal conditions", "color_key": "green" },
+    "IL": { "code": "None", "label": "Normal conditions", "color_key": "green" },
+    "GA": { "code": "None", "label": "Normal conditions", "color_key": "green" },
+    "NE": { "code": "None", "label": "Normal conditions", "color_key": "green" }
+  }
+}

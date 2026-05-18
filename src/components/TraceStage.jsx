@@ -12,7 +12,7 @@ const CONFIDENCE_STYLES = {
   'best-guess': { bg: 'bg-gray-100', text: 'text-gray-600',  label: 'Best guess' },
 };
 
-export default function TraceStage({ stageNumber, title, subtitle, facts, confidence, source, isLast }) {
+export default function TraceStage({ stageNumber, title, subtitle, facts, confidence, source, isLast, children }) {
   const pill = CONFIDENCE_STYLES[confidence] || CONFIDENCE_STYLES['best-guess'];
 
   return (
@@ -51,6 +51,9 @@ export default function TraceStage({ stageNumber, title, subtitle, facts, confid
             </li>
           ))}
         </ul>
+
+        {/* Custom content slot (badges, charts, etc.) */}
+        {children && <div className="mb-2">{children}</div>}
 
         {/* Source link */}
         {source && (
