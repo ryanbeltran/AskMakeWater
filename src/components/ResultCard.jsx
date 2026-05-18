@@ -625,8 +625,7 @@ export default function ResultCard({ data, query, model, usage, onTier2Submit, f
           cited/attributed power_sources reference data is available */}
       <PowerSourceChart variants={powerSourceVariants} />
 
-      {/* Water & Energy Journey View — preview release, hardcoded example data.
-          Next release will wire to real per-ZIP lookups. */}
+      {/* Water & Energy Journey View — real per-ZIP data */}
       <div className="border-t border-gray-100">
         <button
           onClick={() => setTraceOpen(!traceOpen)}
@@ -637,9 +636,6 @@ export default function ResultCard({ data, query, model, usage, onTier2Submit, f
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l5.447 2.724A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
             </svg>
             Water &amp; Energy Journey View
-            <span className="inline-flex items-center text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
-              Preview
-            </span>
           </span>
           <svg
             className={`w-4 h-4 transition-transform duration-200 ${traceOpen ? 'rotate-180' : ''}`}
@@ -653,7 +649,13 @@ export default function ResultCard({ data, query, model, usage, onTier2Submit, f
 
         {traceOpen && (
           <div className="px-5 pb-5">
-            <WaterTrace />
+            <WaterTrace
+              activityId={data.activity_id || null}
+              activityName={data.activity || 'digital activity'}
+              activityKwh={params.activity_kwh}
+              durationHours={params.duration_hours}
+              operatorClass={params.operator_class}
+            />
           </div>
         )}
       </div>

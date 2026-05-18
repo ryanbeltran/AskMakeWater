@@ -1,17 +1,30 @@
 /**
  * WaterTrace — Water & Energy Journey View content.
  *
- * Phase 2A-2: Two-section layout with two-sided sub-entries.
- *   Section 1 "The data path" — You ↔ Data center (pure context, no resource numbers)
- *   Section 2 "What it takes to run" — Power (⚡ only) | Water (💧 only)
- *     Each Section 2 card has "your side" and "data center side" sub-entries.
+ * Phase 2A-3: Wired to real per-ZIP data. Given a user's ZIP code and the
+ * queried activity, computes the actual journey: user location → nearest
+ * data center for that service's operator → real grid mix, water sources,
+ * drought/stress data, and distance.
  *
- * Hardcoded San Antonio → Netflix example. Phase 2A-3 wires real per-ZIP data.
+ * Props (from ResultCard):
+ *   activityId    — e.g. 'netflix_hd_per_hour'
+ *   activityName  — e.g. 'Netflix HD streaming'
+ *   activityKwh   — energy per unit (kWh), from the result
+ *   durationHours — duration in hours
+ *   operatorClass — e.g. 'hyperscaler_aws' (auto-detected or user-set)
  */
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import TraceStage from './TraceStage';
 import InputSubEntry from './InputSubEntry';
 import WaterSourceBadges from './WaterSourceBadges';
+import JourneyMap from './JourneyMap';
+import { lookupZip } from '../data/zipToLocation';
+import { getStateGridMix, formatGridMix } from '../data/stateGridMix';
+import { getNearestRegion } from '../data/dcRegions';
+import { getOperatorForActivity } from '../data/serviceRouting';
+import { getActivityEmoji } from '../data/activityEmojiMap';
+import droughtData from '../data/droughtStatus.json';
+import stressData from '../data/waterStress.json';
 
 // ─── Section heading ─────────────────────────────────────────────
 function SectionHeading({ children }) {
@@ -22,49 +35,49 @@ function SectionHeading({ children }) {
   );
 }
 
-// ─── Section 1 card data ─────────────────────────────────────────
-// San Antonio 78228 → Netflix HD streaming (1 hr, 65" OLED TV)
+// ─── Helpers ─────────────────────────────────────────────────────
 
-// "You" card — pure path context, no resource numbers
-// CPS Energy: municipal utility for San Antonio, TX.
-// Edwards Aquifer: primary water source for San Antonio.
-// Grid mix: EIA Form 861 for CPS Energy service territory (2023).
-const YOU_CARD = {
-  emoji: '📺',
-  title: 'You',
-  subtitle: 'San Antonio 78228',
-  facts: [
-    'CPS Energy local utility',
-    '65" OLED TV uses ~0.12 kWh/hr',
-    'Local grid: 47% gas, 22% coal, 28% renewable',
-    'Water context: Edwards Aquifer, drought stage 2',
-  ],
-  confidence: 'high',
-  source: { label: 'CPS Energy 2024', url: 'https://www.cpsenergy.com' },
-};
+/** Look up drought data for a county key, falling back to state. */
+function getDrought(countyKey, stateCode) {
+  const county = droughtData.counties?.[countyKey];
+  if (county) return county;
+  const state = droughtData.states?.[stateCode];
+  if (state) return state;
+  return null;
+}
 
-// "Data center" card — pure path context
-// Netflix uses AWS (us-east-1, Ashburn VA) for backend/encoding.
-// AWS WUE: 0.15 L/kWh (Amazon 2024 Sustainability Report).
-// "Data Center Alley" in Loudoun County handles ~70% of global
-// internet traffic (Loudoun County Economic Development).
-const DC_CARD = {
-  emoji: '🏢',
-  title: 'Data center',
-  subtitle: 'AWS us-east-1, Ashburn, VA',
-  facts: [
-    'Cooling: indirect evaporative · WUE 0.15 L/kWh',
-    'Data Center Alley — ~70% of global internet traffic',
-  ],
-  confidence: 'medium',
-  source: {
-    label: 'Amazon 2024 Sustainability Report',
-    url: 'https://sustainability.aboutamazon.com/2024-amazon-sustainability-report.pdf',
-  },
-};
+/** Look up water stress data for a county key, falling back to state. */
+function getStress(countyKey, stateCode) {
+  const county = stressData.counties?.[countyKey];
+  if (county) return county;
+  const state = stressData.states?.[stateCode];
+  if (state) return state;
+  return null;
+}
 
-// Hardcoded distance San Antonio → Ashburn. Phase 2A-3 calculates real.
-const DISTANCE_MI = '1,510';
+/** Build WaterSourceBadges props from drought + stress data. */
+function buildBadgeProps(drought, stress) {
+  const props = {};
+  if (drought) {
+    props.drought = {
+      code: drought.code,
+      label: drought.label,
+      color_key: drought.color_key,
+      regional_addendum: drought.regional_addendum || null,
+      source: 'US Drought Monitor',
+      as_of: drought.as_of || droughtData._meta?.as_of,
+    };
+  }
+  if (stress) {
+    props.stress = {
+      code: stress.code,
+      label: stress.label,
+      color_key: stress.color_key,
+      source: 'WRI Aqueduct',
+    };
+  }
+  return props;
+}
 
 const UNMODELED_FACTORS = [
   'Time of day (grid mix shifts hourly)',
@@ -74,7 +87,13 @@ const UNMODELED_FACTORS = [
   'Watershed return flows',
 ];
 
-export default function WaterTrace() {
+export default function WaterTrace({
+  activityId = null,
+  activityName = 'digital activity',
+  activityKwh = 0.12,
+  durationHours = 1,
+  operatorClass = null,
+}) {
   const [zip, setZip] = useState(() => {
     try { return localStorage.getItem('mw_user_zip') || ''; }
     catch { return ''; }
@@ -97,6 +116,86 @@ export default function WaterTrace() {
     setZip('');
     setZipInput('');
   }
+
+  // ─── Compute journey data from ZIP + activity ─────────────────
+  const journey = useMemo(() => {
+    const loc = lookupZip(zip);
+    if (!loc) return null;
+
+    // Resolve operator class
+    const resolvedOperator = operatorClass || getOperatorForActivity(activityId) || 'hyperscaler_aws';
+
+    // Find nearest DC region
+    const dcRegion = getNearestRegion(resolvedOperator, loc.lat, loc.lng);
+
+    // Grid mix for user's state and DC's state
+    const userGrid = getStateGridMix(loc.state);
+    const dcGrid = getStateGridMix(dcRegion.state);
+
+    // Energy: user device energy = activityKwh * durationHours
+    // DC energy: approximate as 80% of user-side for streaming/browsing
+    // (Phase 2A-4 will use real per-activity DC energy models)
+    const userEnergyKwh = activityKwh * durationHours;
+    const dcEnergyKwh = userEnergyKwh * 0.8;
+
+    // Water calculations
+    // User side: all indirect (grid water from power generation)
+    const userWaterMl = userEnergyKwh * userGrid.grid_water_intensity_l_per_kwh * 1000;
+    // DC side: grid water + direct cooling water
+    const dcGridWaterMl = dcEnergyKwh * dcGrid.grid_water_intensity_l_per_kwh * 1000;
+    const dcCoolingWaterMl = dcEnergyKwh * dcRegion.wue_l_per_kwh * 1000;
+    const dcWaterMl = dcGridWaterMl + dcCoolingWaterMl;
+    const totalWaterMl = userWaterMl + dcWaterMl;
+
+    // Percentages
+    const totalGridWater = userWaterMl + dcGridWaterMl;
+    const pctGeneration = totalWaterMl > 0 ? Math.round((totalGridWater / totalWaterMl) * 100) : 0;
+    const pctCooling = 100 - pctGeneration;
+
+    // Drought/stress lookups
+    // User side: try state-level (we don't have county keys for arbitrary ZIPs)
+    const userDrought = getDrought(null, loc.state);
+    const userStress = getStress(null, loc.state);
+
+    // DC side: use county_key from dcRegion
+    const dcDrought = getDrought(dcRegion.county_key, dcRegion.state);
+    const dcStress = getStress(dcRegion.county_key, dcRegion.state);
+
+    // Activity emoji
+    const emoji = getActivityEmoji(activityId);
+
+    return {
+      loc,
+      dcRegion,
+      userGrid,
+      dcGrid,
+      userEnergyKwh,
+      dcEnergyKwh,
+      userWaterMl,
+      dcWaterMl,
+      dcGridWaterMl,
+      dcCoolingWaterMl,
+      totalWaterMl,
+      pctGeneration,
+      pctCooling,
+      userDrought,
+      userStress,
+      dcDrought,
+      dcStress,
+      emoji,
+      resolvedOperator,
+    };
+  }, [zip, activityId, activityKwh, durationHours, operatorClass]);
+
+  // ─── Format helpers ───────────────────────────────────────────
+  const fmt = (ml) => {
+    if (ml >= 1000) return `${(ml / 1000).toFixed(1)} L`;
+    return `${Math.round(ml)} mL`;
+  };
+  const fmtKwh = (kwh) => {
+    if (kwh < 0.01) return `${(kwh * 1000).toFixed(1)} Wh`;
+    return `${kwh.toFixed(2)} kWh`;
+  };
 
   return (
     <div className="space-y-4">
@@ -121,7 +220,10 @@ export default function WaterTrace() {
         </form>
       ) : (
         <div className="flex items-center gap-2 text-xs text-gray-500">
-          <span>Showing journey for ZIP <strong className="text-gray-700">{zip}</strong></span>
+          <span>
+            Showing journey for ZIP <strong className="text-gray-700">{zip}</strong>
+            {journey && <> — {journey.loc.city}, {journey.loc.state}</>}
+          </span>
           <button
             onClick={handleClearZip}
             className="text-mw-water hover:underline cursor-pointer"
@@ -131,25 +233,72 @@ export default function WaterTrace() {
         </div>
       )}
 
-      {/* Journey content — only shown after ZIP entry */}
-      {zip && (
+      {/* Journey content — only shown after ZIP entry + valid lookup */}
+      {zip && journey && (
         <>
+          {/* ─── Journey Map ─── */}
+          <JourneyMap
+            activityEmoji={journey.emoji}
+            activityName={activityName}
+            userCity={`${journey.loc.city}, ${journey.loc.state}`}
+            userUtility={journey.userGrid.primary_utilities[0] || journey.loc.primary_utility}
+            userWatershed={journey.loc.watershed_hint}
+            userDroughtLabel={journey.userDrought?.label?.toLowerCase() || ''}
+            dcLabel={`Data center · ${journey.dcRegion.operator_label} ${journey.dcRegion.region_id}`}
+            dcCity={`${journey.dcRegion.city}, ${journey.dcRegion.state}`}
+            dcUtility={journey.dcGrid.primary_utilities[0] || 'Grid operator'}
+            dcWaterUtility={journey.dcRegion.water_utility}
+            dcWatershed={journey.dcRegion.watershed_name}
+            dcDroughtLabel={journey.dcDrought?.label?.toLowerCase() || ''}
+            distanceMi={journey.dcRegion.distance_mi}
+          />
+
           {/* ─── Section 1: THE DATA PATH ─── */}
           <div className="space-y-3">
             <SectionHeading>The data path</SectionHeading>
 
-            <TraceStage {...YOU_CARD} />
+            <TraceStage
+              emoji={journey.emoji}
+              title="You"
+              subtitle={`${journey.loc.city}, ${journey.loc.state} ${zip}`}
+              facts={[
+                `${journey.loc.primary_utility} local utility`,
+                `Local grid: ${formatGridMix(journey.userGrid.grid_mix)}`,
+                `Water context: ${journey.loc.watershed_hint}${journey.userDrought ? `, ${journey.userDrought.label.toLowerCase()}` : ''}`,
+              ]}
+              confidence={journey.userGrid.is_estimated ? 'medium' : 'high'}
+              source={{ label: journey.userGrid.source, url: 'https://www.eia.gov/electricity/data/eia923/' }}
+            />
 
             {/* Round-trip distance indicator */}
             <div className="flex items-center justify-center gap-2 py-1">
               <span className="text-gray-300 text-lg leading-none">↓</span>
               <span className="text-[11px] text-gray-400">
-                data travels {DISTANCE_MI} mi each way
+                data travels {journey.dcRegion.distance_mi.toLocaleString()} mi each way
               </span>
               <span className="text-gray-300 text-lg leading-none">↑</span>
             </div>
 
-            <TraceStage {...DC_CARD} />
+            <TraceStage
+              emoji="🏢"
+              title="Data center"
+              subtitle={`${journey.dcRegion.operator_label} ${journey.dcRegion.region_id}, ${journey.dcRegion.city}, ${journey.dcRegion.state}`}
+              facts={[
+                `Cooling: ${journey.dcRegion.typical_cooling} · WUE ${journey.dcRegion.wue_l_per_kwh} L/kWh`,
+                `${journey.dcRegion.county}, ${journey.dcRegion.state}`,
+              ]}
+              confidence="medium"
+              source={{
+                label: `${journey.dcRegion.operator_label} sustainability report`,
+                url: journey.dcRegion.operator === 'hyperscaler_aws'
+                  ? 'https://sustainability.aboutamazon.com/2024-amazon-sustainability-report.pdf'
+                  : journey.dcRegion.operator === 'hyperscaler_gcp'
+                  ? 'https://sustainability.google/reports/google-2024-environmental-report/'
+                  : journey.dcRegion.operator === 'hyperscaler_msft'
+                  ? 'https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RW1lMjE'
+                  : 'https://sustainability.fb.com/2024-sustainability-report/',
+              }}
+            />
           </div>
 
           {/* ─── Section 2: WHAT IT TAKES TO RUN ─── */}
@@ -159,125 +308,88 @@ export default function WaterTrace() {
             {/* Side-by-side grid — collapses to stacked at ≤500px */}
             <div className="grid grid-cols-1 min-[501px]:grid-cols-2 gap-2">
 
-              {/* ── Power card (⚡ only — no water numbers here) ── */}
+              {/* ── Power card (⚡ only) ── */}
               <div className="bg-gray-50 border border-gray-200 rounded-xl p-3">
                 <p className="text-sm font-semibold text-gray-800 mb-1">
                   <span className="mr-1">🔌</span> Power
                 </p>
 
-                {/* Your side — CPS Energy, San Antonio */}
-                {/* CPS Energy grid mix: EIA Form 861 (2023) */}
+                {/* Your side */}
                 <InputSubEntry
                   side="your"
-                  utility="CPS Energy"
-                  location="San Antonio, TX"
-                  confidence="high"
+                  utility={journey.userGrid.primary_utilities[0] || journey.loc.primary_utility}
+                  location={`${journey.loc.city}, ${journey.loc.state}`}
+                  confidence={journey.userGrid.is_estimated ? 'medium' : 'high'}
                   metricType="energy"
-                  value="0.12 kWh"
-                  source={{ label: 'CPS Energy 2024', url: 'https://www.cpsenergy.com' }}
+                  value={fmtKwh(journey.userEnergyKwh)}
+                  source={{ label: journey.userGrid.source, url: 'https://www.eia.gov/electricity/data/eia923/' }}
                 >
                   <p className="text-[10px] text-gray-500 leading-relaxed">
-                    47% gas · 22% coal · 28% renewable
+                    {formatGridMix(journey.userGrid.grid_mix)}
                   </p>
                   <p className="text-[10px] text-gray-500 leading-relaxed">
-                    Water intensity: 4.2 L/kWh
+                    Water intensity: {journey.userGrid.grid_water_intensity_l_per_kwh} L/kWh
+                    {journey.userGrid.is_estimated && <span className="text-amber-600"> (estimated)</span>}
                   </p>
                 </InputSubEntry>
 
                 <div className="border-t border-gray-200/60" />
 
-                {/* Data center side — Dominion Energy, Virginia */}
-                {/* Dominion fuel mix: EIA Form 923 (2024) */}
-                {/* Grid water intensity ~4.2 L/kWh: EESI 2023 / LBNL/EIA for PJM */}
+                {/* Data center side */}
                 <InputSubEntry
                   side="datacenter"
-                  utility="Dominion Energy"
-                  location="Ashburn, VA"
-                  confidence="high"
+                  utility={journey.dcGrid.primary_utilities[0] || 'Grid operator'}
+                  location={`${journey.dcRegion.city}, ${journey.dcRegion.state}`}
+                  confidence={journey.dcGrid.is_estimated ? 'medium' : 'high'}
                   metricType="energy"
-                  value="0.09 kWh"
-                  source={{ label: 'EIA Form 923 (2024)', url: 'https://www.eia.gov/electricity/data/eia923/' }}
+                  value={fmtKwh(journey.dcEnergyKwh)}
+                  source={{ label: journey.dcGrid.source, url: 'https://www.eia.gov/electricity/data/eia923/' }}
                 >
                   <p className="text-[10px] text-gray-500 leading-relaxed">
-                    33% gas · 31% nuclear · 12% coal · 6% solar · 18% other
+                    {formatGridMix(journey.dcGrid.grid_mix)}
                   </p>
                   <p className="text-[10px] text-gray-500 leading-relaxed">
-                    Water intensity: 4.2 L/kWh
+                    Water intensity: {journey.dcGrid.grid_water_intensity_l_per_kwh} L/kWh
+                    {journey.dcGrid.is_estimated && <span className="text-amber-600"> (estimated)</span>}
                   </p>
                 </InputSubEntry>
-
               </div>
 
-              {/* ── Water card (💧 only — no energy numbers here) ── */}
+              {/* ── Water card (💧 only) ── */}
               <div className="bg-gray-50 border border-gray-200 rounded-xl p-3">
                 <p className="text-sm font-semibold text-gray-800 mb-1">
                   <span className="mr-1">💧</span> Water
                 </p>
 
-                {/* Your side — Edwards Aquifer, San Antonio */}
-                {/* Drought: US Drought Monitor (D2, Stage 2 for Texas) */}
-                {/* Stress: WRI Aqueduct 4.0 baseline */}
+                {/* Your side */}
                 <InputSubEntry
                   side="your"
-                  utility="Edwards Aquifer"
-                  location="SAWS · San Antonio"
-                  confidence="high"
+                  utility={journey.loc.watershed_hint}
+                  location={`${journey.loc.primary_utility} · ${journey.loc.city}`}
+                  confidence={journey.userGrid.is_estimated ? 'medium' : 'high'}
                   metricType="water"
-                  value="504 mL"
+                  value={fmt(journey.userWaterMl)}
                   breakdown="indirect, from your local grid"
-                  source={{ label: 'SAWS drought stages + US Drought Monitor', url: 'https://droughtmonitor.unl.edu' }}
+                  source={{ label: 'US Drought Monitor + local utility', url: 'https://droughtmonitor.unl.edu' }}
                 >
-                  <WaterSourceBadges
-                    drought={{
-                      code: 'D2',
-                      label: 'Severe drought',
-                      color_key: 'orange',
-                      regional_addendum: 'Stage 2',
-                      source: 'US Drought Monitor',
-                      as_of: '2026-05-13',
-                    }}
-                    stress={{
-                      code: 'Medium-high',
-                      label: 'Moderate stress',
-                      color_key: 'light-orange',
-                      source: 'WRI Aqueduct',
-                    }}
-                  />
+                  <WaterSourceBadges {...buildBadgeProps(journey.userDrought, journey.userStress)} />
                 </InputSubEntry>
 
                 <div className="border-t border-gray-200/60" />
 
-                {/* Data center side — Potomac watershed, Loudoun Water */}
-                {/* Drought: US Drought Monitor (D0) */}
-                {/* Stress: WRI Aqueduct 4.0 baseline */}
+                {/* Data center side */}
                 <InputSubEntry
                   side="datacenter"
-                  utility="Potomac watershed"
-                  location="Loudoun Water · VA"
-                  confidence="high"
+                  utility={journey.dcRegion.watershed_name}
+                  location={`${journey.dcRegion.water_utility} · ${journey.dcRegion.state}`}
+                  confidence="medium"
                   metricType="water"
-                  value="405 mL"
-                  breakdown="391 mL grid + 14 mL cooling"
-                  source={{ label: 'US Drought Monitor + Loudoun Water', url: 'https://droughtmonitor.unl.edu' }}
+                  value={fmt(journey.dcWaterMl)}
+                  breakdown={`${fmt(journey.dcGridWaterMl)} grid + ${fmt(journey.dcCoolingWaterMl)} cooling`}
+                  source={{ label: `US Drought Monitor + ${journey.dcRegion.water_utility}`, url: 'https://droughtmonitor.unl.edu' }}
                 >
-                  <WaterSourceBadges
-                    drought={{
-                      code: 'D0',
-                      label: 'Abnormally dry',
-                      color_key: 'yellow',
-                      regional_addendum: null,
-                      source: 'US Drought Monitor',
-                      as_of: '2026-05-13',
-                    }}
-                    stress={{
-                      code: 'Medium-high',
-                      label: 'Moderate stress',
-                      color_key: 'light-orange',
-                      source: 'WRI Aqueduct',
-                    }}
-                  />
+                  <WaterSourceBadges {...buildBadgeProps(journey.dcDrought, journey.dcStress)} />
                 </InputSubEntry>
-
               </div>
             </div>
           </div>
@@ -285,10 +397,10 @@ export default function WaterTrace() {
           {/* Total water summary */}
           <div className="bg-mw-water-light/40 border border-mw-water/15 rounded-xl px-4 py-3 space-y-1">
             <p className="text-sm font-semibold text-gray-800">
-              Total water for this query: ~909 mL
+              Total water for this query: ~{fmt(journey.totalWaterMl)}
             </p>
             <p className="text-xs text-gray-500">
-              98% from power generation, 2% from cooling
+              {journey.pctGeneration}% from power generation, {journey.pctCooling}% from cooling
             </p>
           </div>
 
@@ -321,6 +433,22 @@ export default function WaterTrace() {
             )}
           </div>
         </>
+      )}
+
+      {/* Invalid ZIP message */}
+      {zip && !journey && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+          <p className="text-sm text-amber-800">
+            We couldn&apos;t find location data for ZIP code <strong>{zip}</strong>.
+            This feature currently supports US ZIP codes only.
+          </p>
+          <button
+            onClick={handleClearZip}
+            className="mt-2 text-xs text-mw-water hover:underline cursor-pointer"
+          >
+            Try a different ZIP
+          </button>
+        </div>
       )}
     </div>
   );

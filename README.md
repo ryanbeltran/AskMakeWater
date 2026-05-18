@@ -204,6 +204,15 @@ This project is in early development. If you'd like to help:
 <!-- CHANGELOG:START -->
 ## What's New
 
+### v1.12.0 — 2026-05-18
+Journey View wired to real per-ZIP data with interactive map.
+- The Water & Energy Journey View now uses your actual ZIP code to compute real data: local utility, grid mix, nearest data center for the service you queried, drought/stress conditions, and haversine distance
+- New JourneyMap SVG at the top of the journey: two-cluster diagram with activity and data center pins, energy and water source satellites, dashed arc with distance pill, and a legend
+- Automatic service-to-operator routing: Netflix queries route to the nearest AWS region, ChatGPT to Azure, YouTube to Google Cloud, and so on — with fallback to AWS for unknown services
+- State-level grid mix data for TX, CA, VA, NY, IL, WA, OR, IA with real EIA Form 923 numbers; remaining states use US national average with an 'estimated' flag that degrades confidence
+- Dropped the Preview badge — the journey is no longer a hardcoded demo
+- Invalid or non-US ZIP codes show a clear message instead of broken data
+
 ### v1.11.0 — 2026-05-18
 Journey view restructure — two-sided sub-entries with clean resource attribution.
 - Reorganized the Water & Energy Journey View into two sections: 'The data path' (pure context, no resource numbers) and 'What it takes to run' (power and water side by side)
@@ -235,13 +244,6 @@ Polish: clickable sources, shared footer, sticky footer layout.
 - Sticky footer layout via PageLayout wrapper — footer pins to the bottom of the viewport on short-content pages and flows naturally on long ones
 - Removed redundant 'For Educators' link from the homepage footer (already in the top nav)
 - Added missing canonical URLs for Google Environmental Report 2024 and TRG Datacenters 2025 in the reference data
-
-### v1.7.0 — 2026-05-13
-Unified navigation, operator class and cooling technology controls, and hidden Recent Searches.
-- Shared site header across all pages — About, Sources, For Educators — with active-page highlighting and mobile hamburger menu
-- New Advanced controls on every result: set the operator class (AWS, Azure, Google Cloud, Meta, enterprise, crypto mining) and cooling technology (evaporative, air-cooled, liquid, hybrid, dry) to override the default site WUE
-- Auto-detection of cloud providers: queries about Netflix apply AWS WUE, ChatGPT applies Azure WUE, YouTube applies Google Cloud WUE, and so on
-- Recent Searches hidden from the public homepage to keep the interface clean
 <!-- CHANGELOG:END -->
 
 ---
