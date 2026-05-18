@@ -204,6 +204,14 @@ This project is in early development. If you'd like to help:
 <!-- CHANGELOG:START -->
 ## What's New
 
+### v1.11.0 — 2026-05-18
+Journey view restructure — clearer layout with data path and resource sections.
+- Reorganized the Water & Energy Journey View into two sections: 'The data path' (your activity to the data center and back) and 'What it takes to run' (power and water side by side)
+- Added water and energy quick-readouts on every card showing the contribution of each stage
+- Dropped the misleading 1-5 sequential numbering since the journey isn't really sequential
+- Removed the Network stage (merged into the round-trip distance indicator between You and Data center)
+- Emoji labels on every card for quick visual scanning
+
 ### v1.10.0 — 2026-05-18
 Water & Energy Journey View (preview) — trace the path from your home to the data center to the water source.
 - New expandable section on every result: 'Water & Energy Journey View' traces the full path of a digital activity from your location through the network, data center, power grid, and water source
@@ -233,13 +241,6 @@ Unified navigation, operator class and cooling technology controls, and hidden R
 - New Advanced controls on every result: set the operator class (AWS, Azure, Google Cloud, Meta, enterprise, crypto mining) and cooling technology (evaporative, air-cooled, liquid, hybrid, dry) to override the default site WUE
 - Auto-detection of cloud providers: queries about Netflix apply AWS WUE, ChatGPT applies Azure WUE, YouTube applies Google Cloud WUE, and so on
 - Recent Searches hidden from the public homepage to keep the interface clean
-
-### v1.6.0 — 2026-05-13
-Indirect grid water added to every estimate — the headline number now includes water consumed by power plants.
-- Total water cost now includes both site water (direct cooling) and grid water (power generation) — every result shows the split
-- 40 regions updated with grid water intensity values based on EESI 2023 analysis of LBNL/EIA data, scaled by each region's renewable energy fraction
-- US national default grid water intensity: 4.54 L/kWh; Texas-specific value from UT COMPASS 2025: 3.63 L/kWh
-- Calculation chain in the interactive breakdown shows the full site + grid decomposition with labeled sources
 <!-- CHANGELOG:END -->
 
 ---
