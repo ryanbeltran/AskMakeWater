@@ -291,11 +291,11 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
               <div className="flex items-center gap-8 mb-8 w-full max-w-lg">
                 <div className="flex-1 text-left">
                   <h1 className="text-2xl font-bold text-mw-base tracking-tight mb-2">
-                    What's the water cost of your digital life?
+                    How much water do AI and data centers use?
                   </h1>
                   <p className="text-gray-500 text-sm leading-relaxed">
-                    Compare the hidden water and energy costs of streaming, gaming, AI, and more.
-                    We cap our queries to one bottle of water a day.
+                    Map the water and energy behind any digital activity: the data centers serving you, the power that feeds them, and the watersheds they draw from.
+                    We cap our queries to one bottle a day.
                   </p>
                 </div>
                 <div className="flex-shrink-0">
