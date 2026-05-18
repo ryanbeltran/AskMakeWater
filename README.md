@@ -205,12 +205,13 @@ This project is in early development. If you'd like to help:
 ## What's New
 
 ### v1.11.0 — 2026-05-18
-Journey view restructure — clearer layout with data path and resource sections.
-- Reorganized the Water & Energy Journey View into two sections: 'The data path' (your activity to the data center and back) and 'What it takes to run' (power and water side by side)
-- Added water and energy quick-readouts on every card showing the contribution of each stage
+Journey view restructure — two-sided sub-entries with clean resource attribution.
+- Reorganized the Water & Energy Journey View into two sections: 'The data path' (pure context, no resource numbers) and 'What it takes to run' (power and water side by side)
+- Cleaner accounting: energy lives in the Power card, water lives in the Water card, with the data center's water broken down into grid generation + direct cooling
+- Each resource card shows 'your side' and 'data center side' sub-entries with utility, location, confidence, and a single-metric readout
 - Dropped the misleading 1-5 sequential numbering since the journey isn't really sequential
 - Removed the Network stage (merged into the round-trip distance indicator between You and Data center)
-- Emoji labels on every card for quick visual scanning
+- Real per-location data wiring ships next
 
 ### v1.10.0 — 2026-05-18
 Water & Energy Journey View (preview) — trace the path from your home to the data center to the water source.
