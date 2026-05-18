@@ -53,57 +53,61 @@ export default function WaterTrace({
     );
   }
 
+  const isLocal = journey.mode === 'local';
+
   return (
     <div className="space-y-4">
-      {/* ─── Section 1: THE DATA PATH ─── */}
-      <div className="space-y-3">
-        <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider" style={{ letterSpacing: '0.5px' }}>
-          The data path
-        </p>
+      {/* ─── Section 1: THE DATA PATH (digital only) ─── */}
+      {!isLocal && (
+        <div className="space-y-3">
+          <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider" style={{ letterSpacing: '0.5px' }}>
+            The data path
+          </p>
 
-        <TraceStage
-          emoji={journey.emoji}
-          title="Your location"
-          subtitle={`${journey.loc.city}, ${journey.loc.state} ${effectiveZip}`}
-          facts={[
-            `${journey.loc.primary_utility} local utility`,
-            `Local grid: ${formatGridMix(journey.userGrid.grid_mix)}`,
-            `Water context: ${journey.loc.watershed_hint}${journey.userDrought ? `, ${journey.userDrought.label.toLowerCase()}` : ''}`,
-          ]}
-          confidence={journey.userGrid.is_estimated ? 'medium' : 'high'}
-          source={{ label: journey.userGrid.source, url: 'https://www.eia.gov/electricity/data/eia923/' }}
-        />
+          <TraceStage
+            emoji={journey.emoji}
+            title="Your location"
+            subtitle={`${journey.loc.city}, ${journey.loc.state} ${effectiveZip}`}
+            facts={[
+              `${journey.loc.primary_utility} local utility`,
+              `Local grid: ${formatGridMix(journey.userGrid.grid_mix)}`,
+              `Water context: ${journey.loc.watershed_hint}${journey.userDrought ? `, ${journey.userDrought.label.toLowerCase()}` : ''}`,
+            ]}
+            confidence={journey.userGrid.is_estimated ? 'medium' : 'high'}
+            source={{ label: journey.userGrid.source, url: 'https://www.eia.gov/electricity/data/eia923/' }}
+          />
 
-        {/* Round-trip distance indicator */}
-        <div className="flex items-center justify-center gap-2 py-1">
-          <span className="text-gray-300 text-lg leading-none">↓</span>
-          <span className="text-[11px] text-gray-400">
-            data travels {journey.dcRegion.distance_mi.toLocaleString()} mi each way
-          </span>
-          <span className="text-gray-300 text-lg leading-none">↑</span>
+          {/* Round-trip distance indicator */}
+          <div className="flex items-center justify-center gap-2 py-1">
+            <span className="text-gray-300 text-lg leading-none">↓</span>
+            <span className="text-[11px] text-gray-400">
+              data travels {journey.dcRegion.distance_mi.toLocaleString()} mi each way
+            </span>
+            <span className="text-gray-300 text-lg leading-none">↑</span>
+          </div>
+
+          <TraceStage
+            emoji="🏢"
+            title="Data center"
+            subtitle={`${journey.dcRegion.operator_label} ${journey.dcRegion.region_id}, ${journey.dcRegion.city}, ${journey.dcRegion.state}`}
+            facts={[
+              `Cooling: ${journey.dcRegion.typical_cooling} · WUE ${journey.dcRegion.wue_l_per_kwh} L/kWh`,
+              `${journey.dcRegion.county}, ${journey.dcRegion.state}`,
+            ]}
+            confidence="medium"
+            source={{
+              label: `${journey.dcRegion.operator_label} sustainability report`,
+              url: journey.dcRegion.operator === 'hyperscaler_aws'
+                ? 'https://sustainability.aboutamazon.com/2024-amazon-sustainability-report.pdf'
+                : journey.dcRegion.operator === 'hyperscaler_gcp'
+                ? 'https://sustainability.google/reports/google-2024-environmental-report/'
+                : journey.dcRegion.operator === 'hyperscaler_msft'
+                ? 'https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RW1lMjE'
+                : 'https://sustainability.fb.com/2024-sustainability-report/',
+            }}
+          />
         </div>
-
-        <TraceStage
-          emoji="🏢"
-          title="Data center"
-          subtitle={`${journey.dcRegion.operator_label} ${journey.dcRegion.region_id}, ${journey.dcRegion.city}, ${journey.dcRegion.state}`}
-          facts={[
-            `Cooling: ${journey.dcRegion.typical_cooling} · WUE ${journey.dcRegion.wue_l_per_kwh} L/kWh`,
-            `${journey.dcRegion.county}, ${journey.dcRegion.state}`,
-          ]}
-          confidence="medium"
-          source={{
-            label: `${journey.dcRegion.operator_label} sustainability report`,
-            url: journey.dcRegion.operator === 'hyperscaler_aws'
-              ? 'https://sustainability.aboutamazon.com/2024-amazon-sustainability-report.pdf'
-              : journey.dcRegion.operator === 'hyperscaler_gcp'
-              ? 'https://sustainability.google/reports/google-2024-environmental-report/'
-              : journey.dcRegion.operator === 'hyperscaler_msft'
-              ? 'https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RW1lMjE'
-              : 'https://sustainability.fb.com/2024-sustainability-report/',
-          }}
-        />
-      </div>
+      )}
 
       {/* ─── Section 2: WHAT IT TAKES TO RUN ─── */}
       <div className="space-y-3">
@@ -138,25 +142,29 @@ export default function WaterTrace({
               </p>
             </InputSubEntry>
 
-            <div className="border-t border-gray-200/60" />
+            {!isLocal && (
+              <>
+                <div className="border-t border-gray-200/60" />
 
-            <InputSubEntry
-              side="datacenter"
-              utility={journey.dcGrid.primary_utilities[0] || 'Grid operator'}
-              location={`${journey.dcRegion.city}, ${journey.dcRegion.state}`}
-              confidence={journey.dcGrid.is_estimated ? 'medium' : 'high'}
-              metricType="energy"
-              value={fmtKwh(journey.dcEnergyKwh)}
-              source={{ label: journey.dcGrid.source, url: 'https://www.eia.gov/electricity/data/eia923/' }}
-            >
-              <p className="text-[10px] text-gray-500 leading-relaxed">
-                {formatGridMix(journey.dcGrid.grid_mix)}
-              </p>
-              <p className="text-[10px] text-gray-500 leading-relaxed">
-                Water intensity: {journey.dcGrid.grid_water_intensity_l_per_kwh} L/kWh
-                {journey.dcGrid.is_estimated && <span className="text-amber-600"> (estimated)</span>}
-              </p>
-            </InputSubEntry>
+                <InputSubEntry
+                  side="datacenter"
+                  utility={journey.dcGrid.primary_utilities[0] || 'Grid operator'}
+                  location={`${journey.dcRegion.city}, ${journey.dcRegion.state}`}
+                  confidence={journey.dcGrid.is_estimated ? 'medium' : 'high'}
+                  metricType="energy"
+                  value={fmtKwh(journey.dcEnergyKwh)}
+                  source={{ label: journey.dcGrid.source, url: 'https://www.eia.gov/electricity/data/eia923/' }}
+                >
+                  <p className="text-[10px] text-gray-500 leading-relaxed">
+                    {formatGridMix(journey.dcGrid.grid_mix)}
+                  </p>
+                  <p className="text-[10px] text-gray-500 leading-relaxed">
+                    Water intensity: {journey.dcGrid.grid_water_intensity_l_per_kwh} L/kWh
+                    {journey.dcGrid.is_estimated && <span className="text-amber-600"> (estimated)</span>}
+                  </p>
+                </InputSubEntry>
+              </>
+            )}
           </div>
 
           {/* ── Water card (💧 only) ── */}
@@ -178,20 +186,24 @@ export default function WaterTrace({
               <WaterSourceBadges {...buildBadgeProps(journey.userDrought, journey.userStress)} />
             </InputSubEntry>
 
-            <div className="border-t border-gray-200/60" />
+            {!isLocal && (
+              <>
+                <div className="border-t border-gray-200/60" />
 
-            <InputSubEntry
-              side="datacenter"
-              utility={journey.dcRegion.watershed_name}
-              location={`${journey.dcRegion.water_utility} · ${journey.dcRegion.state}`}
-              confidence="medium"
-              metricType="water"
-              value={fmt(journey.dcWaterMl)}
-              breakdown={`${fmt(journey.dcGridWaterMl)} grid + ${fmt(journey.dcCoolingWaterMl)} cooling`}
-              source={{ label: `US Drought Monitor + ${journey.dcRegion.water_utility}`, url: 'https://droughtmonitor.unl.edu' }}
-            >
-              <WaterSourceBadges {...buildBadgeProps(journey.dcDrought, journey.dcStress)} />
-            </InputSubEntry>
+                <InputSubEntry
+                  side="datacenter"
+                  utility={journey.dcRegion.watershed_name}
+                  location={`${journey.dcRegion.water_utility} · ${journey.dcRegion.state}`}
+                  confidence="medium"
+                  metricType="water"
+                  value={fmt(journey.dcWaterMl)}
+                  breakdown={`${fmt(journey.dcGridWaterMl)} grid + ${fmt(journey.dcCoolingWaterMl)} cooling`}
+                  source={{ label: `US Drought Monitor + ${journey.dcRegion.water_utility}`, url: 'https://droughtmonitor.unl.edu' }}
+                >
+                  <WaterSourceBadges {...buildBadgeProps(journey.dcDrought, journey.dcStress)} />
+                </InputSubEntry>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -202,7 +214,10 @@ export default function WaterTrace({
           Total water for this query: ~{fmt(journey.totalWaterMl)}
         </p>
         <p className="text-xs text-gray-500">
-          {journey.pctGeneration}% from power generation, {journey.pctCooling}% from cooling
+          {isLocal
+            ? '100% from power generation'
+            : `${journey.pctGeneration}% from power generation, ${journey.pctCooling}% from cooling`
+          }
         </p>
       </div>
 

@@ -641,20 +641,23 @@ export default function ResultCard({ data, query, model, usage, onTier2Submit, f
       {journeyCtx.journey && (
         <div className="border-t border-gray-100 px-5 pt-4 pb-2 space-y-2">
           <JourneyMap
+            mode={journeyCtx.journey.mode}
             activityEmoji={journeyCtx.journey.emoji}
             activityName={data.activity || 'digital activity'}
             userCity={`${journeyCtx.journey.loc.city}, ${journeyCtx.journey.loc.state}`}
             userUtility={journeyCtx.journey.userGrid.primary_utilities[0] || journeyCtx.journey.loc.primary_utility}
             userWatershed={journeyCtx.journey.loc.watershed_hint}
             userDroughtLabel={journeyCtx.journey.userDrought?.label?.toLowerCase() || ''}
-            dcLabel={`Data center · ${journeyCtx.journey.dcRegion.operator_label} ${journeyCtx.journey.dcRegion.region_id}`}
-            dcTypeLabel="Data center"
-            dcCity={`${journeyCtx.journey.dcRegion.city}, ${journeyCtx.journey.dcRegion.state}`}
-            dcUtility={journeyCtx.journey.dcGrid.primary_utilities[0] || 'Grid operator'}
-            dcWaterUtility={journeyCtx.journey.dcRegion.water_utility}
-            dcWatershed={journeyCtx.journey.dcRegion.watershed_name}
-            dcDroughtLabel={journeyCtx.journey.dcDrought?.label?.toLowerCase() || ''}
-            distanceMi={journeyCtx.journey.dcRegion.distance_mi}
+            {...(journeyCtx.journey.mode === 'digital' && journeyCtx.journey.dcRegion ? {
+              dcLabel: `Data center · ${journeyCtx.journey.dcRegion.operator_label} ${journeyCtx.journey.dcRegion.region_id}`,
+              dcTypeLabel: 'Data center',
+              dcCity: `${journeyCtx.journey.dcRegion.city}, ${journeyCtx.journey.dcRegion.state}`,
+              dcUtility: journeyCtx.journey.dcGrid.primary_utilities[0] || 'Grid operator',
+              dcWaterUtility: journeyCtx.journey.dcRegion.water_utility,
+              dcWatershed: journeyCtx.journey.dcRegion.watershed_name,
+              dcDroughtLabel: journeyCtx.journey.dcDrought?.label?.toLowerCase() || '',
+              distanceMi: journeyCtx.journey.dcRegion.distance_mi,
+            } : {})}
           />
 
           {/* ZIP context line */}

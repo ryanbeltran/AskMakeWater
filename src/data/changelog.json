@@ -1,6 +1,20 @@
 [
   {
     "date": "2026-05-18",
+    "version": "v1.14.0",
+    "summary": "Smart map mode — local for elevator/microwave/AC, digital for streaming/AI.",
+    "tokens_estimated": 120000,
+    "changes": [
+      "Activities that don't route through a data center (elevator, microwave, AC, hair dryer, EV charging, washer, dryer, etc.) now show a local-only map with a single centered user cluster instead of the misleading two-cluster user→DC layout",
+      "Digital activities (streaming, AI queries, search, social media) keep the full two-cluster map with dashed arc and distance pill",
+      "New getJourneyMode() detection: checks operator class, LOCAL_ONLY_ACTIVITIES set, general_energy prefix, and SERVICE_ROUTING membership to decide local vs digital",
+      "WaterTrace detail view adapts to mode: local hides the data path section, round-trip arrow, and DC sub-entries; shows only your-side Power and Water cards with '100% from power generation' summary",
+      "Local mode water math uses only user grid water (no DC component) — more accurate for appliances and home devices",
+      "Crypto mining (Bitcoin, Ethereum) stays in digital mode since mining facilities are real data centers with their own water footprint"
+    ]
+  },
+  {
+    "date": "2026-05-18",
     "version": "v1.13.0",
     "summary": "Map promoted to always-visible + lightweight anonymous analytics.",
     "tokens_estimated": 280000,

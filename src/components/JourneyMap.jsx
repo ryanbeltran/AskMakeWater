@@ -2,14 +2,15 @@
  * JourneyMap — SVG map showing user location → data center with
  * energy and water source satellites on each side.
  *
- * Phase 2A-3: renders at the top of WaterTrace, between the section
- * header and "THE DATA PATH" heading.
+ * Supports two modes:
+ *   'digital' — full two-cluster map (user → DC with arc)
+ *   'local'   — single centered user cluster (no DC, no arc)
  */
 
+// ── Digital mode constants ──────────────────────────────────────
 const VIEWBOX_W = 680;
 const VIEWBOX_H = 460;
 
-// Pin positions (left cluster = user, right cluster = DC)
 const USER_CX = 155;
 const DC_CX = 525;
 const MAIN_CY = 220;
@@ -19,10 +20,15 @@ const SAT_OFFSET_X = 90;
 const SAT_ENERGY_CY = 110;
 const SAT_WATER_CY = 350;
 
-// Arc path from user to DC (curves upward)
 const ARC_PATH = `M ${USER_CX + MAIN_R} ${MAIN_CY} Q ${(USER_CX + DC_CX) / 2} 10 ${DC_CX - MAIN_R} ${MAIN_CY}`;
 const PILL_X = (USER_CX + DC_CX) / 2;
 const PILL_Y = 46;
+
+// ── Local mode constants ────────────────────────────────────────
+const LOCAL_VIEWBOX_W = 400;
+const LOCAL_VIEWBOX_H = 440;
+const LOCAL_CX = 200;
+const LOCAL_CY = 200;
 
 function SatellitePin({ cx, cy, emoji, bgColor, borderColor }) {
   return (
@@ -37,24 +43,9 @@ function ConnectorLine({ x1, y1, x2, y2 }) {
   return <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="#D1D5DB" strokeWidth={0.5} />;
 }
 
-/**
- * Props:
- *   activityEmoji    — emoji for user's activity (from activityEmojiMap)
- *   activityName     — human-readable activity name
- *   userCity         — e.g. "San Antonio, TX"
- *   userUtility      — e.g. "CPS Energy"
- *   userWatershed    — e.g. "Edwards Aquifer"
- *   userDroughtLabel — e.g. "severe drought"
- *   dcLabel          — e.g. "Data center · AWS us-east-1"
- *   dcCity           — e.g. "Ashburn, VA"
- *   dcUtility        — e.g. "Dominion Energy"
- *   dcWaterUtility   — e.g. "Loudoun Water"
- *   dcWatershed      — e.g. "Potomac River"
- *   dcDroughtLabel   — e.g. "abnormally dry"
- *   distanceMi       — number, e.g. 1510
- */
 export default function JourneyMap({
-  activityEmoji = '⚡',
+  mode = 'digital',
+  activityEmoji = '',
   activityName = 'activity',
   userCity = '',
   userUtility = '',
@@ -69,6 +60,80 @@ export default function JourneyMap({
   dcDroughtLabel = '',
   distanceMi = 0,
 }) {
+  if (mode === 'local') {
+    return (
+      <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 space-y-2">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-2">
+          <p className="text-[11px] text-gray-600 leading-snug">
+            Your <strong className="text-gray-800">{activityName}</strong> runs on local power and water
+          </p>
+          <span className="text-[9px] text-gray-400 flex-shrink-0 whitespace-nowrap">
+            Stylized · not to scale
+          </span>
+        </div>
+
+        {/* SVG — single centered cluster */}
+        <svg
+          viewBox={`0 0 ${LOCAL_VIEWBOX_W} ${LOCAL_VIEWBOX_H}`}
+          className="w-full"
+          style={{ maxHeight: 340 }}
+          role="img"
+          aria-label={`Local activity map for ${userCity}`}
+        >
+          {/* Connectors to satellites */}
+          <ConnectorLine x1={LOCAL_CX - 20} y1={LOCAL_CY - 48} x2={LOCAL_CX - SAT_OFFSET_X} y2={SAT_ENERGY_CY + SAT_R} />
+          <ConnectorLine x1={LOCAL_CX + 20} y1={LOCAL_CY + 48} x2={LOCAL_CX + SAT_OFFSET_X} y2={SAT_WATER_CY - SAT_R} />
+
+          {/* Energy satellite (left-above) */}
+          <SatellitePin cx={LOCAL_CX - SAT_OFFSET_X} cy={SAT_ENERGY_CY} emoji="" bgColor="#FAEEDA" borderColor="#BA7517" />
+          <text x={LOCAL_CX - SAT_OFFSET_X} y={SAT_ENERGY_CY - 36} textAnchor="middle" fill="#BA7517" fontSize="13" fontWeight="500">
+            {userUtility}
+          </text>
+
+          {/* Water satellite (right-below) */}
+          <SatellitePin cx={LOCAL_CX + SAT_OFFSET_X} cy={SAT_WATER_CY} emoji="" bgColor="#E6F1FB" borderColor="#185FA5" />
+          <text x={LOCAL_CX + SAT_OFFSET_X} y={SAT_WATER_CY + 40} textAnchor="middle" fill="#185FA5" fontSize="13" fontWeight="500">
+            {userWatershed}
+          </text>
+          {userDroughtLabel && (
+            <text x={LOCAL_CX + SAT_OFFSET_X} y={SAT_WATER_CY + 56} textAnchor="middle" fill="#92400E" fontSize="11">
+              {userDroughtLabel}
+            </text>
+          )}
+
+          {/* Main user pin */}
+          <circle cx={LOCAL_CX} cy={LOCAL_CY} r={MAIN_R} fill="white" stroke="#378ADD" strokeWidth={2.5} />
+          <text x={LOCAL_CX} y={LOCAL_CY + 2} textAnchor="middle" dominantBaseline="central" fontSize="32">{activityEmoji}</text>
+
+          {/* User labels */}
+          <text x={LOCAL_CX} y={LOCAL_CY + 66} textAnchor="middle" fill="#9CA3AF" fontSize="11" fontWeight="600" letterSpacing="0.3">
+            YOUR LOCATION
+          </text>
+          <text x={LOCAL_CX} y={LOCAL_CY + 82} textAnchor="middle" fill="#1F2937" fontSize="16" fontWeight="600">
+            {userCity.split(',')[0]}
+          </text>
+          <text x={LOCAL_CX} y={LOCAL_CY + 98} textAnchor="middle" fill="#6B7280" fontSize="14">
+            {userCity.includes(',') ? userCity.split(',').slice(1).join(',').trim() : ''}
+          </text>
+        </svg>
+
+        {/* Legend */}
+        <div className="flex items-center gap-4 justify-center">
+          <span className="flex items-center gap-1 text-[10px] text-gray-400">
+            <span className="inline-block w-2 h-2 rounded-full bg-amber-200 border border-amber-500" />
+            Energy source
+          </span>
+          <span className="flex items-center gap-1 text-[10px] text-gray-400">
+            <span className="inline-block w-2 h-2 rounded-full bg-blue-100 border border-blue-600" />
+            Water source
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Digital mode (existing full map) ──────────────────────────
   const distanceStr = distanceMi.toLocaleString();
 
   return (
@@ -115,18 +180,15 @@ export default function JourneyMap({
         </text>
 
         {/* ─── USER CLUSTER (left) ─── */}
-        {/* Connectors from main pin edge to satellite edge */}
         <ConnectorLine x1={USER_CX - 20} y1={MAIN_CY - 48} x2={USER_CX - SAT_OFFSET_X} y2={SAT_ENERGY_CY + SAT_R} />
         <ConnectorLine x1={USER_CX - 20} y1={MAIN_CY + 48} x2={USER_CX - SAT_OFFSET_X} y2={SAT_WATER_CY - SAT_R} />
 
-        {/* Energy satellite */}
-        <SatellitePin cx={USER_CX - SAT_OFFSET_X} cy={SAT_ENERGY_CY} emoji="⚡" bgColor="#FAEEDA" borderColor="#BA7517" />
+        <SatellitePin cx={USER_CX - SAT_OFFSET_X} cy={SAT_ENERGY_CY} emoji="" bgColor="#FAEEDA" borderColor="#BA7517" />
         <text x={USER_CX - SAT_OFFSET_X} y={SAT_ENERGY_CY - 36} textAnchor="middle" fill="#BA7517" fontSize="13" fontWeight="500">
           {userUtility}
         </text>
 
-        {/* Water satellite */}
-        <SatellitePin cx={USER_CX - SAT_OFFSET_X} cy={SAT_WATER_CY} emoji="💧" bgColor="#E6F1FB" borderColor="#185FA5" />
+        <SatellitePin cx={USER_CX - SAT_OFFSET_X} cy={SAT_WATER_CY} emoji="" bgColor="#E6F1FB" borderColor="#185FA5" />
         <text x={USER_CX - SAT_OFFSET_X} y={SAT_WATER_CY + 40} textAnchor="middle" fill="#185FA5" fontSize="13" fontWeight="500">
           {userWatershed}
         </text>
@@ -136,11 +198,9 @@ export default function JourneyMap({
           </text>
         )}
 
-        {/* Main user pin */}
         <circle cx={USER_CX} cy={MAIN_CY} r={MAIN_R} fill="white" stroke="#378ADD" strokeWidth={2.5} />
         <text x={USER_CX} y={MAIN_CY + 2} textAnchor="middle" dominantBaseline="central" fontSize="32">{activityEmoji}</text>
 
-        {/* User labels */}
         <text x={USER_CX} y={MAIN_CY + 66} textAnchor="middle" fill="#9CA3AF" fontSize="11" fontWeight="600" letterSpacing="0.3">
           YOUR LOCATION
         </text>
@@ -152,18 +212,15 @@ export default function JourneyMap({
         </text>
 
         {/* ─── DC CLUSTER (right) ─── */}
-        {/* Connectors from main pin edge to satellite edge */}
         <ConnectorLine x1={DC_CX + 20} y1={MAIN_CY - 48} x2={DC_CX + SAT_OFFSET_X} y2={SAT_ENERGY_CY + SAT_R} />
         <ConnectorLine x1={DC_CX + 20} y1={MAIN_CY + 48} x2={DC_CX + SAT_OFFSET_X} y2={SAT_WATER_CY - SAT_R} />
 
-        {/* Energy satellite */}
-        <SatellitePin cx={DC_CX + SAT_OFFSET_X} cy={SAT_ENERGY_CY} emoji="⚡" bgColor="#FAEEDA" borderColor="#BA7517" />
+        <SatellitePin cx={DC_CX + SAT_OFFSET_X} cy={SAT_ENERGY_CY} emoji="" bgColor="#FAEEDA" borderColor="#BA7517" />
         <text x={DC_CX + SAT_OFFSET_X} y={SAT_ENERGY_CY - 36} textAnchor="middle" fill="#BA7517" fontSize="13" fontWeight="500">
           {dcUtility}
         </text>
 
-        {/* Water satellite */}
-        <SatellitePin cx={DC_CX + SAT_OFFSET_X} cy={SAT_WATER_CY} emoji="💧" bgColor="#E6F1FB" borderColor="#185FA5" />
+        <SatellitePin cx={DC_CX + SAT_OFFSET_X} cy={SAT_WATER_CY} emoji="" bgColor="#E6F1FB" borderColor="#185FA5" />
         <text x={DC_CX + SAT_OFFSET_X} y={SAT_WATER_CY + 40} textAnchor="middle" fill="#185FA5" fontSize="13" fontWeight="500">
           {dcWatershed}
         </text>
@@ -173,11 +230,9 @@ export default function JourneyMap({
           </text>
         )}
 
-        {/* Main DC pin */}
         <circle cx={DC_CX} cy={MAIN_CY} r={MAIN_R} fill="white" stroke="#378ADD" strokeWidth={2.5} />
         <text x={DC_CX} y={MAIN_CY + 2} textAnchor="middle" dominantBaseline="central" fontSize="32">🏢</text>
 
-        {/* DC labels */}
         <text x={DC_CX} y={MAIN_CY + 66} textAnchor="middle" fill="#9CA3AF" fontSize="11" fontWeight="600" letterSpacing="0.3">
           {dcTypeLabel.toUpperCase()}
         </text>

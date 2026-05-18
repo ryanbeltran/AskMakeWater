@@ -204,6 +204,15 @@ This project is in early development. If you'd like to help:
 <!-- CHANGELOG:START -->
 ## What's New
 
+### v1.14.0 — 2026-05-18
+Smart map mode — local for elevator/microwave/AC, digital for streaming/AI.
+- Activities that don't route through a data center (elevator, microwave, AC, hair dryer, EV charging, washer, dryer, etc.) now show a local-only map with a single centered user cluster instead of the misleading two-cluster user→DC layout
+- Digital activities (streaming, AI queries, search, social media) keep the full two-cluster map with dashed arc and distance pill
+- New getJourneyMode() detection: checks operator class, LOCAL_ONLY_ACTIVITIES set, general_energy prefix, and SERVICE_ROUTING membership to decide local vs digital
+- WaterTrace detail view adapts to mode: local hides the data path section, round-trip arrow, and DC sub-entries; shows only your-side Power and Water cards with '100% from power generation' summary
+- Local mode water math uses only user grid water (no DC component) — more accurate for appliances and home devices
+- Crypto mining (Bitcoin, Ethereum) stays in digital mode since mining facilities are real data centers with their own water footprint
+
 ### v1.13.0 — 2026-05-18
 Map promoted to always-visible + lightweight anonymous analytics.
 - The journey map now appears on every result right below the confidence meter — no expansion needed
@@ -242,14 +251,6 @@ Water & Energy Journey View (preview) — trace the path from your home to the d
 - 5-stage journey with cited sources, confidence badges, and connecting visual rail between stages
 - Enter your ZIP code to see the journey — currently shows a San Antonio to Netflix example while real per-location routing is in development
 - Total water summary with power generation vs cooling breakdown, plus disclosure of factors not yet modeled
-
-### v1.9.0 — 2026-05-13
-Deep-research CTA for low-confidence results + duration extraction fix.
-- New 'Improve this estimate' button on low-confidence (<40%) results — uses Sonnet + web search to find published wattage data, with side-by-side comparison, source cards, and edit-before-saving flow
-- Rate-limited deep research: 3 runs per IP per day, 20 site-wide, with upfront water charging and refund on failure
-- Confidence tiering: Quick estimates capped at 15%, researched results at 50%, admin-verified data at 60%+
-- Admin Research Drafts tab: review, promote (attributed/cited), or reject AI-researched energy data before it enters the reference dataset
-- Fixed duration extraction bug: short-duration activities (elevator per floor, microwave per use) no longer default to 1 hour — seconds and minutes are properly converted to fractional hours
 <!-- CHANGELOG:END -->
 
 ---

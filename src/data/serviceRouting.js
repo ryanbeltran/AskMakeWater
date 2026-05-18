@@ -221,4 +221,67 @@ export function getOperatorForActivity(activityId) {
   return SERVICE_TO_OPERATOR[activityId];
 }
 
+// ── Local-only activity detection ────────────────────────────────
+
+const LOCAL_ONLY_ACTIVITIES = new Set([
+  'microwave',
+  'refrigerator',
+  'hair_dryer',
+  'ac',
+  'air_conditioner',
+  'heating',
+  'elevator',
+  'ev_charging',
+  'light_bulb',
+  'washer',
+  'dryer',
+  'dishwasher',
+  'oven',
+  'toaster',
+  'vacuum',
+  'iron',
+  'fan',
+  'space_heater',
+  'water_heater',
+  'console_gaming_per_hour',
+]);
+
+/**
+ * Determine whether an activity should show a local-only map
+ * (just user location) or the full digital journey (user → DC).
+ *
+ * @returns {'local' | 'digital'}
+ */
+export function getJourneyMode(activityId, operatorClass) {
+  // Explicit hyperscaler or crypto → digital
+  if (operatorClass && operatorClass !== 'industry_typical') {
+    return 'digital';
+  }
+
+  // Known local-only activities
+  if (activityId && LOCAL_ONLY_ACTIVITIES.has(activityId)) {
+    return 'local';
+  }
+
+  // General energy fallback path → local
+  if (activityId && (activityId.startsWith('general_') || activityId === 'general_energy')) {
+    return 'local';
+  }
+
+  // No operator class and not in any service routing → local
+  if (!operatorClass || operatorClass === 'industry_typical') {
+    // Check if this activity has a known service routing (digital service)
+    if (activityId && activityId in SERVICE_TO_OPERATOR) {
+      return 'digital';
+    }
+    if (activityId && activityId in SERVICE_ROUTING) {
+      return 'digital';
+    }
+    return 'local';
+  }
+
+  // Default to digital for ambiguous cases
+  return 'digital';
+}
+
 export default SERVICE_ROUTING;
