@@ -7,26 +7,28 @@
  */
 
 const VIEWBOX_W = 680;
-const VIEWBOX_H = 280;
+const VIEWBOX_H = 360;
 
 // Pin positions (left cluster = user, right cluster = DC)
 const USER_CX = 160;
 const DC_CX = 520;
-const MAIN_CY = 140;
-const SAT_OFFSET_X = 55;
-const SAT_ENERGY_CY = 85;
-const SAT_WATER_CY = 195;
+const MAIN_CY = 180;
+const MAIN_R = 36;
+const SAT_R = 18;
+const SAT_OFFSET_X = 70;
+const SAT_ENERGY_CY = 100;
+const SAT_WATER_CY = 260;
 
 // Arc path from user to DC (curves upward)
-const ARC_PATH = `M ${USER_CX + 26} ${MAIN_CY} Q ${(USER_CX + DC_CX) / 2} 30 ${DC_CX - 26} ${MAIN_CY}`;
+const ARC_PATH = `M ${USER_CX + MAIN_R} ${MAIN_CY} Q ${(USER_CX + DC_CX) / 2} 20 ${DC_CX - MAIN_R} ${MAIN_CY}`;
 const PILL_X = (USER_CX + DC_CX) / 2;
-const PILL_Y = 52;
+const PILL_Y = 48;
 
 function SatellitePin({ cx, cy, emoji, bgColor, borderColor }) {
   return (
     <g>
-      <circle cx={cx} cy={cy} r={14} fill={bgColor} stroke={borderColor} strokeWidth={1.5} />
-      <text x={cx} y={cy + 1} textAnchor="middle" dominantBaseline="central" fontSize="11">{emoji}</text>
+      <circle cx={cx} cy={cy} r={SAT_R} fill={bgColor} stroke={borderColor} strokeWidth={1.5} />
+      <text x={cx} y={cy + 1} textAnchor="middle" dominantBaseline="central" fontSize="14">{emoji}</text>
     </g>
   );
 }
@@ -85,7 +87,7 @@ export default function JourneyMap({
       <svg
         viewBox={`0 0 ${VIEWBOX_W} ${VIEWBOX_H}`}
         className="w-full"
-        style={{ maxHeight: 280 }}
+        style={{ maxHeight: 360 }}
         role="img"
         aria-label={`Map showing data traveling ${distanceStr} miles from ${userCity} to ${dcCity}`}
       >
@@ -106,76 +108,76 @@ export default function JourneyMap({
         />
 
         {/* Distance pill at arc apex */}
-        <rect x={PILL_X - 32} y={PILL_Y - 11} width={64} height={22} rx={11} fill="#378ADD" />
-        <text x={PILL_X} y={PILL_Y + 1} textAnchor="middle" dominantBaseline="central" fill="white" fontSize="10" fontWeight="600">
+        <rect x={PILL_X - 36} y={PILL_Y - 13} width={72} height={26} rx={13} fill="#378ADD" />
+        <text x={PILL_X} y={PILL_Y + 1} textAnchor="middle" dominantBaseline="central" fill="white" fontSize="12" fontWeight="600">
           {distanceStr} mi
         </text>
 
         {/* ─── USER CLUSTER (left) ─── */}
         {/* Connectors */}
-        <ConnectorLine x1={USER_CX} y1={MAIN_CY - 20} x2={USER_CX - SAT_OFFSET_X} y2={SAT_ENERGY_CY + 14} />
-        <ConnectorLine x1={USER_CX} y1={MAIN_CY + 20} x2={USER_CX - SAT_OFFSET_X} y2={SAT_WATER_CY - 14} />
+        <ConnectorLine x1={USER_CX} y1={MAIN_CY - 28} x2={USER_CX - SAT_OFFSET_X} y2={SAT_ENERGY_CY + SAT_R} />
+        <ConnectorLine x1={USER_CX} y1={MAIN_CY + 28} x2={USER_CX - SAT_OFFSET_X} y2={SAT_WATER_CY - SAT_R} />
 
         {/* Energy satellite */}
         <SatellitePin cx={USER_CX - SAT_OFFSET_X} cy={SAT_ENERGY_CY} emoji="⚡" bgColor="#FAEEDA" borderColor="#BA7517" />
-        <text x={USER_CX - SAT_OFFSET_X} y={SAT_ENERGY_CY - 20} textAnchor="middle" fill="#BA7517" fontSize="9" fontWeight="500">
+        <text x={USER_CX - SAT_OFFSET_X} y={SAT_ENERGY_CY - 26} textAnchor="middle" fill="#BA7517" fontSize="11" fontWeight="500">
           {userUtility}
         </text>
 
         {/* Water satellite */}
         <SatellitePin cx={USER_CX - SAT_OFFSET_X} cy={SAT_WATER_CY} emoji="💧" bgColor="#E6F1FB" borderColor="#185FA5" />
-        <text x={USER_CX - SAT_OFFSET_X} y={SAT_WATER_CY + 24} textAnchor="middle" fill="#185FA5" fontSize="9" fontWeight="500">
+        <text x={USER_CX - SAT_OFFSET_X} y={SAT_WATER_CY + 30} textAnchor="middle" fill="#185FA5" fontSize="11" fontWeight="500">
           {userWatershed}
         </text>
         {userDroughtLabel && (
-          <text x={USER_CX - SAT_OFFSET_X} y={SAT_WATER_CY + 36} textAnchor="middle" fill="#92400E" fontSize="8">
+          <text x={USER_CX - SAT_OFFSET_X} y={SAT_WATER_CY + 44} textAnchor="middle" fill="#92400E" fontSize="10">
             {userDroughtLabel}
           </text>
         )}
 
         {/* Main user pin */}
-        <circle cx={USER_CX} cy={MAIN_CY} r={26} fill="white" stroke="#378ADD" strokeWidth={2} />
-        <text x={USER_CX} y={MAIN_CY + 1} textAnchor="middle" dominantBaseline="central" fontSize="18">{activityEmoji}</text>
+        <circle cx={USER_CX} cy={MAIN_CY} r={MAIN_R} fill="white" stroke="#378ADD" strokeWidth={2} />
+        <text x={USER_CX} y={MAIN_CY + 1} textAnchor="middle" dominantBaseline="central" fontSize="22">{activityEmoji}</text>
 
         {/* User labels */}
-        <text x={USER_CX} y={MAIN_CY + 38} textAnchor="middle" fill="#1F2937" fontSize="11" fontWeight="600">
+        <text x={USER_CX} y={MAIN_CY + 50} textAnchor="middle" fill="#1F2937" fontSize="13" fontWeight="600">
           {userCity.split(',')[0]}
         </text>
-        <text x={USER_CX} y={MAIN_CY + 50} textAnchor="middle" fill="#6B7280" fontSize="10">
+        <text x={USER_CX} y={MAIN_CY + 64} textAnchor="middle" fill="#6B7280" fontSize="12">
           {userCity.includes(',') ? userCity.split(',').slice(1).join(',').trim() : ''}
         </text>
 
         {/* ─── DC CLUSTER (right) ─── */}
         {/* Connectors */}
-        <ConnectorLine x1={DC_CX} y1={MAIN_CY - 20} x2={DC_CX + SAT_OFFSET_X} y2={SAT_ENERGY_CY + 14} />
-        <ConnectorLine x1={DC_CX} y1={MAIN_CY + 20} x2={DC_CX + SAT_OFFSET_X} y2={SAT_WATER_CY - 14} />
+        <ConnectorLine x1={DC_CX} y1={MAIN_CY - 28} x2={DC_CX + SAT_OFFSET_X} y2={SAT_ENERGY_CY + SAT_R} />
+        <ConnectorLine x1={DC_CX} y1={MAIN_CY + 28} x2={DC_CX + SAT_OFFSET_X} y2={SAT_WATER_CY - SAT_R} />
 
         {/* Energy satellite */}
         <SatellitePin cx={DC_CX + SAT_OFFSET_X} cy={SAT_ENERGY_CY} emoji="⚡" bgColor="#FAEEDA" borderColor="#BA7517" />
-        <text x={DC_CX + SAT_OFFSET_X} y={SAT_ENERGY_CY - 20} textAnchor="middle" fill="#BA7517" fontSize="9" fontWeight="500">
+        <text x={DC_CX + SAT_OFFSET_X} y={SAT_ENERGY_CY - 26} textAnchor="middle" fill="#BA7517" fontSize="11" fontWeight="500">
           {dcUtility}
         </text>
 
         {/* Water satellite */}
         <SatellitePin cx={DC_CX + SAT_OFFSET_X} cy={SAT_WATER_CY} emoji="💧" bgColor="#E6F1FB" borderColor="#185FA5" />
-        <text x={DC_CX + SAT_OFFSET_X} y={SAT_WATER_CY + 24} textAnchor="middle" fill="#185FA5" fontSize="9" fontWeight="500">
+        <text x={DC_CX + SAT_OFFSET_X} y={SAT_WATER_CY + 30} textAnchor="middle" fill="#185FA5" fontSize="11" fontWeight="500">
           {dcWatershed}
         </text>
         {dcDroughtLabel && (
-          <text x={DC_CX + SAT_OFFSET_X} y={SAT_WATER_CY + 36} textAnchor="middle" fill="#92400E" fontSize="8">
+          <text x={DC_CX + SAT_OFFSET_X} y={SAT_WATER_CY + 44} textAnchor="middle" fill="#92400E" fontSize="10">
             {dcDroughtLabel}
           </text>
         )}
 
         {/* Main DC pin */}
-        <circle cx={DC_CX} cy={MAIN_CY} r={26} fill="white" stroke="#378ADD" strokeWidth={2} />
-        <text x={DC_CX} y={MAIN_CY + 1} textAnchor="middle" dominantBaseline="central" fontSize="18">🏢</text>
+        <circle cx={DC_CX} cy={MAIN_CY} r={MAIN_R} fill="white" stroke="#378ADD" strokeWidth={2} />
+        <text x={DC_CX} y={MAIN_CY + 1} textAnchor="middle" dominantBaseline="central" fontSize="22">🏢</text>
 
         {/* DC labels */}
-        <text x={DC_CX} y={MAIN_CY + 38} textAnchor="middle" fill="#1F2937" fontSize="11" fontWeight="600">
+        <text x={DC_CX} y={MAIN_CY + 50} textAnchor="middle" fill="#1F2937" fontSize="13" fontWeight="600">
           {dcCity.split(',')[0]}
         </text>
-        <text x={DC_CX} y={MAIN_CY + 50} textAnchor="middle" fill="#6B7280" fontSize="10">
+        <text x={DC_CX} y={MAIN_CY + 64} textAnchor="middle" fill="#6B7280" fontSize="12">
           {dcCity.includes(',') ? dcCity.split(',').slice(1).join(',').trim() : ''}
         </text>
       </svg>

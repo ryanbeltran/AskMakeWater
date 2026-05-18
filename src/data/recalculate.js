@@ -1,4 +1,8 @@
 import referenceData from './water_cost_reference_data.json';
+import { lookupZip } from './zipToLocation';
+import { getStateGridMix } from './stateGridMix';
+import { getNearestRegion } from './dcRegions';
+import { getOperatorForActivity } from './serviceRouting';
 
 // Device energy lookup (kWh per hour)
 export const DEVICES = {
@@ -485,6 +489,8 @@ export function recalculate({
   water_per_kwh_override = null,
   operator_class = null,
   cooling_tech = null,
+  user_zip = null,
+  activity_id = null,
 }) {
   let device = DEVICES[device_key] || DEVICES.none;
   // Handle custom device wattage
@@ -539,8 +545,38 @@ export function recalculate({
   }
 
   // --- Combined water calculation ---
-  const siteWater_liters = total_kwh * siteWue;
-  const gridWater_liters = total_kwh * gridWaterIntensity;
+  // Dual-region mode: when user_zip is available, split user-side and DC-side
+  // water using their respective state grid water intensities + DC cooling WUE.
+  // This matches the Journey View methodology so headline and journey agree.
+  let siteWater_liters, gridWater_liters;
+  let isDualRegion = false;
+
+  const loc = user_zip ? lookupZip(user_zip) : null;
+  if (loc && water_per_kwh_override == null) {
+    const resolvedOp = operator_class || getOperatorForActivity(activity_id) || 'hyperscaler_aws';
+    const dcRegion = getNearestRegion(resolvedOp, loc.lat, loc.lng);
+    const userGrid = getStateGridMix(loc.state);
+    const dcGrid = getStateGridMix(dcRegion.state);
+
+    // DC energy ≈ 80% of activity energy (same ratio as Journey View)
+    const dcKwh = base_kwh * 0.8;
+
+    // User side: device energy uses user's grid water intensity
+    // DC side: DC energy uses DC's grid water intensity
+    const userGridWater = device_kwh * userGrid.grid_water_intensity_l_per_kwh;
+    const dcGridWater = dcKwh * dcGrid.grid_water_intensity_l_per_kwh;
+    gridWater_liters = userGridWater + dcGridWater;
+
+    // Site water: only DC-side cooling (user device doesn't use DC cooling)
+    siteWater_liters = dcKwh * siteWue;
+    isDualRegion = true;
+    gridSource = `dual:${userGrid.source}+${dcGrid.source}`;
+    gridWaterIntensity = gridWater_liters / (total_kwh || 1); // effective blended rate
+  } else {
+    siteWater_liters = total_kwh * siteWue;
+    gridWater_liters = total_kwh * gridWaterIntensity;
+  }
+
   const totalWater_liters = siteWater_liters + gridWater_liters;
   const water_ml = totalWater_liters * 1000;
   const siteWater_mL = siteWater_liters * 1000;
@@ -562,7 +598,8 @@ export function recalculate({
     wue: siteWue,       // site WUE (L/kWh) — kept as 'wue' for backward compat
     gridWaterIntensity, // grid water intensity (L/kWh)
     gridSource,
-    gridEstimated: water_per_kwh_override != null ? false : (region.gridEstimated ?? true),
+    gridEstimated: water_per_kwh_override != null ? false : (isDualRegion ? false : (region.gridEstimated ?? true)),
+    isDualRegion,
     wue_source,
     operator_class: resolvedOperator,
     operator_label: operatorObj?.label || 'Industry Average',

@@ -318,6 +318,29 @@ export default function ResultCard({ data, query, model, usage, onTier2Submit, f
   const [researchBadge, setResearchBadge] = useState(null); // 'pending_review' after accepting
   const [traceOpen, setTraceOpen] = useState(false);
 
+  // Read user ZIP for dual-region water math (synced with WaterTrace's localStorage)
+  const [userZip, setUserZip] = useState(() => {
+    try { return localStorage.getItem('mw_user_zip') || ''; }
+    catch { return ''; }
+  });
+
+  // Listen for ZIP changes from WaterTrace (which writes to localStorage)
+  useEffect(() => {
+    function handleStorage(e) {
+      if (e.key === 'mw_user_zip') setUserZip(e.newValue || '');
+    }
+    window.addEventListener('storage', handleStorage);
+    // Also poll on trace open/close since same-tab storage events don't fire
+    const checkZip = () => {
+      try {
+        const z = localStorage.getItem('mw_user_zip') || '';
+        setUserZip(prev => prev !== z ? z : prev);
+      } catch { /* ignore */ }
+    };
+    const interval = setInterval(checkZip, 1000);
+    return () => { window.removeEventListener('storage', handleStorage); clearInterval(interval); };
+  }, []);
+
   // Respond to focusRequest: expand breakdown, scroll to the target field,
   // focus its native control, and briefly highlight it.
   useEffect(() => {
@@ -395,8 +418,10 @@ export default function ResultCard({ data, query, model, usage, onTier2Submit, f
       reference_data: referenceData,
       operator_class: params.operator_class,
       cooling_tech: params.cooling_tech,
+      user_zip: userZip || null,
+      activity_id: data.activity_id || null,
     });
-  }, [params, referenceData]);
+  }, [params, referenceData, userZip, data.activity_id]);
 
   // Power source variants — one recalculation per published power source in
   // the reference data. Empty array until reference data loads or if no

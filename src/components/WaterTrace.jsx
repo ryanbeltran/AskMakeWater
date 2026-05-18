@@ -259,7 +259,7 @@ export default function WaterTrace({
 
             <TraceStage
               emoji={journey.emoji}
-              title="You"
+              title="Your location"
               subtitle={`${journey.loc.city}, ${journey.loc.state} ${zip}`}
               facts={[
                 `${journey.loc.primary_utility} local utility`,

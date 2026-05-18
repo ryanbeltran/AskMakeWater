@@ -210,6 +210,7 @@ Journey View wired to real per-ZIP data with interactive map.
 - New JourneyMap SVG at the top of the journey: two-cluster diagram with activity and data center pins, energy and water source satellites, dashed arc with distance pill, and a legend
 - Automatic service-to-operator routing: Netflix queries route to the nearest AWS region, ChatGPT to Azure, YouTube to Google Cloud, and so on — with fallback to AWS for unknown services
 - State-level grid mix data for TX, CA, VA, NY, IL, WA, OR, IA with real EIA Form 923 numbers; remaining states use US national average with an 'estimated' flag that degrades confidence
+- Water cost math now uses dual-region attribution — your local grid water for your device's energy, the data center's grid water for the data center's energy. More accurate, especially when you and the data center are in different states
 - Dropped the Preview badge — the journey is no longer a hardcoded demo
 - Invalid or non-US ZIP codes show a clear message instead of broken data
 
