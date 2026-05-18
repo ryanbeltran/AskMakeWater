@@ -1,11 +1,12 @@
-import pkg from '../../package.json';
+import changelog from '../data/changelog.json';
+
+const latestVersion = changelog?.[0]?.version || 'v0.0.0';
 
 /**
  * Shared site footer used on every public page.
  *
- * Mirrors the ChatPage footer (post-cleanup): MakeWater attribution,
- * version tag, and feedback link. No "For Educators" link — that's
- * in the top nav now.
+ * Version is auto-read from the first entry in changelog.json so the
+ * footer and What's New on /about always agree.
  */
 export default function SiteFooter() {
   return (
@@ -23,7 +24,13 @@ export default function SiteFooter() {
           </a>
           {' '}501(c)(3)
           <span className="ml-2 text-gray-300">
-            · v{pkg.version}
+            ·{' '}
+            <a
+              href="/about?tab=new"
+              className="text-gray-300 hover:text-mw-water transition-colors no-underline"
+            >
+              {latestVersion}
+            </a>
             {typeof __APP_COMMIT__ !== 'undefined' && ` (${__APP_COMMIT__})`}
           </span>
         </p>

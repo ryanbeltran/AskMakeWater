@@ -161,11 +161,8 @@ export default function WaterTrace() {
 
               {/* ── Power card (⚡ only — no water numbers here) ── */}
               <div className="bg-gray-50 border border-gray-200 rounded-xl p-3">
-                <p className="text-sm font-semibold text-gray-800 mb-0.5">
+                <p className="text-sm font-semibold text-gray-800 mb-1">
                   <span className="mr-1">🔌</span> Power
-                </p>
-                <p className="text-[10px] text-gray-400 mb-2">
-                  Renewable PPA claims ≠ delivered grid power
                 </p>
 
                 {/* Your side — CPS Energy, San Antonio */}
@@ -177,6 +174,7 @@ export default function WaterTrace() {
                   confidence="high"
                   metricType="energy"
                   value="0.12 kWh"
+                  source={{ label: 'CPS Energy 2024', url: 'https://www.cpsenergy.com' }}
                 >
                   <p className="text-[10px] text-gray-500 leading-relaxed">
                     47% gas · 22% coal · 28% renewable
@@ -198,6 +196,7 @@ export default function WaterTrace() {
                   confidence="high"
                   metricType="energy"
                   value="0.09 kWh"
+                  source={{ label: 'EIA Form 923 (2024)', url: 'https://www.eia.gov/electricity/data/eia923/' }}
                 >
                   <p className="text-[10px] text-gray-500 leading-relaxed">
                     33% gas · 31% nuclear · 12% coal · 6% solar · 18% other
@@ -207,27 +206,12 @@ export default function WaterTrace() {
                   </p>
                 </InputSubEntry>
 
-                {/* Source */}
-                <a
-                  href="https://www.eia.gov/electricity/data/eia923/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-[11px] text-gray-400 hover:text-mw-water transition-colors no-underline mt-1"
-                >
-                  Source: EIA Form 923 (2024)
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
-                </a>
               </div>
 
               {/* ── Water card (💧 only — no energy numbers here) ── */}
               <div className="bg-gray-50 border border-gray-200 rounded-xl p-3">
-                <p className="text-sm font-semibold text-gray-800 mb-0.5">
+                <p className="text-sm font-semibold text-gray-800 mb-1">
                   <span className="mr-1">💧</span> Water
-                </p>
-                <p className="text-[10px] text-gray-400 mb-2">
-                  Data center water demand projected to triple by 2030
                 </p>
 
                 {/* Your side — Edwards Aquifer, San Antonio */}
@@ -241,6 +225,7 @@ export default function WaterTrace() {
                   metricType="water"
                   value="504 mL"
                   breakdown="indirect, from your local grid"
+                  source={{ label: 'SAWS drought stages + US Drought Monitor', url: 'https://droughtmonitor.unl.edu' }}
                 >
                   <WaterSourceBadges
                     drought={{
@@ -273,6 +258,7 @@ export default function WaterTrace() {
                   metricType="water"
                   value="405 mL"
                   breakdown="391 mL grid + 14 mL cooling"
+                  source={{ label: 'US Drought Monitor + Loudoun Water', url: 'https://droughtmonitor.unl.edu' }}
                 >
                   <WaterSourceBadges
                     drought={{
@@ -292,18 +278,6 @@ export default function WaterTrace() {
                   />
                 </InputSubEntry>
 
-                {/* Source */}
-                <a
-                  href="https://droughtmonitor.unl.edu"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-[11px] text-gray-400 hover:text-mw-water transition-colors no-underline mt-1"
-                >
-                  Source: US Drought Monitor
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
-                </a>
               </div>
             </div>
           </div>
@@ -311,10 +285,10 @@ export default function WaterTrace() {
           {/* Total water summary */}
           <div className="bg-mw-water-light/40 border border-mw-water/15 rounded-xl px-4 py-3 space-y-1">
             <p className="text-sm font-semibold text-gray-800">
-              Total water for this 1-hour stream: ~1.8 L
+              Total water for this query: ~909 mL
             </p>
             <p className="text-xs text-gray-500">
-              73% from power generation, 27% from cooling
+              98% from power generation, 2% from cooling
             </p>
           </div>
 

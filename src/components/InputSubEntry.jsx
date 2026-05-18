@@ -45,11 +45,12 @@ function MetricTooltip({ text, onClose }) {
  *   value        — e.g. "0.12 kWh" / "504 mL" / "—" / "?"
  *   valueTooltip — tooltip for "—" or "?" values
  *   breakdown    — optional sub-line e.g. "391 mL grid + 14 mL cooling"
+ *   source       — optional { label, url } shown below facts
  *   children     — facts content (grid mix text, WaterSourceBadges, etc.)
  */
 export default function InputSubEntry({
   side, utility, location, confidence, metricType, value,
-  valueTooltip, breakdown, children,
+  valueTooltip, breakdown, source, children,
 }) {
   const [showTip, setShowTip] = useState(false);
   const pill = CONFIDENCE_STYLES[confidence] || CONFIDENCE_STYLES['best-guess'];
@@ -104,6 +105,21 @@ export default function InputSubEntry({
 
       {/* Facts content (grid mix, badges, etc.) */}
       {children && <div className="mt-2">{children}</div>}
+
+      {/* Source link */}
+      {source && (
+        <a
+          href={source.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 text-[10px] text-gray-400 hover:text-mw-water transition-colors no-underline mt-1.5"
+        >
+          Source: {source.label}
+          <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          </svg>
+        </a>
+      )}
     </div>
   );
 }
