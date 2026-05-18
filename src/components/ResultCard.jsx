@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import WaterDrop from './WaterDrop';
 import InteractiveBreakdown from './InteractiveBreakdown';
 import ImproveModal from './ImproveModal';
+import WaterTrace from './WaterTrace';
 import { recalculate, recalculateConfidence, calculateMetaWater, formatWater, DEVICES, REGIONS, OPERATOR_CLASSES, COOLING_TECH, calculatePowerSourceVariants } from '../data/recalculate';
 import AIModelComparison from './AIModelComparison';
 import PowerSourceChart from './PowerSourceChart';
@@ -315,6 +316,14 @@ export default function ResultCard({ data, query, model, usage, onTier2Submit, f
   const [highlightedField, setHighlightedField] = useState(null);
   const [improveOpen, setImproveOpen] = useState(false);
   const [researchBadge, setResearchBadge] = useState(null); // 'pending_review' after accepting
+  const [traceOpen, setTraceOpen] = useState(false);
+
+  // Phase 1 checkpoint gate. Phase 2 will remove this and wire
+  // the section to real per-ZIP lookups for all users.
+  const [showTrace] = useState(() => {
+    try { return localStorage.getItem('mw_trace_preview') === 'true'; }
+    catch { return false; }
+  });
 
   // Respond to focusRequest: expand breakdown, scroll to the target field,
   // focus its native control, and briefly highlight it.
@@ -622,6 +631,37 @@ export default function ResultCard({ data, query, model, usage, onTier2Submit, f
       {/* Power source comparison — collapsed by default, only renders when
           cited/attributed power_sources reference data is available */}
       <PowerSourceChart variants={powerSourceVariants} />
+
+      {/* Water & Energy Journey View — gated behind localStorage flag */}
+      {showTrace && (
+        <div className="border-t border-gray-100">
+          <button
+            onClick={() => setTraceOpen(!traceOpen)}
+            className="w-full px-5 py-3 text-left text-sm font-medium text-mw-water hover:bg-mw-water-light/50 transition-colors flex items-center justify-between cursor-pointer"
+          >
+            <span className="flex items-center gap-1.5">
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l5.447 2.724A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+              </svg>
+              Water &amp; Energy Journey View
+            </span>
+            <svg
+              className={`w-4 h-4 transition-transform duration-200 ${traceOpen ? 'rotate-180' : ''}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          {traceOpen && (
+            <div className="px-5 pb-5">
+              <WaterTrace />
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Expandable breakdown */}
       <div className="border-t border-gray-100">
