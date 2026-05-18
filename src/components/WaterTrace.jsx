@@ -245,6 +245,7 @@ export default function WaterTrace({
             userWatershed={journey.loc.watershed_hint}
             userDroughtLabel={journey.userDrought?.label?.toLowerCase() || ''}
             dcLabel={`Data center · ${journey.dcRegion.operator_label} ${journey.dcRegion.region_id}`}
+            dcTypeLabel="Data center"
             dcCity={`${journey.dcRegion.city}, ${journey.dcRegion.state}`}
             dcUtility={journey.dcGrid.primary_utilities[0] || 'Grid operator'}
             dcWaterUtility={journey.dcRegion.water_utility}

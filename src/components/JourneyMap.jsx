@@ -7,7 +7,7 @@
  */
 
 const VIEWBOX_W = 680;
-const VIEWBOX_H = 440;
+const VIEWBOX_H = 460;
 
 // Pin positions (left cluster = user, right cluster = DC)
 const USER_CX = 155;
@@ -17,7 +17,7 @@ const MAIN_R = 52;
 const SAT_R = 28;
 const SAT_OFFSET_X = 90;
 const SAT_ENERGY_CY = 110;
-const SAT_WATER_CY = 330;
+const SAT_WATER_CY = 350;
 
 // Arc path from user to DC (curves upward)
 const ARC_PATH = `M ${USER_CX + MAIN_R} ${MAIN_CY} Q ${(USER_CX + DC_CX) / 2} 10 ${DC_CX - MAIN_R} ${MAIN_CY}`;
@@ -61,6 +61,7 @@ export default function JourneyMap({
   userWatershed = '',
   userDroughtLabel = '',
   dcLabel = 'Data center',
+  dcTypeLabel = 'Data center',
   dcCity = '',
   dcUtility = '',
   dcWaterUtility = '',
@@ -87,7 +88,7 @@ export default function JourneyMap({
       <svg
         viewBox={`0 0 ${VIEWBOX_W} ${VIEWBOX_H}`}
         className="w-full"
-        style={{ maxHeight: 440 }}
+        style={{ maxHeight: 460 }}
         role="img"
         aria-label={`Map showing data traveling ${distanceStr} miles from ${userCity} to ${dcCity}`}
       >
@@ -140,10 +141,13 @@ export default function JourneyMap({
         <text x={USER_CX} y={MAIN_CY + 2} textAnchor="middle" dominantBaseline="central" fontSize="32">{activityEmoji}</text>
 
         {/* User labels */}
-        <text x={USER_CX} y={MAIN_CY + 68} textAnchor="middle" fill="#1F2937" fontSize="16" fontWeight="600">
+        <text x={USER_CX} y={MAIN_CY + 66} textAnchor="middle" fill="#9CA3AF" fontSize="11" fontWeight="600" letterSpacing="0.3">
+          YOUR LOCATION
+        </text>
+        <text x={USER_CX} y={MAIN_CY + 82} textAnchor="middle" fill="#1F2937" fontSize="16" fontWeight="600">
           {userCity.split(',')[0]}
         </text>
-        <text x={USER_CX} y={MAIN_CY + 84} textAnchor="middle" fill="#6B7280" fontSize="14">
+        <text x={USER_CX} y={MAIN_CY + 98} textAnchor="middle" fill="#6B7280" fontSize="14">
           {userCity.includes(',') ? userCity.split(',').slice(1).join(',').trim() : ''}
         </text>
 
@@ -174,10 +178,13 @@ export default function JourneyMap({
         <text x={DC_CX} y={MAIN_CY + 2} textAnchor="middle" dominantBaseline="central" fontSize="32">🏢</text>
 
         {/* DC labels */}
-        <text x={DC_CX} y={MAIN_CY + 68} textAnchor="middle" fill="#1F2937" fontSize="16" fontWeight="600">
+        <text x={DC_CX} y={MAIN_CY + 66} textAnchor="middle" fill="#9CA3AF" fontSize="11" fontWeight="600" letterSpacing="0.3">
+          {dcTypeLabel.toUpperCase()}
+        </text>
+        <text x={DC_CX} y={MAIN_CY + 82} textAnchor="middle" fill="#1F2937" fontSize="16" fontWeight="600">
           {dcCity.split(',')[0]}
         </text>
-        <text x={DC_CX} y={MAIN_CY + 84} textAnchor="middle" fill="#6B7280" fontSize="14">
+        <text x={DC_CX} y={MAIN_CY + 98} textAnchor="middle" fill="#6B7280" fontSize="14">
           {dcCity.includes(',') ? dcCity.split(',').slice(1).join(',').trim() : ''}
         </text>
       </svg>
