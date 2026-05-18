@@ -7,11 +7,16 @@
 # `git push` so both commits go together.
 #
 # Skip conditions:
-#  - SKIP_CHANGELOG=1 env var set
+#  - SKIP_CHANGELOG=1 env var set (default — manual changelog preferred)
 #  - No upstream configured (first push of a new branch)
 #  - Nothing ahead of upstream
 #  - Pushing to a branch other than main
+#
+# Currently disabled: manual changelog entries are preferred over AI-generated
+# ones, and the Anthropic API key in .env.local is expired. To re-enable,
+# set SKIP_CHANGELOG=0 and update the API key.
 
+SKIP_CHANGELOG="${SKIP_CHANGELOG:-1}"
 if [ "$SKIP_CHANGELOG" = "1" ]; then
   exit 0
 fi
