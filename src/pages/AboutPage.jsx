@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import changelog from '../data/changelog.json';
 import { computeCostFromTokens, formatTokens, formatWater, formatEnergy } from '../data/changelogCost';
 import PageLayout from '../components/PageLayout';
+import { trackEvent } from '../lib/stats';
 
 const TABS = [
   { id: 'why', label: 'Why We Built This' },
@@ -62,6 +63,10 @@ const FAQ_ITEMS = [
     a: `Tiers I through IV, defined by the Uptime Institute, measure redundancy, fault tolerance, and guaranteed uptime — not water efficiency. A Tier IV facility has fully redundant infrastructure and 99.995% availability. Higher-tier facilities tend to be hyperscale operations that also invest in efficient cooling, so they often have lower WUE in practice. The informal "Tier V" designation, used by some operators, includes the requirement to operate without water-based cooling entirely — making water independence a design goal rather than a side effect.`,
   },
   {
+    q: 'What does MakeWater track?',
+    a: `We count anonymous aggregate events — how many queries we get per day, which pages get visited, how many users explore the journey view. We do NOT track individual users, IP addresses, or anything that could identify you. ZIP codes you enter stay in your browser's local storage and are not sent to our servers. We use no third-party analytics services — just simple self-hosted counters.`,
+  },
+  {
     q: 'What is MakeWater?',
     a: `MakeWater is a 501(c)(3) nonprofit focused on water and environmental STEM education. Our core program uses hands-on water purification kits in classrooms, and we've reached over 10,000 participants in underserved Texas communities. This calculator is our expansion into helping everyone understand water's hidden role in our digital lives. Learn more at makewater.org.`,
   },
@@ -93,6 +98,8 @@ export default function AboutPage() {
     ? searchParams.get('tab')
     : 'why';
   const [tab, setTab] = useState(initialTab);
+
+  useEffect(() => { trackEvent('page_view', 'about'); }, []);
 
   return (
     <PageLayout>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { recalculate, formatWater, REGIONS } from '../data/recalculate';
+import { trackEvent } from '../lib/stats';
 
 const PHASES = [
   'Searching for published sources...',
@@ -63,6 +64,7 @@ export default function ImproveModal({ open, onClose, data, onAccept }) {
     setStage('loading');
     setPhaseIdx(0);
     setError(null);
+    trackEvent('deep_research_started');
 
     try {
       const res = await fetch('/api/research', {

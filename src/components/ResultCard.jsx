@@ -9,6 +9,7 @@ import { recalculate, recalculateConfidence, calculateMetaWater, formatWater, DE
 import AIModelComparison from './AIModelComparison';
 import PowerSourceChart from './PowerSourceChart';
 import { getReferenceData } from '../data/referenceDataClient';
+import { trackEvent } from '../lib/stats';
 
 const BOTTLE_ML = 500;
 
@@ -700,6 +701,7 @@ export default function ResultCard({ data, query, model, usage, onTier2Submit, f
                     journeyCtx.setZip(val);
                     setZipEditing(false);
                     setZipInput('');
+                    trackEvent('zip_entered');
                   }
                 }}
                 className="flex items-center gap-2"
@@ -740,7 +742,7 @@ export default function ResultCard({ data, query, model, usage, onTier2Submit, f
       {/* ─── Water & Energy Journey Detail (expandable) ─── */}
       <div className="border-t border-gray-100">
         <button
-          onClick={() => setTraceOpen(!traceOpen)}
+          onClick={() => { if (!traceOpen) trackEvent('journey_expanded'); setTraceOpen(!traceOpen); }}
           className="w-full px-5 py-3 text-left text-sm font-medium text-mw-water hover:bg-mw-water-light/50 transition-colors flex items-center justify-between cursor-pointer"
         >
           <span className="flex items-center gap-1.5">

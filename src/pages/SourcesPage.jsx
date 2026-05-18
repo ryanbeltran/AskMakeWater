@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getReferenceData, getPowerSourceWaterPerKwh } from '../data/referenceDataClient';
 import PageLayout from '../components/PageLayout';
+import { trackEvent } from '../lib/stats';
 
 const CATEGORY_LABELS = {
   power_sources: 'Power Sources',
@@ -68,6 +69,8 @@ function SourceCard({ dataset }) {
 export default function SourcesPage() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => { trackEvent('page_view', 'sources'); }, []);
 
   useEffect(() => {
     getReferenceData()

@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import evalTests from '../data/evalTests.json';
 import ReferenceDataPanel from '../components/admin/ReferenceDataPanel';
 import DataIngestionPanel from '../components/admin/DataIngestionPanel';
+import { trackEvent } from '../lib/stats';
 
 const CATEGORIES = ['all', 'streaming', 'ai', 'social', 'gaming', 'crypto', 'email', 'edge_case', 'greeting', 'off_catalog', 'off_catalog_digital', 'general_energy'];
 
@@ -297,6 +298,147 @@ function formatDraftDuration(sec) {
   if (sec < 60) return `${Math.round(sec)}s`;
   if (sec < 3600) return `${Math.round(sec / 60)}min`;
   return `${(sec / 3600).toFixed(1)}h`;
+}
+
+/**
+ * Inline SVG sparkline for a 30-day data series.
+ */
+function Sparkline({ data, width = 200, height = 32 }) {
+  if (!data || data.length === 0) return <span className="text-[10px] text-gray-300">No data</span>;
+  const max = Math.max(...data.map(d => d.count), 1);
+  const points = data.map((d, i) => {
+    const x = (i / Math.max(data.length - 1, 1)) * width;
+    const y = height - (d.count / max) * (height - 4) - 2;
+    return `${x},${y}`;
+  }).join(' ');
+
+  const counts = data.map(d => d.count);
+  const sum = counts.reduce((a, b) => a + b, 0);
+  const avg = (sum / counts.length).toFixed(1);
+  const min = Math.min(...counts);
+  const maxVal = Math.max(...counts);
+
+  return (
+    <div>
+      <svg width={width} height={height} className="block">
+        <polyline points={points} fill="none" stroke="#378ADD" strokeWidth={1.5} strokeLinejoin="round" />
+      </svg>
+      <div className="flex gap-3 text-[9px] text-gray-400 mt-0.5">
+        <span>min {min}</span>
+        <span>max {maxVal}</span>
+        <span>avg {avg}</span>
+      </div>
+    </div>
+  );
+}
+
+function StatsPanel() {
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const refreshTimer = useRef(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const password = sessionStorage.getItem('admin_auth') || '';
+      const res = await fetch('/api/stat', {
+        headers: { 'X-Admin-Password': password },
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setStats(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    load();
+    refreshTimer.current = setInterval(load, 60000);
+    return () => clearInterval(refreshTimer.current);
+  }, [load]);
+
+  if (loading && !stats) return <p className="text-sm text-gray-400">Loading stats...</p>;
+  if (error && !stats) return <p className="text-sm text-red-500">Error: {error}</p>;
+
+  const counters = stats?.counters || {};
+  const daily = stats?.daily || {};
+
+  // Sort counters: page_view variants first, then by count descending
+  const sortedKeys = Object.keys(counters).sort((a, b) => {
+    const aPage = a.startsWith('page_view');
+    const bPage = b.startsWith('page_view');
+    if (aPage && !bPage) return -1;
+    if (!aPage && bPage) return 1;
+    return (counters[b] || 0) - (counters[a] || 0);
+  });
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-sm font-semibold text-gray-800 uppercase tracking-wider">Site Stats</h2>
+        <button
+          onClick={load}
+          disabled={loading}
+          className="text-xs px-3 py-1.5 border border-gray-200 text-gray-600 rounded-lg font-medium hover:border-mw-water hover:text-mw-water disabled:opacity-40 transition-colors cursor-pointer"
+        >
+          {loading ? 'Loading...' : 'Refresh'}
+        </button>
+      </div>
+
+      <p className="text-[10px] text-gray-400">Auto-refreshes every 60s. All counts are anonymous aggregates.</p>
+
+      {/* Lifetime totals table */}
+      <div className="bg-white rounded-2xl border border-gray-200 p-5">
+        <h3 className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-3">Lifetime Totals</h3>
+        {sortedKeys.length === 0 ? (
+          <p className="text-sm text-gray-400">No events recorded yet.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-100">
+                  <th className="text-left text-[10px] text-gray-400 font-medium uppercase py-1.5 pr-4">Event</th>
+                  <th className="text-right text-[10px] text-gray-400 font-medium uppercase py-1.5 w-24">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sortedKeys.map(key => (
+                  <tr key={key} className="border-b border-gray-50">
+                    <td className="py-1.5 pr-4 text-xs text-gray-700 font-mono">{key}</td>
+                    <td className="py-1.5 text-right text-xs text-gray-800 font-semibold tabular-nums">
+                      {(counters[key] || 0).toLocaleString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Last 30 days sparklines */}
+      <div className="bg-white rounded-2xl border border-gray-200 p-5">
+        <h3 className="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-3">Last 30 Days</h3>
+        {sortedKeys.length === 0 ? (
+          <p className="text-sm text-gray-400">No daily data yet.</p>
+        ) : (
+          <div className="space-y-4">
+            {sortedKeys.map(key => (
+              <div key={key} className="flex items-start gap-4 flex-wrap sm:flex-nowrap">
+                <span className="text-[11px] text-gray-600 font-mono w-40 flex-shrink-0 pt-1 truncate">{key}</span>
+                <Sparkline data={daily[key] || []} />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
 function PasswordGate({ onAuth }) {
@@ -783,6 +925,7 @@ export default function AdminPage() {
               { id: 'reference', label: 'Reference Data' },
               { id: 'ingest', label: 'Data Ingestion' },
               { id: 'research', label: 'Research Drafts' },
+              { id: 'stats', label: 'Stats' },
             ].map(tab => (
               <button
                 key={tab.id}
@@ -798,6 +941,7 @@ export default function AdminPage() {
             ))}
           </div>
 
+          {activeTab === 'stats' && <StatsPanel />}
           {activeTab === 'suggestions' && <SuggestionsPanel />}
           {activeTab === 'reference' && <ReferenceDataPanel refreshKey={referenceRefreshKey} />}
           {activeTab === 'ingest' && (

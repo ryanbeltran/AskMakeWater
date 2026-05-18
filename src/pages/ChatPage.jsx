@@ -12,6 +12,7 @@ import GeometricBackground from '../components/GeometricBackground';
 import SuggestCorrectionForm from '../components/SuggestCorrectionForm';
 import EmailSignup from '../components/EmailSignup';
 import { computeChangelogTotals, getFoundingCost, formatWater, formatEnergy } from '../data/changelogCost';
+import { trackEvent } from '../lib/stats';
 
 const EXAMPLE_QUESTIONS = [
   'How much water does it cost to stream Netflix for 2 hours?',
@@ -85,6 +86,9 @@ export default function ChatPage() {
   const [bottleMl, setBottleMl] = useState(0);
   const [bottleMax, setBottleMax] = useState(500);
   const [recentQueries, setRecentQueries] = useState([]);
+
+  // Track page view
+  useEffect(() => { trackEvent('page_view', 'home'); }, []);
 
   // Fetch global usage on mount
   useEffect(() => {
@@ -194,6 +198,7 @@ export default function ChatPage() {
       // Only report usage for new queries, not repeat searches
       if (!isRepeat) {
         reportUsage(text.trim(), data.usage);
+        trackEvent('query_submitted');
       }
 
       // Fire-and-forget: log estimated-tier classifications to /api/suggest
@@ -304,27 +309,6 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
                 </div>
               </div>
 
-              {/* Build-cost transparency widget */}
-              {(() => {
-                const totals = computeChangelogTotals();
-                const founding = getFoundingCost();
-                return (
-                  <div className="w-full max-w-lg mb-6 text-left">
-                    <div className="bg-white/80 border border-gray-100 rounded-xl px-4 py-3 text-[11px] text-gray-400 leading-relaxed space-y-0.5">
-                      <p>
-                        Launching v1.0.0 cost {formatWater(founding?.water_ml || 0)} of water and {formatEnergy(founding?.energy_wh || 0)}.
-                      </p>
-                      <p>
-                        {totals.versions} updates later, cumulative build cost: {formatWater(totals.totalWaterMl)} water, {formatEnergy(totals.totalEnergyWh)}.
-                      </p>
-                      <p>
-                        <a href="/about?tab=new" className="text-mw-water hover:underline">See per-version costs →</a>
-                      </p>
-                    </div>
-                  </div>
-                );
-              })()}
-
               {/* Input area */}
               <div className="w-full max-w-lg mb-8 bg-white rounded-2xl border border-gray-200 p-4 shadow-sm">
                 <form onSubmit={handleSubmit} className="flex gap-2">
@@ -366,6 +350,27 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
                   </button>
                 ))}
               </div>
+
+              {/* Build-cost transparency widget */}
+              {(() => {
+                const totals = computeChangelogTotals();
+                const founding = getFoundingCost();
+                return (
+                  <div className="w-full max-w-lg mb-4 text-left">
+                    <div className="bg-white/80 border border-gray-100 rounded-xl px-4 py-3 text-[11px] text-gray-400 leading-relaxed space-y-0.5">
+                      <p>
+                        Launching v1.0.0 cost {formatWater(founding?.water_ml || 0)} of water and {formatEnergy(founding?.energy_wh || 0)}.
+                      </p>
+                      <p>
+                        {totals.versions} updates later, cumulative build cost: {formatWater(totals.totalWaterMl)} water, {formatEnergy(totals.totalEnergyWh)}.
+                      </p>
+                      <p>
+                        <a href="/about?tab=new" className="text-mw-water hover:underline">See per-version costs →</a>
+                      </p>
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Email signup */}
               <div className="w-full max-w-lg mb-8">

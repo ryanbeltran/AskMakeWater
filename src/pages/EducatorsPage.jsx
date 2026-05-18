@@ -1,8 +1,12 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import EmailSignup from '../components/EmailSignup';
 import PageLayout from '../components/PageLayout';
+import { trackEvent } from '../lib/stats';
 
 export default function EducatorsPage() {
+  useEffect(() => { trackEvent('page_view', 'educators'); }, []);
+
   return (
     <PageLayout>
       <div className="max-w-3xl mx-auto px-4 py-12">

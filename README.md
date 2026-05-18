@@ -205,13 +205,17 @@ This project is in early development. If you'd like to help:
 ## What's New
 
 ### v1.13.0 — 2026-05-18
-Map promoted to always-visible on every result with default ZIP fallback.
+Map promoted to always-visible + lightweight anonymous analytics.
 - The journey map now appears on every result right below the confidence meter — no expansion needed
 - Detailed data breakdown (data path and resource cards) moved to the first expandable, so the visual and the data live together
 - First-time visitors see a Dallas, TX default location with a prominent invite to enter their own ZIP for personalized routing
 - ZIP context line under the map clearly labels whether you're seeing the default or your own location, with inline ZIP editor
 - Journey computation extracted to shared useJourneyContext hook so the map and the expanded detail always show consistent data
 - Expandable reordered: journey detail first, then power source comparison, then calculation breakdown
+- Anonymous aggregate analytics: page views, queries, ZIP entries, journey expansions, and deep-research starts tracked as simple Redis counters — no personal data stored
+- New Stats tab in the admin dashboard with lifetime totals table and 30-day sparklines per event
+- Build-cost transparency widget moved to sit just above the email signup on the home page
+- New privacy FAQ entry explaining what MakeWater tracks (aggregate counts only, no PII)
 
 ### v1.12.0 — 2026-05-18
 Journey View wired to real per-ZIP data with interactive map.

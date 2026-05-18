@@ -1,4 +1,5 @@
 import changelog from '../data/changelog.json';
+import { trackEvent } from '../lib/stats';
 
 const latestVersion = changelog?.[0]?.version || 'v0.0.0';
 
@@ -39,6 +40,7 @@ export default function SiteFooter() {
           target="_blank"
           rel="noopener noreferrer"
           className="text-[11px] text-gray-500 hover:text-mw-water transition-colors no-underline"
+          onClick={() => trackEvent('feedback_clicked')}
         >
           Feedback
         </a>
