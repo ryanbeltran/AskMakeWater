@@ -1,13 +1,13 @@
 /**
  * WaterTrace — Water & Energy Journey View content.
  *
- * Phase 1: hardcoded San Antonio → Netflix trace data.
- * Phase 2 will wire to real per-ZIP lookups.
+ * Preview release: hardcoded San Antonio → Netflix journey data.
+ * Next release will wire to real per-ZIP lookups.
  */
 import { useState } from 'react';
 import TraceStage from './TraceStage';
 
-// ─── Hardcoded Phase 1 trace data ─────────────────────────────────
+// ─── Hardcoded preview journey data ───────────────────────────────
 // San Antonio 78201 → Netflix HD streaming (1 hr, 65" OLED TV)
 // Each stage cites its source in comments.
 
@@ -162,12 +162,12 @@ export default function WaterTrace() {
             type="submit"
             className="px-3 py-1.5 text-sm font-medium text-white bg-mw-water rounded-lg hover:bg-mw-water-dark transition-colors cursor-pointer flex-shrink-0"
           >
-            See the trace
+            See the journey
           </button>
         </form>
       ) : (
         <div className="flex items-center gap-2 text-xs text-gray-500">
-          <span>Showing trace for ZIP <strong className="text-gray-700">{zip}</strong></span>
+          <span>Showing journey for ZIP <strong className="text-gray-700">{zip}</strong></span>
           <button
             onClick={handleClearZip}
             className="text-mw-water hover:underline cursor-pointer"
@@ -180,10 +180,10 @@ export default function WaterTrace() {
       {/* Trace stages — only shown after ZIP entry */}
       {zip && (
         <>
-          {/* Phase 1 notice */}
+          {/* Preview notice */}
           <p className="text-[10px] text-gray-400 italic leading-relaxed bg-gray-50 rounded-lg px-3 py-2">
-            Phase 1 preview — currently shows the San Antonio → Netflix example regardless
-            of ZIP entered. Phase 2 will use your actual ZIP.
+            Preview: currently shows a San Antonio → Netflix example for every ZIP.
+            Real per-location routing is coming soon.
           </p>
 
           {/* 5-stage trace */}
@@ -207,7 +207,7 @@ export default function WaterTrace() {
             </p>
           </div>
 
-          {/* What this trace doesn't yet model */}
+          {/* What this journey doesn't yet model */}
           <div>
             <button
               onClick={() => setShowDisclosure(!showDisclosure)}
@@ -221,7 +221,7 @@ export default function WaterTrace() {
               >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
-              What this trace doesn&apos;t yet model
+              What this journey doesn&apos;t yet model
             </button>
 
             {showDisclosure && (

@@ -1,5 +1,16 @@
 [
   {
+    "date": "2026-05-18",
+    "version": "v1.10.0",
+    "summary": "Water & Energy Journey View (preview) — trace the path from your home to the data center to the water source.",
+    "changes": [
+      "New expandable section on every result: 'Water & Energy Journey View' traces the full path of a digital activity from your location through the network, data center, power grid, and water source",
+      "5-stage journey with cited sources, confidence badges, and connecting visual rail between stages",
+      "Enter your ZIP code to see the journey — currently shows a San Antonio to Netflix example while real per-location routing is in development",
+      "Total water summary with power generation vs cooling breakdown, plus disclosure of factors not yet modeled"
+    ]
+  },
+  {
     "date": "2026-05-13",
     "version": "v1.9.0",
     "summary": "Deep-research CTA for low-confidence results + duration extraction fix.",

@@ -204,6 +204,13 @@ This project is in early development. If you'd like to help:
 <!-- CHANGELOG:START -->
 ## What's New
 
+### v1.10.0 — 2026-05-18
+Water & Energy Journey View (preview) — trace the path from your home to the data center to the water source.
+- New expandable section on every result: 'Water & Energy Journey View' traces the full path of a digital activity from your location through the network, data center, power grid, and water source
+- 5-stage journey with cited sources, confidence badges, and connecting visual rail between stages
+- Enter your ZIP code to see the journey — currently shows a San Antonio to Netflix example while real per-location routing is in development
+- Total water summary with power generation vs cooling breakdown, plus disclosure of factors not yet modeled
+
 ### v1.9.0 — 2026-05-13
 Deep-research CTA for low-confidence results + duration extraction fix.
 - New 'Improve this estimate' button on low-confidence (<40%) results — uses Sonnet + web search to find published wattage data, with side-by-side comparison, source cards, and edit-before-saving flow
@@ -233,11 +240,6 @@ Indirect grid water added to every estimate — the headline number now includes
 - 40 regions updated with grid water intensity values based on EESI 2023 analysis of LBNL/EIA data, scaled by each region's renewable energy fraction
 - US national default grid water intensity: 4.54 L/kWh; Texas-specific value from UT COMPASS 2025: 3.63 L/kWh
 - Calculation chain in the interactive breakdown shows the full site + grid decomposition with labeled sources
-
-### v1.5.0 — 2026-05-13
-Five new reference sources and expanded FAQ content.
-- Added EESI 2023 water-energy nexus analysis, UT Austin COMPASS 2025 Texas grid study, SourceMaterial/Guardian Amazon investigation, Kairos Fellowship Google water research, and Amazon 2024 Sustainability Report to the sources page
-- Updated FAQ entries on hyperscaler water use, location impact, and the project's own AI usage to reflect the new site + grid breakdown and operator class features
 <!-- CHANGELOG:END -->
 
 ---
