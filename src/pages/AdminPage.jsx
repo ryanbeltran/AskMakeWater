@@ -346,7 +346,10 @@ function StatsPanel() {
       const res = await fetch('/api/stat', {
         headers: { 'X-Admin-Password': password },
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || body.detail || `HTTP ${res.status}`);
+      }
       const data = await res.json();
       setStats(data);
     } catch (err) {
@@ -362,8 +365,14 @@ function StatsPanel() {
     return () => clearInterval(refreshTimer.current);
   }, [load]);
 
-  if (loading && !stats) return <p className="text-sm text-gray-400">Loading stats...</p>;
-  if (error && !stats) return <p className="text-sm text-red-500">Error: {error}</p>;
+  if (loading && !stats) return <p className="text-sm text-gray-400 animate-pulse">Loading stats...</p>;
+  if (error && !stats) return (
+    <div className="bg-red-50 border border-red-200 rounded-xl p-4 space-y-2">
+      <p className="text-sm text-red-700 font-medium">Failed to load stats</p>
+      <p className="text-xs text-red-500">{error}</p>
+      <button onClick={load} className="text-xs text-red-600 underline cursor-pointer">Retry</button>
+    </div>
+  );
 
   const counters = stats?.counters || {};
   const daily = stats?.daily || {};
@@ -391,6 +400,12 @@ function StatsPanel() {
       </div>
 
       <p className="text-[10px] text-gray-400">Auto-refreshes every 60s. All counts are anonymous aggregates.</p>
+
+      {stats?.warning && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+          <p className="text-xs text-amber-700">{stats.warning}</p>
+        </div>
+      )}
 
       {/* Lifetime totals table */}
       <div className="bg-white rounded-2xl border border-gray-200 p-5">

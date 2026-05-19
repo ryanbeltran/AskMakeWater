@@ -75,36 +75,37 @@ export default async function handler(req, res) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    if (!r) return res.status(200).json({ counters: {}, daily: {} });
+    if (!r) return res.status(200).json({ counters: {}, daily: {}, dates: [] });
+
+    const counters = {};
+    const dailyData = {};
+    const dates = [];
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      dates.push(d.toISOString().slice(0, 10));
+    }
 
     try {
-      // Scan for all counter keys
-      const counters = {};
-      let cursor = 0;
+      // Discover all counter keys via SCAN (handle cursor as string or number)
+      let cursor = '0';
+      let iterations = 0;
       do {
-        const [next, keys] = await r.scan(cursor, { match: 'stats:counter:*', count: 200 });
-        cursor = next;
-        if (keys.length > 0) {
+        const result = await r.scan(cursor, { match: 'stats:counter:*', count: 200 });
+        const [next, keys] = result;
+        cursor = String(next);
+        if (keys && keys.length > 0) {
           const values = await r.mget(...keys);
           keys.forEach((k, i) => {
             const label = k.replace('stats:counter:', '');
             counters[label] = parseInt(values[i], 10) || 0;
           });
         }
-      } while (cursor !== 0);
+        iterations++;
+        if (iterations > 50) break; // safety cap
+      } while (cursor !== '0');
 
-      // Fetch last 30 days for each known event
-      const dailyData = {};
-      const dateStr = today();
-      const dates = [];
-      for (let i = 0; i < 30; i++) {
-        const d = new Date();
-        d.setDate(d.getDate() - i);
-        dates.push(d.toISOString().slice(0, 10));
-      }
-      dates.reverse();
-
-      // Collect all event keys (unique events from counters)
+      // Fetch daily counts for each discovered event
       const eventKeys = Object.keys(counters);
       for (const eventKey of eventKeys) {
         const dailyKeys = dates.map(d => `stats:daily:${eventKey}:${d}`);
@@ -117,7 +118,24 @@ export default async function handler(req, res) {
 
       return res.status(200).json({ counters, daily: dailyData, dates });
     } catch (err) {
-      return res.status(500).json({ error: 'Redis read failed' });
+      const msg = err?.message || String(err);
+      console.error('Stats GET error:', msg);
+
+      // If we got partial data before the error, return what we have
+      if (Object.keys(counters).length > 0) {
+        return res.status(200).json({
+          counters,
+          daily: dailyData,
+          dates,
+          warning: `Partial data — ${msg}`,
+        });
+      }
+
+      const isQuota = msg.includes('max requests limit') || msg.includes('limit exceeded');
+      return res.status(isQuota ? 429 : 500).json({
+        error: isQuota ? 'Redis quota exceeded — stats will resume when the monthly limit resets' : 'Redis read failed',
+        detail: msg,
+      });
     }
   }
 
