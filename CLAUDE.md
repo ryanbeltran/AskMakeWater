@@ -27,12 +27,17 @@ Every shipped version must include a `tokens_estimated` field in its
 `src/data/changelog.json` entry. This feeds the build-cost transparency
 widget on the home page and per-version cost lines on the About page.
 
-### How to estimate tokens
+### How to measure tokens
 
-- Count approximate input + output tokens across all AI coding sessions
-- Small bugfix: 8K–30K tokens
-- Medium feature: 60K–120K tokens
-- Large feature: 150K–300K tokens
+Token counts should come from actual session data, not guesses:
+- Parse the Claude Code JSONL transcript (`.claude/projects/…/*.jsonl`)
+- Count **output tokens** from assistant messages with a `stop_reason`
+- Deduplicate by message ID to avoid counting streaming chunks twice
+- Record the model used (e.g. `claude-opus-4-6`) in the `model` field
+
+Energy per token varies by model:
+- Sonnet/Haiku class: 0.14 Wh per 1K tokens
+- Opus class: 0.42 Wh per 1K tokens (~3× Sonnet)
 
 ### What updates automatically
 

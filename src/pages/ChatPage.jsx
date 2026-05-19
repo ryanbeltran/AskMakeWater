@@ -11,7 +11,7 @@ import TokenCalculator from '../components/TokenCalculator';
 import GeometricBackground from '../components/GeometricBackground';
 import SuggestCorrectionForm from '../components/SuggestCorrectionForm';
 import EmailSignup from '../components/EmailSignup';
-import { computeChangelogTotals, getFoundingCost, formatWater, formatEnergy } from '../data/changelogCost';
+import { computeChangelogTotals, getFoundingCost, formatWater, formatEnergy, formatTokens } from '../data/changelogCost';
 import { trackEvent } from '../lib/stats';
 
 const EXAMPLE_QUESTIONS = [
@@ -359,10 +359,13 @@ Provide a brief adjustment to the water estimate based on their specific setup. 
                   <div className="w-full max-w-lg mb-4 text-left">
                     <div className="bg-white/80 border border-gray-100 rounded-xl px-4 py-3 text-[11px] text-gray-400 leading-relaxed space-y-0.5">
                       <p>
-                        Launching v1.0.0 cost {formatWater(founding?.water_ml || 0)} of water and {formatEnergy(founding?.energy_wh || 0)}.
+                        Launching v1.0.0 cost {formatTokens(founding?.tokens || 0)} tokens, {formatWater(founding?.water_ml || 0)} of water, and {formatEnergy(founding?.energy_wh || 0)}.
                       </p>
                       <p>
-                        {totals.versions} updates later, cumulative build cost: {formatWater(totals.totalWaterMl)} water, {formatEnergy(totals.totalEnergyWh)}.
+                        {totals.versions} updates later, cumulative: {formatTokens(totals.totalTokens)} tokens, {formatWater(totals.totalWaterMl)} water, {formatEnergy(totals.totalEnergyWh)}.
+                      </p>
+                      <p className="text-gray-300">
+                        All versions built with Claude Opus 4.6.
                       </p>
                       <p>
                         <a href="/about?tab=new" className="text-mw-water hover:underline">See per-version costs →</a>

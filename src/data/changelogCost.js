@@ -1,33 +1,40 @@
 /**
- * changelogCost.js — Convert token estimates from changelog.json into
- * water (mL) and energy (Wh) costs, using the same meta-cost formula
- * the app uses for its own query accounting.
+ * changelogCost.js — Convert token counts from changelog.json into
+ * water (mL) and energy (Wh) costs.
  *
- * Formula (matches recalculate.js / calculateMetaWater):
- *   energy_wh  = (tokens / 1000) × 0.14
- *   water_ml   = (energy_wh / 1000) × 1800
+ * Token counts are measured from actual Claude Code session transcripts
+ * (output tokens — what the model wrote: code, explanations, tool calls).
  *
- * The 0.14 Wh/1K-token figure comes from industry estimates of
- * inference energy for models in the Sonnet/Haiku class.  The 1.8 L/kWh
- * water intensity is the US-average blended site + grid figure.
+ * Energy per token varies by model class:
+ *   Haiku/Sonnet class:  0.14 Wh per 1K tokens
+ *   Opus class:          0.42 Wh per 1K tokens  (~3× Sonnet)
+ *
+ * Water intensity: 1.8 L/kWh (US-average blended site + grid).
  */
 
 import changelog from './changelog.json';
 
 // ── Conversion constants ──────────────────────────────────────────
-const WH_PER_1K_TOKENS = 0.14;
-const WATER_ML_PER_KWH = 1800; // 1.8 L/kWh = 1800 mL/kWh
+const WH_PER_1K_TOKENS_DEFAULT = 0.14;      // Sonnet/Haiku class
+const WH_PER_1K_TOKENS_OPUS = 0.42;         // Opus class (~3× Sonnet)
+const WATER_ML_PER_KWH = 1800;              // 1.8 L/kWh = 1800 mL/kWh
+
+/** Get energy factor for a model string. */
+function whPer1kTokens(model) {
+  if (model && model.includes('opus')) return WH_PER_1K_TOKENS_OPUS;
+  return WH_PER_1K_TOKENS_DEFAULT;
+}
 
 // ── Core math ─────────────────────────────────────────────────────
 
 /** Watt-hours consumed by `tokens` inference tokens. */
-export function tokensToEnergyWh(tokens) {
-  return (tokens / 1000) * WH_PER_1K_TOKENS;
+export function tokensToEnergyWh(tokens, model) {
+  return (tokens / 1000) * whPer1kTokens(model);
 }
 
 /** Millilitres of water attributable to `tokens` inference tokens. */
-export function tokensToWaterMl(tokens) {
-  const kwh = tokensToEnergyWh(tokens) / 1000;
+export function tokensToWaterMl(tokens, model) {
+  const kwh = tokensToEnergyWh(tokens, model) / 1000;
   return kwh * WATER_ML_PER_KWH;
 }
 
@@ -54,10 +61,10 @@ export function formatTokens(tokens) {
 // ── Aggregate helpers ─────────────────────────────────────────────
 
 /** Cost object for a single changelog entry. */
-export function computeCostFromTokens(tokens) {
-  const energy_wh = tokensToEnergyWh(tokens);
-  const water_ml = tokensToWaterMl(tokens);
-  return { tokens, energy_wh, water_ml };
+export function computeCostFromTokens(tokens, model) {
+  const energy_wh = tokensToEnergyWh(tokens, model);
+  const water_ml = tokensToWaterMl(tokens, model);
+  return { tokens, energy_wh, water_ml, model };
 }
 
 /** Totals across the entire changelog. */
@@ -68,9 +75,10 @@ export function computeChangelogTotals() {
 
   for (const entry of changelog) {
     const t = entry.tokens_estimated || 0;
+    const m = entry.model || null;
     totalTokens += t;
-    totalEnergyWh += tokensToEnergyWh(t);
-    totalWaterMl += tokensToWaterMl(t);
+    totalEnergyWh += tokensToEnergyWh(t, m);
+    totalWaterMl += tokensToWaterMl(t, m);
   }
 
   return {
@@ -85,5 +93,5 @@ export function computeChangelogTotals() {
 export function getFoundingCost() {
   const v1 = changelog.find(e => e.version === 'v1.0.0');
   if (!v1) return null;
-  return computeCostFromTokens(v1.tokens_estimated || 0);
+  return computeCostFromTokens(v1.tokens_estimated || 0, v1.model);
 }

@@ -201,10 +201,10 @@ export default function AboutPage() {
                       ))}
                     </ul>
                     {entry.tokens_estimated > 0 && (() => {
-                      const cost = computeCostFromTokens(entry.tokens_estimated);
+                      const cost = computeCostFromTokens(entry.tokens_estimated, entry.model);
                       return (
                         <p className="text-[11px] text-gray-400 mt-3 pt-2 border-t border-gray-100">
-                          Built with {formatTokens(cost.tokens)} tokens · {formatWater(cost.water_ml)} water · {formatEnergy(cost.energy_wh)}
+                          {entry.model && <><span className="font-medium text-gray-500">{entry.model}</span> · </>}{formatTokens(cost.tokens)} tokens · {formatWater(cost.water_ml)} water · {formatEnergy(cost.energy_wh)}
                         </p>
                       );
                     })()}

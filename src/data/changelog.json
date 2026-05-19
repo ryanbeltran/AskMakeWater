@@ -3,7 +3,8 @@
     "date": "2026-05-18",
     "version": "v1.14.0",
     "summary": "Smart map mode — local for elevator/microwave/AC, digital for streaming/AI.",
-    "tokens_estimated": 120000,
+    "tokens_estimated": 22000,
+    "model": "claude-opus-4-6",
     "changes": [
       "Activities that don't route through a data center (elevator, microwave, AC, hair dryer, EV charging, washer, dryer, etc.) now show a local-only map with a single centered user cluster instead of the misleading two-cluster user→DC layout",
       "Digital activities (streaming, AI queries, search, social media) keep the full two-cluster map with dashed arc and distance pill",
@@ -17,7 +18,8 @@
     "date": "2026-05-18",
     "version": "v1.13.0",
     "summary": "Map promoted to always-visible + lightweight anonymous analytics.",
-    "tokens_estimated": 280000,
+    "tokens_estimated": 30000,
+    "model": "claude-opus-4-6",
     "changes": [
       "The journey map now appears on every result right below the confidence meter — no expansion needed",
       "Detailed data breakdown (data path and resource cards) moved to the first expandable, so the visual and the data live together",
@@ -35,7 +37,8 @@
     "date": "2026-05-18",
     "version": "v1.12.0",
     "summary": "Journey View wired to real per-ZIP data with interactive map.",
-    "tokens_estimated": 300000,
+    "tokens_estimated": 57000,
+    "model": "claude-opus-4-6",
     "changes": [
       "The Water & Energy Journey View now uses your actual ZIP code to compute real data: local utility, grid mix, nearest data center for the service you queried, drought/stress conditions, and haversine distance",
       "New JourneyMap SVG at the top of the journey: two-cluster diagram with activity and data center pins, energy and water source satellites, dashed arc with distance pill, and a legend",
@@ -50,7 +53,8 @@
     "date": "2026-05-18",
     "version": "v1.11.0",
     "summary": "Journey view restructure — two-sided sub-entries with clean resource attribution.",
-    "tokens_estimated": 120000,
+    "tokens_estimated": 31000,
+    "model": "claude-opus-4-6",
     "changes": [
       "Reorganized the Water & Energy Journey View into two sections: 'The data path' (pure context, no resource numbers) and 'What it takes to run' (power and water side by side)",
       "Cleaner accounting: energy lives in the Power card, water lives in the Water card, with the data center's water broken down into grid generation + direct cooling",
@@ -64,7 +68,8 @@
     "date": "2026-05-18",
     "version": "v1.10.0",
     "summary": "Water & Energy Journey View (preview) — trace the path from your home to the data center to the water source.",
-    "tokens_estimated": 150000,
+    "tokens_estimated": 24000,
+    "model": "claude-opus-4-6",
     "changes": [
       "New expandable section on every result: 'Water & Energy Journey View' traces the full path of a digital activity from your location through the network, data center, power grid, and water source",
       "5-stage journey with cited sources, confidence badges, and connecting visual rail between stages",
@@ -76,7 +81,8 @@
     "date": "2026-05-13",
     "version": "v1.9.0",
     "summary": "Deep-research CTA for low-confidence results + duration extraction fix.",
-    "tokens_estimated": 200000,
+    "tokens_estimated": 48000,
+    "model": "claude-opus-4-6",
     "changes": [
       "New 'Improve this estimate' button on low-confidence (<40%) results — uses Sonnet + web search to find published wattage data, with side-by-side comparison, source cards, and edit-before-saving flow",
       "Rate-limited deep research: 3 runs per IP per day, 20 site-wide, with upfront water charging and refund on failure",
@@ -89,7 +95,8 @@
     "date": "2026-05-13",
     "version": "v1.8.0",
     "summary": "Polish: clickable sources, shared footer, sticky footer layout.",
-    "tokens_estimated": 60000,
+    "tokens_estimated": 56000,
+    "model": "claude-opus-4-6",
     "changes": [
       "All 11 sources in the Additional Sources section on /sources are now clickable links that open the original paper or report in a new tab, with external-link icons",
       "Shared SiteFooter component used across all pages — consistent MakeWater attribution, version tag, and feedback link everywhere",
@@ -102,7 +109,8 @@
     "date": "2026-05-13",
     "version": "v1.7.0",
     "summary": "Unified navigation, operator class and cooling technology controls, and hidden Recent Searches.",
-    "tokens_estimated": 100000,
+    "tokens_estimated": 56000,
+    "model": "claude-opus-4-6",
     "changes": [
       "Shared site header across all pages — About, Sources, For Educators — with active-page highlighting and mobile hamburger menu",
       "New Advanced controls on every result: set the operator class (AWS, Azure, Google Cloud, Meta, enterprise, crypto mining) and cooling technology (evaporative, air-cooled, liquid, hybrid, dry) to override the default site WUE",
@@ -114,7 +122,8 @@
     "date": "2026-05-13",
     "version": "v1.6.0",
     "summary": "Indirect grid water added to every estimate — the headline number now includes water consumed by power plants.",
-    "tokens_estimated": 80000,
+    "tokens_estimated": 56000,
+    "model": "claude-opus-4-6",
     "changes": [
       "Total water cost now includes both site water (direct cooling) and grid water (power generation) — every result shows the split",
       "40 regions updated with grid water intensity values based on EESI 2023 analysis of LBNL/EIA data, scaled by each region's renewable energy fraction",
@@ -126,7 +135,8 @@
     "date": "2026-05-13",
     "version": "v1.5.0",
     "summary": "Five new reference sources and expanded FAQ content.",
-    "tokens_estimated": 30000,
+    "tokens_estimated": 6000,
+    "model": "claude-opus-4-6",
     "changes": [
       "Added EESI 2023 water-energy nexus analysis, UT Austin COMPASS 2025 Texas grid study, SourceMaterial/Guardian Amazon investigation, Kairos Fellowship Google water research, and Amazon 2024 Sustainability Report to the sources page",
       "Updated FAQ entries on hyperscaler water use, location impact, and the project's own AI usage to reflect the new site + grid breakdown and operator class features"
@@ -136,7 +146,8 @@
     "date": "2026-04-14",
     "version": "v1.4.0",
     "summary": "Reference data system, AI-powered ingestion, and a new power source bar chart on every result.",
-    "tokens_estimated": 250000,
+    "tokens_estimated": 162000,
+    "model": "claude-opus-4-6",
     "changes": [
       "New 'Same activity, different power source' chart on every result — re-runs the calculation against every published power source (solar, wind, natural gas, coal, nuclear, hydro, US grid mix) and shows a horizontal bar chart from lowest to highest water cost, with the US grid mix baseline outlined for reference",
       "Reference data system: power sources, cooling methods, and regional WUE values are now stored in a live database and feed directly into public calculations — with graceful fallback to hardcoded defaults if the data is unavailable",
@@ -155,7 +166,8 @@
     "date": "2026-04-14",
     "version": "v1.3.0",
     "summary": "Result-anchored chat, smarter follow-ups, and a repositioned donate button.",
-    "tokens_estimated": 80000,
+    "tokens_estimated": 68000,
+    "model": "claude-opus-4-6",
     "changes": [
       "Conversations now center on your first result — up to 5 follow-up messages per session before a gentle reset",
       "Follow-up chips 'Try a different device' and 'Change region' open the existing breakdown dropdowns instead of sending new messages (so Recent Searches stays clean)",
@@ -168,7 +180,8 @@
     "date": "2026-04-14",
     "version": "v1.2.1",
     "summary": "Simplified the result card by removing redundant refinement questions.",
-    "tokens_estimated": 8000,
+    "tokens_estimated": 5000,
+    "model": "claude-opus-4-6",
     "changes": [
       "Removed the separate refinement questions block — the device and region dropdowns in the breakdown already cover the same ground"
     ]
@@ -177,7 +190,8 @@
     "date": "2026-04-14",
     "version": "v1.2.0",
     "summary": "New floating geometric background and off-catalog activities now return real results.",
-    "tokens_estimated": 60000,
+    "tokens_estimated": 21000,
+    "model": "claude-opus-4-6",
     "changes": [
       "Added floating geometric shapes and accent circles to the background, inspired by makewater.org",
       "Off-catalog digital activities (LinkedIn, Spotify, Twitch, WhatsApp, Disney+, Reddit, etc.) now map to the closest matching activity with a clearly labeled 'approximate match' notice, instead of returning a text-only fallback",
@@ -188,7 +202,8 @@
     "date": "2026-04-13",
     "version": "v1.1.0",
     "summary": "Ask about two things at once and see them side-by-side.",
-    "tokens_estimated": 40000,
+    "tokens_estimated": 13000,
+    "model": "claude-opus-4-6",
     "changes": [
       "Multi-activity comparison mode: ask 'What costs more, an hour of Netflix or an hour of Zoom?' and get a single comparison table",
       "Supports up to 5 items per comparison with shared narrative context"
@@ -198,7 +213,8 @@
     "date": "2026-04-13",
     "version": "v1.0.0",
     "summary": "Initial release.",
-    "tokens_estimated": 200000,
+    "tokens_estimated": 250000,
+    "model": "claude-opus-4-6",
     "changes": [
       "30 activity water cost calculator with natural language input",
       "40 global regions with specific Water Use Efficiency data",
